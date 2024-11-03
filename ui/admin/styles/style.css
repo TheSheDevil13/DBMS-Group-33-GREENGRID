@@ -1,0 +1,26 @@
+/* Custom sidebar background color */
+.sidebar-dark-custom {
+    background-color: #2C3333 !important;
+}
+
+/* Custom active link color */
+.sidebar-dark-custom .nav-sidebar > .nav-item > .nav-link.active {
+    background-color: #2E7D32 !important;
+}
+
+/* Hover effect for sidebar items */
+.sidebar-dark-custom .nav-sidebar > .nav-item > .nav-link:hover {
+    background-color: #404949 !important;
+}
+
+/* Navbar width alignment */
+.main-header {
+    margin-left: 250px !important;
+    max-width: calc(100% - 250px);
+}
+
+/* Navbar width when sidebar is collapsed */
+body.sidebar-collapse .main-header {
+    margin-left: 4.6rem !important;
+    max-width: calc(100% - 4.6rem);
+}
