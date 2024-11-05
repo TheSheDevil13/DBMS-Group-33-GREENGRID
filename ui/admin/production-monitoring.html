@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agricultural Analysts - GreenGrid</title>
+    <title>Production Monitoring - GreenGrid</title>
     <link rel="icon" type="image/png" href="Images/GREENGRID Logo 1.png">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.1/dist/css/adminlte.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
@@ -223,19 +223,65 @@
                     <li class="nav-item">
                         <a href="#" class="nav-link">
                             <i class="nav-icon fas fa-industry"></i>
-                            <p>Production Monitoring</p>
+                            <p>
+                                Production Monitoring
+                                <i class="fas fa-angle-left right"></i>
+                            </p>
                         </a>
+                        <ul class="nav nav-treeview">
+                            <li class="nav-item">
+                                <a href="#" class="nav-link">
+                                    <i class="fas fa-database nav-icon"></i>
+                                    <p>Production Data</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#" class="nav-link">
+                                    <i class="fas fa-chart-area nav-icon"></i>
+                                    <p>Yield Analysis</p>
+                                </a>
+                            </li>
+                        </ul>
                     </li>
                     <li class="nav-item">
                         <a href="#" class="nav-link">
                             <i class="nav-icon fas fa-shopping-cart"></i>
-                            <p>Order Management</p>
+                            <p>
+                                Order Management
+                                <i class="fas fa-angle-left right"></i>
+                            </p>
                         </a>
+                        <ul class="nav nav-treeview">
+                            <li class="nav-item">
+                                <a href="#" class="nav-link">
+                                    <i class="fas fa-list-alt nav-icon"></i>
+                                    <p>All Orders</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#" class="nav-link">
+                                    <i class="fas fa-check-circle nav-icon"></i>
+                                    <p>Order Approvals</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#" class="nav-link">
+                                    <i class="fas fa-chart-line nav-icon"></i>
+                                    <p>Demand Forecasting</p>
+                                </a>
+                            </li>
+                        </ul>
                     </li>
                     <li class="nav-item">
                         <a href="#" class="nav-link">
                             <i class="nav-icon fas fa-warehouse"></i>
-                            <p>Warehouse Monitoring</p>
+                            <p>Warehouse Management</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            <i class="nav-icon fas fa-microscope"></i>
+                            <p>Agricultural Analysis</p>
                         </a>
                     </li>
                     <li class="nav-item">
@@ -276,7 +322,7 @@
                 <div class="container-fluid">
                     <div class="row mb-2">
                         <div class="col-sm-6">
-                            <h1 class="m-0">Agricultural Analysts</h1>
+                            <h1 class="m-0">Production Data</h1>
                         </div>
                         <div class="col-sm-6">
                             <!-- Empty div for potential future content or right-aligned elements -->
@@ -288,50 +334,56 @@
             <!-- Main content -->
             <section class="content">
                 <div class="container-fluid">
-                    <!-- Action Buttons -->
-                    <div class="row mb-3">
-                        <div class="col-12">
-                            <button class="btn btn-primary" data-toggle="modal" data-target="#addOfficerModal">
-                                <i class="fas fa-plus"></i> Add New Analyst
-                            </button>
-                        </div>
-                    </div>
+                    
 
-                    <!-- Officers List -->
+                    <!-- Production Data Table -->
                     <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">Agricultural Analysts Directory</h3>
-                        </div>
+                        
                         <div class="card-body">
                             <table class="table table-bordered table-striped">
                                 <thead>
                                     <tr>
-                                        <th>ID</th>
+                                        <th>Production ID</th>
+                                        <th>Farmer ID</th>
                                         <th>Name</th>
-                                        <th>Region</th>
-                                        <th>Contact</th>
-                                        <th>Status</th>
+                                        <th>Category</th>
+                                        <th>Harvest Date</th>
+                                        <th>Shelf Life (Days)</th>
+                                        <th>Expiration Date</th>
+                                        <th>Quantity (kg)</th>
+                                        <th>Acreage (acres)</th>
+                                        <th>Yield Rate (kg/acre)</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td>AA001</td>
-                                        <td>Abu Saeed</td>
-                                        <td>Dhaka Division</td>
-                                        <td>+880 1921-234567</td>
-                                        <td><span class="badge badge-success">Active</span></td>
+                                        <td>PRD001</td>
+                                        <td>FRM123</td>
+                                        <td>Rice (Boro)</td>
+                                        <td>Cereal Grains</td>
+                                        <td>2024-03-15</td>
+                                        <td>180</td>
+                                        <td>2024-09-11</td>
+                                        <td>2,500</td>
+                                        <td>5.0</td>
+                                        <td>500</td>
                                         <td>
                                             <button class="btn btn-sm btn-secondary"><i class="fas fa-edit"></i></button>
                                             <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td>AA002</td>
-                                        <td>Abdul Karim</td>
-                                        <td>Rajshahi Division</td>
-                                        <td>+880 1613-556789</td>
-                                        <td><span class="badge badge-warning">On Leave</span></td>
+                                        <td>PRD002</td>
+                                        <td>FRM456</td>
+                                        <td>Rice (Aman)</td>
+                                        <td>Cereal Grains</td>
+                                        <td>2024-03-10</td>
+                                        <td>90</td>
+                                        <td>2024-06-08</td>
+                                        <td>3,200</td>
+                                        <td>6.4</td>
+                                        <td>500</td>
                                         <td>
                                             <button class="btn btn-sm btn-secondary"><i class="fas fa-edit"></i></button>
                                             <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>

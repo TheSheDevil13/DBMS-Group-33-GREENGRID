@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agricultural Analysts - GreenGrid</title>
+    <title>Demand Forecasting - GreenGrid</title>
     <link rel="icon" type="image/png" href="Images/GREENGRID Logo 1.png">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.1/dist/css/adminlte.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
@@ -223,19 +223,65 @@
                     <li class="nav-item">
                         <a href="#" class="nav-link">
                             <i class="nav-icon fas fa-industry"></i>
-                            <p>Production Monitoring</p>
+                            <p>
+                                Production Monitoring
+                                <i class="fas fa-angle-left right"></i>
+                            </p>
                         </a>
+                        <ul class="nav nav-treeview">
+                            <li class="nav-item">
+                                <a href="#" class="nav-link">
+                                    <i class="fas fa-database nav-icon"></i>
+                                    <p>Production Data</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#" class="nav-link">
+                                    <i class="fas fa-chart-area nav-icon"></i>
+                                    <p>Yield Analysis</p>
+                                </a>
+                            </li>
+                        </ul>
                     </li>
                     <li class="nav-item">
                         <a href="#" class="nav-link">
                             <i class="nav-icon fas fa-shopping-cart"></i>
-                            <p>Order Management</p>
+                            <p>
+                                Order Management
+                                <i class="fas fa-angle-left right"></i>
+                            </p>
                         </a>
+                        <ul class="nav nav-treeview">
+                            <li class="nav-item">
+                                <a href="#" class="nav-link">
+                                    <i class="fas fa-list-alt nav-icon"></i>
+                                    <p>All Orders</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#" class="nav-link">
+                                    <i class="fas fa-check-circle nav-icon"></i>
+                                    <p>Order Approvals</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#" class="nav-link">
+                                    <i class="fas fa-chart-line nav-icon"></i>
+                                    <p>Demand Forecasting</p>
+                                </a>
+                            </li>
+                        </ul>
                     </li>
                     <li class="nav-item">
                         <a href="#" class="nav-link">
                             <i class="nav-icon fas fa-warehouse"></i>
-                            <p>Warehouse Monitoring</p>
+                            <p>Warehouse Management</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            <i class="nav-icon fas fa-microscope"></i>
+                            <p>Agricultural Analysis</p>
                         </a>
                     </li>
                     <li class="nav-item">
@@ -276,7 +322,7 @@
                 <div class="container-fluid">
                     <div class="row mb-2">
                         <div class="col-sm-6">
-                            <h1 class="m-0">Agricultural Analysts</h1>
+                            <h1 class="m-0">Demand Forecasting</h1>
                         </div>
                         <div class="col-sm-6">
                             <!-- Empty div for potential future content or right-aligned elements -->
@@ -285,70 +331,12 @@
                 </div>
             </div>
 
-            <!-- Main content -->
-            <section class="content">
-                <div class="container-fluid">
-                    <!-- Action Buttons -->
-                    <div class="row mb-3">
-                        <div class="col-12">
-                            <button class="btn btn-primary" data-toggle="modal" data-target="#addOfficerModal">
-                                <i class="fas fa-plus"></i> Add New Analyst
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Officers List -->
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">Agricultural Analysts Directory</h3>
-                        </div>
-                        <div class="card-body">
-                            <table class="table table-bordered table-striped">
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Name</th>
-                                        <th>Region</th>
-                                        <th>Contact</th>
-                                        <th>Status</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>AA001</td>
-                                        <td>Abu Saeed</td>
-                                        <td>Dhaka Division</td>
-                                        <td>+880 1921-234567</td>
-                                        <td><span class="badge badge-success">Active</span></td>
-                                        <td>
-                                            <button class="btn btn-sm btn-secondary"><i class="fas fa-edit"></i></button>
-                                            <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>AA002</td>
-                                        <td>Abdul Karim</td>
-                                        <td>Rajshahi Division</td>
-                                        <td>+880 1613-556789</td>
-                                        <td><span class="badge badge-warning">On Leave</span></td>
-                                        <td>
-                                            <button class="btn btn-sm btn-secondary"><i class="fas fa-edit"></i></button>
-                                            <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </div>
-    </div>
 
     <!-- Required Scripts -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.1/dist/js/adminlte.min.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </body>
 </html>
