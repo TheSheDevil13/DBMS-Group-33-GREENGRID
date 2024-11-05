@@ -24,3 +24,41 @@ body.sidebar-collapse .main-header {
     margin-left: 4.6rem !important;
     max-width: calc(100% - 4.6rem);
 }
+/* Custom green color classes */
+.bg-green-1 {
+    background-color: #2D5A27 !important; /* Deep forest green */
+    color: #fff;
+}
+
+.bg-green-2 {
+    background-color: #367D2F !important; /* Forest green */
+    color: #fff;
+}
+
+.bg-green-3 {
+    background-color: #3E9B37 !important; /* Medium green */
+    color: #fff;
+}
+
+.bg-green-4 {
+    background-color: #4CB944 !important; /* Light green */
+    color: #fff;
+}
+/* Override any remaining blue colors */
+.text-info {
+    color: #6c757d !important; /* Bootstrap's gray color */
+}
+
+.badge-info {
+    background-color: #6c757d !important;
+}
+
+/* If you need to override any links that were blue */
+a {
+    color: #6c757d;
+}
+
+a:hover {
+    color: #545b62;
+}
+
