@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Warehouse Managers - GreenGrid</title>
+    <title>Subsidy Management - GreenGrid</title>
     <link rel="icon" type="image/png" href="../../Images/GREENGRID Logo 1.png">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.1/dist/css/adminlte.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
@@ -182,15 +182,13 @@
 
             <!-- Simplified sidebar menu -->
             <nav class="mt-2">
-                <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
-                    data-accordion="false">
-                    
+                <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
                     <li class="nav-item">
-                    <a href="dashboard.html" class="nav-link">
-                        <i class="nav-icon fas fa-tachometer-alt"></i>
-                        <p>Dashboard</p>
-                    </a>
-                </li>
+                        <a href="dashboard.html" class="nav-link">
+                            <i class="nav-icon fas fa-tachometer-alt"></i>
+                            <p>Dashboard</p>
+                        </a>
+                    </li>
                     <li class="nav-item">
                         <a href="#" class="nav-link">
                             <i class="nav-icon fas fa-users"></i>
@@ -238,6 +236,7 @@
                             <p>Warehouse Management</p>
                         </a>
                     </li>
+                    
                     <li class="nav-item">
                         <a href="subidery-management.html" class="nav-link">
                             <i class="nav-icon fas fa-coins"></i>
@@ -266,7 +265,7 @@
                                 </a>
                             </li>
                         </ul>
-                    </li>
+                    </li>                    
                     <li class="nav-item">
                         <a href="#" class="nav-link">
                             <i class="nav-icon fas fa-cog"></i>
@@ -293,7 +292,7 @@
                 <div class="container-fluid">
                     <div class="row mb-2">
                         <div class="col-sm-6">
-                            <h1 class="m-0">Warehouse Managers</h1>
+                            <h1 class="m-0">Subsidy Management</h1>
                         </div>
                         <div class="col-sm-6">
                             <!-- Empty div for potential future content or right-aligned elements -->
@@ -305,58 +304,59 @@
             <!-- Main content -->
             <section class="content">
                 <div class="container-fluid">
-                    <!-- Action Buttons -->
-                    <div class="row mb-3">
-                        <div class="col-12">
-                            <button class="btn btn-success" data-toggle="modal" data-target="#addOfficerModal">
-                                <i class="fas fa-plus"></i> Add New Manager
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Officers List -->
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">Warehouse Managers Directory</h3>
-                        </div>
                         <div class="card-body">
                             <table class="table table-bordered table-striped">
                                 <thead>
                                     <tr>
-                                        <th>ID</th>
-                                        <th>Name</th>
-                                        <th>Region</th>
-                                        <th>Contact</th>
+                                        <th>Farmer ID</th>
+                                        <th>Farmer Name</th>
+                                        <th>Subsidy Type</th>
+                                        <th>Quantity</th>
                                         <th>Status</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td>WM001</td>
-                                        <td>Rayan Ahmed</td>
-                                        <td>Chittagong Division</td>
-                                        <td>+880 1811-234567</td>
-                                        <td><span class="badge badge-success">Active</span></td>
+                                        <td>FRM123</td>
+                                        <td>Abdul Karim</td>
+                                        <td>Fertilizer</td>
+                                        <td>50 kg</td>
+                                        <td><span class="badge badge-success">Approved</span></td>
                                         <td>
-                                            <button class="btn btn-sm btn-secondary"><i class="fas fa-edit"></i></button>
-                                            <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                            <button class="btn btn-info btn-sm"><i class="fas fa-eye"></i></button>
+                                            <button class="btn btn-secondary btn-sm"><i class="fas fa-edit"></i></button>
+                                            <button class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td>WM002</td>
-                                        <td>Mohammad Hossain</td>
-                                        <td>Dhaka Division</td>
-                                        <td>+880 1777-456789</td>
-                                        <td><span class="badge badge-warning">On Leave</span></td>
+                                        <td>FRM456</td>
+                                        <td>Rahima Begum</td>
+                                        <td>Seeds</td>
+                                        <td>25 kg</td>
+                                        <td><span class="badge badge-secondary">Pending</span></td>
                                         <td>
-                                            <button class="btn btn-sm btn-secondary"><i class="fas fa-edit"></i></button>
-                                            <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                            <button class="btn btn-info btn-sm"><i class="fas fa-eye"></i></button>
+                                            <button class="btn btn-secondary btn-sm"><i class="fas fa-edit"></i></button>
+                                            <button class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
                                         </td>
-                                    </tr>                                 
+                                    </tr>
+                                    <tr>
+                                        <td>FRM789</td>
+                                        <td>Kamal Hossain</td>
+                                        <td>Pesticides</td>
+                                        <td>10 L</td>
+                                        <td><span class="badge badge-warning">In Progress</span></td>
+                                        <td>
+                                            <button class="btn btn-info btn-sm"><i class="fas fa-eye"></i></button>
+                                            <button class="btn btn-secondary btn-sm"><i class="fas fa-edit"></i></button>
+                                            <button class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
+                                        </td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
+                        <!-- Pagination remains the same -->
                     </div>
                 </div>
             </section>

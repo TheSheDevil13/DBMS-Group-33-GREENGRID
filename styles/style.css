@@ -61,4 +61,8 @@ a {
 a:hover {
     color: #545b62;
 }
+.wrapper {
+    min-height: 100vh;
+    position: relative;
+}
 

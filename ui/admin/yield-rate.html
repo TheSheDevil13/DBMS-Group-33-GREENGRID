@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Warehouse Managers - GreenGrid</title>
+    <title>Yield Rate - GreenGrid</title>
     <link rel="icon" type="image/png" href="../../Images/GREENGRID Logo 1.png">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.1/dist/css/adminlte.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="../../styles/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="sidebar-mini">
     <div class="wrapper">
@@ -182,15 +183,13 @@
 
             <!-- Simplified sidebar menu -->
             <nav class="mt-2">
-                <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
-                    data-accordion="false">
-                    
+                <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
                     <li class="nav-item">
-                    <a href="dashboard.html" class="nav-link">
-                        <i class="nav-icon fas fa-tachometer-alt"></i>
-                        <p>Dashboard</p>
-                    </a>
-                </li>
+                        <a href="dashboard.html" class="nav-link">
+                            <i class="nav-icon fas fa-tachometer-alt"></i>
+                            <p>Dashboard</p>
+                        </a>
+                    </li>
                     <li class="nav-item">
                         <a href="#" class="nav-link">
                             <i class="nav-icon fas fa-users"></i>
@@ -238,6 +237,7 @@
                             <p>Warehouse Management</p>
                         </a>
                     </li>
+                    
                     <li class="nav-item">
                         <a href="subidery-management.html" class="nav-link">
                             <i class="nav-icon fas fa-coins"></i>
@@ -293,7 +293,7 @@
                 <div class="container-fluid">
                     <div class="row mb-2">
                         <div class="col-sm-6">
-                            <h1 class="m-0">Warehouse Managers</h1>
+                            <h1 class="m-0">Analytics & Reports</h1>
                         </div>
                         <div class="col-sm-6">
                             <!-- Empty div for potential future content or right-aligned elements -->
@@ -305,57 +305,143 @@
             <!-- Main content -->
             <section class="content">
                 <div class="container-fluid">
-                    <!-- Action Buttons -->
-                    <div class="row mb-3">
+                    <!-- Yield Rate Analytics Section -->
+                    <div class="row mt-4">
                         <div class="col-12">
-                            <button class="btn btn-success" data-toggle="modal" data-target="#addOfficerModal">
-                                <i class="fas fa-plus"></i> Add New Manager
-                            </button>
-                        </div>
-                    </div>
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3 class="card-title">
+                                        <i class="fas fa-seedling mr-2"></i>
+                                        Yield Rate Analytics
+                                    </h3>
+                                    <div class="card-tools">
+                                        <button type="button" class="btn btn-sm btn-warning">
+                                            <i class="fas fa-download mr-1"></i> Export Yield Report
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <!-- Yield Rate Quick Stats -->
+                                    <div class="row mb-4">
+                                        <div class="col-md-3">
+                                            <div class="info-box bg-green-1">
+                                                <span class="info-box-icon"><i class="fas fa-percentage"></i></span>
+                                                <div class="info-box-content">
+                                                    <span class="info-box-text">Average Yield Rate</span>
+                                                    <span class="info-box-number">4.2 tons/hectare</span>
+                                                    <span class="progress-description">
+                                                        ↑ 8% from last season
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="info-box bg-green-2">
+                                                <span class="info-box-icon"><i class="fas fa-star"></i></span>
+                                                <div class="info-box-content">
+                                                    <span class="info-box-text">Best Performing Crop</span>
+                                                    <span class="info-box-number">Rice</span>
+                                                    <span class="progress-description">
+                                                        5.1 tons/hectare
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="info-box bg-green-3">
+                                                <span class="info-box-icon"><i class="fas fa-tint"></i></span>
+                                                <div class="info-box-content">
+                                                    <span class="info-box-text">Irrigation Efficiency</span>
+                                                    <span class="info-box-number">92%</span>
+                                                    <span class="progress-description">
+                                                        Optimal conditions
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="info-box bg-green-4">
+                                                <span class="info-box-icon"><i class="fas fa-chart-line"></i></span>
+                                                <div class="info-box-content">
+                                                    <span class="info-box-text">Growth Potential</span>
+                                                    <span class="info-box-number">15%</span>
+                                                    <span class="progress-description">
+                                                        Based on current trends
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
 
-                    <!-- Officers List -->
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">Warehouse Managers Directory</h3>
-                        </div>
-                        <div class="card-body">
-                            <table class="table table-bordered table-striped">
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Name</th>
-                                        <th>Region</th>
-                                        <th>Contact</th>
-                                        <th>Status</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>WM001</td>
-                                        <td>Rayan Ahmed</td>
-                                        <td>Chittagong Division</td>
-                                        <td>+880 1811-234567</td>
-                                        <td><span class="badge badge-success">Active</span></td>
-                                        <td>
-                                            <button class="btn btn-sm btn-secondary"><i class="fas fa-edit"></i></button>
-                                            <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>WM002</td>
-                                        <td>Mohammad Hossain</td>
-                                        <td>Dhaka Division</td>
-                                        <td>+880 1777-456789</td>
-                                        <td><span class="badge badge-warning">On Leave</span></td>
-                                        <td>
-                                            <button class="btn btn-sm btn-secondary"><i class="fas fa-edit"></i></button>
-                                            <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
-                                        </td>
-                                    </tr>                                 
-                                </tbody>
-                            </table>
+                                    <!-- Yield Charts -->
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="card">
+                                                <div class="card-header border-0">
+                                                    <h3 class="card-title">Seasonal Yield Comparison</h3>
+                                                </div>
+                                                <div class="card-body">
+                                                    <canvas id="yieldComparisonChart" height="300"></canvas>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="card">
+                                                <div class="card-header border-0">
+                                                    <h3 class="card-title">Yield Rate Trends</h3>
+                                                </div>
+                                                <div class="card-body">
+                                                    <canvas id="yieldDistributionChart" height="300"></canvas>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Yield Analysis Table -->
+                                    <div class="row mt-4">
+                                        <div class="col-12">
+                                            <table class="table table-bordered table-hover">
+                                                <thead class="thead-light">
+                                                    <tr>
+                                                        <th>Crop</th>
+                                                        <th>Current Yield</th>
+                                                        <th>Previous Yield</th>
+                                                        <th>Change</th>
+                                                        <th>Soil Quality</th>
+                                                        <th>Recommendations</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td>Rice</td>
+                                                        <td>5.1 tons/ha</td>
+                                                        <td>4.8 tons/ha</td>
+                                                        <td><span class="text-success">↑ 6.25%</span></td>
+                                                        <td><span class="badge badge-success">Excellent</span></td>
+                                                        <td>Maintain current practices</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Wheat</td>
+                                                        <td>4.2 tons/ha</td>
+                                                        <td>4.0 tons/ha</td>
+                                                        <td><span class="text-success">↑ 5%</span></td>
+                                                        <td><span class="badge badge-success">Good</span></td>
+                                                        <td>Consider enhanced irrigation</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Pulses</td>
+                                                        <td>2.8 tons/ha</td>
+                                                        <td>3.0 tons/ha</td>
+                                                        <td><span class="text-danger">↓ 6.67%</span></td>
+                                                        <td><span class="badge badge-warning">Fair</span></td>
+                                                        <td>Soil treatment recommended</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -367,5 +453,130 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.1/dist/js/adminlte.min.js"></script>
+
+    <!-- Initialize charts after document is ready -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Yield Comparison Chart
+        const yieldCtx = document.getElementById('yieldComparisonChart').getContext('2d');
+        new Chart(yieldCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Jan-Mar', 'Apr-Jun', 'Jul-Sep', 'Oct-Dec'],
+                datasets: [{
+                    label: 'Current Year',
+                    data: [4.2, 4.5, 4.8, 5.1],
+                    backgroundColor: '#00a65a20',
+                    borderColor: '#00a65a',
+                    borderWidth: 1
+                }, {
+                    label: 'Previous Year',
+                    data: [4.0, 4.3, 4.6, 4.9],
+                    backgroundColor: '#ffc10720',
+                    borderColor: '#ffc107',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Seasonal Yield Comparison',
+                        color: '#495057'
+                    },
+                    legend: {
+                        labels: {
+                            color: '#495057'
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        ticks: {
+                            color: '#495057'
+                        },
+                        grid: {
+                            color: '#e9ecef'
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            color: '#495057'
+                        },
+                        grid: {
+                            color: '#e9ecef'
+                        }
+                    }
+                }
+            }
+        });
+
+        // New Yield Rate Analytics Chart
+        const distributionCtx = document.getElementById('yieldDistributionChart').getContext('2d');
+        new Chart(distributionCtx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [{
+                    label: 'Actual Yield',
+                    data: [4.2, 4.3, 4.5, 4.6, 4.8, 5.1],
+                    borderColor: '#00a65a',
+                    backgroundColor: '#00a65a20',
+                    tension: 0.3
+                }, {
+                    label: 'Expected Yield',
+                    data: [4.0, 4.2, 4.4, 4.5, 4.7, 4.9],
+                    borderColor: '#ffc107',
+                    backgroundColor: '#ffc10720',
+                    tension: 0.3
+                }, {
+                    label: 'Industry Average',
+                    data: [3.8, 3.9, 4.0, 4.1, 4.2, 4.3],
+                    borderColor: '#39cccc',
+                    backgroundColor: '#39cccc20',
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Yield Rate Trends (tons/hectare)',
+                        color: '#495057'
+                    },
+                    legend: {
+                        labels: {
+                            color: '#495057'
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        min: 3.5,
+                        max: 5.5,
+                        ticks: {
+                            color: '#495057'
+                        },
+                        grid: {
+                            color: '#e9ecef'
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            color: '#495057'
+                        },
+                        grid: {
+                            color: '#e9ecef'
+                        }
+                    }
+                }
+            }
+        });
+    });
+    </script>
 </body>
 </html>
