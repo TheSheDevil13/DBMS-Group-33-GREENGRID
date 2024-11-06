@@ -193,10 +193,16 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="product-list.html" class="nav-link">
+                            <a href="stock-product.html" class="nav-link">
                                 
                                 <i class="nav-icon fa-solid fa-boxes-packing"></i>
                                 <p>Stock Products</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="dispatch.html" class="nav-link">
+                                <i class="nav-icon fas fa-truck-loading"></i>
+                                <p>Dispatch Stock</p>
                             </a>
                         </li>
                         <li class="nav-item">
@@ -235,7 +241,7 @@
                         <div class="col-lg-3 col-6">
                             <div class="small-box bg-info">
                                 <div class="inner">
-                                    <h3>150</h3>
+                                    <h3>3</h3>
                                     <p>Total Products</p>
                                 </div>
                                 <div class="icon">
@@ -246,8 +252,8 @@
                         <div class="col-lg-3 col-6">
                             <div class="small-box bg-success">
                                 <div class="inner">
-                                    <h3>85%</h3>
-                                    <p>Storage Capacity</p>
+                                    <h3>2300</h3>
+                                    <p>Total Stock (kg)</p>
                                 </div>
                                 <div class="icon">
                                     <i class="fas fa-warehouse"></i>
@@ -257,75 +263,24 @@
                         <div class="col-lg-3 col-6">
                             <div class="small-box bg-warning">
                                 <div class="inner">
-                                    <h3>24°C</h3>
-                                    <p>Temperature</p>
+                                    <h3>2</h3>
+                                    <p>Pending Dispatches</p>
                                 </div>
                                 <div class="icon">
-                                    <i class="fas fa-thermometer-half"></i>
+                                    <i class="fas fa-truck-loading"></i>
                                 </div>
                             </div>
                         </div>
                         <div class="col-lg-3 col-6">
                             <div class="small-box bg-danger">
                                 <div class="inner">
-                                    <h3>65%</h3>
-                                    <p>Humidity</p>
+                                    <h3>1</h3>
+                                    <p>Low Stock Items</p>
                                 </div>
                                 <div class="icon">
-                                    <i class="fas fa-tint"></i>
+                                    <i class="fas fa-exclamation-triangle"></i>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-
-                    <!-- Products Table -->
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">Products Inventory</h3>
-                            <div class="card-tools">
-                                <button type="button" class="btn btn-primary btn-sm">
-                                    <i class="fas fa-plus"></i> Add Product
-                                </button>
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <table class="table table-bordered table-striped">
-                                <thead>
-                                    <tr>
-                                        <th>Product ID</th>
-                                        <th>Name</th>
-                                        <th>Category</th>
-                                        <th>Quantity</th>
-                                        
-                                        <th>Status</th>
-                                        
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>PRD001</td>
-                                        <td>Rice</td>
-                                        <td>Grains</td>
-                                        <td>1000 kg</td>
-                                        
-                                        <td><span class="badge badge-success">In Stock</span></td>
-                                        
-                                            
-
-                                    </tr>
-                                    <tr>
-                                        <td>PRD002</td>
-                                        <td>Wheat</td>
-                                        <td>Grains</td>
-                                        <td>800 kg</td>
-                                        
-                                        <td><span class="badge badge-warning">Low Stock</span></td>
-                                        
-                                         
-                                        
-                                    </tr>
-                                </tbody>
-                            </table>
                         </div>
                     </div>
 
@@ -334,7 +289,7 @@
                         <div class="col-md-6">
                             <div class="card">
                                 <div class="card-header">
-                                    <h3 class="card-title">Inventory Levels</h3>
+                                    <h3 class="card-title">Product Stock Levels</h3>
                                 </div>
                                 <div class="card-body">
                                     <canvas id="inventoryChart" style="height: 300px;"></canvas>
@@ -344,10 +299,10 @@
                         <div class="col-md-6">
                             <div class="card">
                                 <div class="card-header">
-                                    <h3 class="card-title">Daily Orders</h3>
+                                    <h3 class="card-title">Dispatch Status Overview</h3>
                                 </div>
                                 <div class="card-body">
-                                    <canvas id="orderChart" style="height: 300px;"></canvas>
+                                    <canvas id="dispatchChart" style="height: 300px;"></canvas>
                                 </div>
                             </div>
                         </div>
@@ -364,41 +319,75 @@
     <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.1/dist/js/adminlte.min.js"></script>
     
     <script>
-        // Sample charts initialization
         document.addEventListener('DOMContentLoaded', function() {
-            // Inventory Chart
+            // Product Stock Levels Chart
             new Chart(document.getElementById('inventoryChart'), {
                 type: 'bar',
                 data: {
-                    labels: ['Zone A', 'Zone B', 'Zone C', 'Zone D'],
+                    labels: ['Rice (Basmati)', 'Wheat', 'Corn'],
                     datasets: [{
-                        label: 'Current Stock Levels',
-                        data: [4500, 3800, 4200, 3180],
-                        backgroundColor: 'rgba(60,141,188,0.9)'
+                        label: 'Current Stock (kg)',
+                        data: [1500, 800, 0],
+                        backgroundColor: [
+                            'rgba(60,141,188,0.9)',  // Blue for normal stock
+                            'rgba(243,156,18,0.9)',  // Yellow for low stock
+                            'rgba(221,75,57,0.9)'    // Red for no stock
+                        ]
                     }]
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Stock Amount (kg)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        }
+                    }
                 }
             });
 
-            // Order Chart
-            new Chart(document.getElementById('orderChart'), {
-                type: 'line',
+            // New Dispatch Status Chart
+            new Chart(document.getElementById('dispatchChart'), {
+                type: 'doughnut',
                 data: {
-                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+                    labels: ['Dispatched', 'Pending', 'Declined'],
                     datasets: [{
-                        label: 'Orders Processed',
-                        data: [65, 59, 80, 81, 56],
-                        fill: false,
-                        borderColor: 'rgb(75, 192, 192)',
-                        tension: 0.1
+                        data: [10, 5, 2], // One of each status from dispatch.html
+                        backgroundColor: [
+                            'rgba(40, 167, 69, 0.8)',    // Green for dispatched
+                            'rgba(255, 193, 7, 0.8)',    // Yellow for pending
+                            'rgba(220, 53, 69, 0.8)'     // Red for declined
+                        ],
+                        borderColor: [
+                            'rgba(40, 167, 69, 1)',
+                            'rgba(255, 193, 7, 1)',
+                            'rgba(220, 53, 69, 1)'
+                        ],
+                        borderWidth: 1
                     }]
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        },
+                        title: {
+                            display: true,
+                            text: 'Distribution of Dispatch Status'
+                        }
+                    }
                 }
             });
         });
