@@ -66,18 +66,3 @@ a:hover {
     position: relative;
 }
 
-.main-sidebar {
-    height: 100vh;
-    position: fixed;
-    top: 0;
-}
-
-.content-wrapper {
-    min-height: calc(100vh - 3.5rem);
-    margin-left: 250px;  /* Adjust this value based on your sidebar width */
-}
-
-body {
-    min-height: 100vh;
-    margin: 0;
-}
