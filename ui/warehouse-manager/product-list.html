@@ -194,9 +194,14 @@
                         </li>
                         <li class="nav-item">
                             <a href="product-list.html" class="nav-link bg-info">
-                                
                                 <i class="nav-icon fa-solid fa-boxes-packing"></i>
                                 <p>Stock Products</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="dispatch.html" class="nav-link">
+                                <i class="nav-icon fas fa-truck-loading"></i>
+                                <p>Dispatch Stock</p>
                             </a>
                         </li>
                         <li class="nav-item">
@@ -223,135 +228,90 @@
             <!-- Content Header -->
             <div class="content-header">
                 <div class="container-fluid">
-                    <h1 class="m-0">Products</h1>
+                    <h1 class="m-0">Stock Products</h1>
                 </div>
             </div>
 
             <!-- Main content -->
             <section class="content">
                 <div class="container-fluid">
-                    <!-- Warehouse Overview Cards -->
-                    <div class="row">
-                        <div class="col-lg-3 col-6">
-                            <div class="small-box bg-info">
-                                <div class="inner">
-                                    <h3>150</h3>
-                                    <p>Total Products</p>
-                                </div>
-                                <div class="icon">
-                                    <i class="fas fa-boxes"></i>
-                                </div>
-                            </div>
+                
+                   
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <button class="btn btn-primary" data-toggle="modal" data-target="#addOfficerModal">
+                                <i class="fas fa-plus"></i> Add New Stock
+                            </button>
                         </div>
-                        <div class="col-lg-3 col-6">
-                            <div class="small-box bg-success">
-                                <div class="inner">
-                                    <h3>85%</h3>
-                                    <p>Storage Capacity</p>
-                                </div>
-                                <div class="icon">
-                                    <i class="fas fa-warehouse"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-3 col-6">
-                            <div class="small-box bg-warning">
-                                <div class="inner">
-                                    <h3>24°C</h3>
-                                    <p>Temperature</p>
-                                </div>
-                                <div class="icon">
-                                    <i class="fas fa-thermometer-half"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-3 col-6">
-                            <div class="small-box bg-danger">
-                                <div class="inner">
-                                    <h3>65%</h3>
-                                    <p>Humidity</p>
-                                </div>
-                                <div class="icon">
-                                    <i class="fas fa-tint"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
-                    <!-- Products Table -->
+                    </div>
                     <div class="card">
                         <div class="card-header">
-                            <h3 class="card-title">Products Inventory</h3>
-                            <div class="card-tools">
-                                <button type="button" class="btn btn-primary btn-sm">
-                                    <i class="fas fa-plus"></i> Add Product
-                                </button>
-                            </div>
+                            <h3 class="card-title">Product Stock Directory</h3>
                         </div>
                         <div class="card-body">
                             <table class="table table-bordered table-striped">
                                 <thead>
                                     <tr>
                                         <th>Product ID</th>
-                                        <th>Name</th>
+                                        <th>Product Name</th>
                                         <th>Category</th>
-                                        <th>Quantity</th>
-                                        
-                                        <th>Status</th>
-                                        
+                                        <th>Stock Amount</th>
+                                        <th>Stock Price</th>
+                                        <th>Stock Date</th>
+                                        <th>Expiry Date</th>
+                                        <th>Availability</th>
+                                        <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td>PRD001</td>
-                                        <td>Rice</td>
+                                        <td>P001</td>
+                                        <td>Rice (Basmati)</td>
                                         <td>Grains</td>
-                                        <td>1000 kg</td>
-                                        
-                                        <td><span class="badge badge-success">In Stock</span></td>
-                                        
-                                            
-
+                                        <td>1500 kg</td>
+                                        <td>$1200/ton</td>
+                                        <td>2024-03-01</td>
+                                        <td>2025-03-01</td>
+                                        <td><span class="badge badge-success">Available</span></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-secondary"><i class="fas fa-edit"></i></button>
+                                            <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                        </td>
                                     </tr>
                                     <tr>
-                                        <td>PRD002</td>
+                                        <td>P002</td>
                                         <td>Wheat</td>
                                         <td>Grains</td>
                                         <td>800 kg</td>
-                                        
+                                        <td>$950/ton</td>
+                                        <td>2024-02-15</td>
+                                        <td>2024-12-15</td>
                                         <td><span class="badge badge-warning">Low Stock</span></td>
-                                        
-                                         
-                                        
+                                        <td>
+                                            <button class="btn btn-sm btn-secondary"><i class="fas fa-edit"></i></button>
+                                            <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>P003</td>
+                                        <td>Corn</td>
+                                        <td>Grains</td>
+                                        <td>0 kg</td>
+                                        <td>$800/ton</td>
+                                        <td>2024-01-20</td>
+                                        <td>2024-07-20</td>
+                                        <td><span class="badge badge-danger">Add Stock</span></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-secondary"><i class="fas fa-edit"></i></button>
+                                            <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
                     </div>
-
-                    <!-- Charts Row -->
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h3 class="card-title">Inventory Levels</h3>
-                                </div>
-                                <div class="card-body">
-                                    <canvas id="inventoryChart" style="height: 300px;"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h3 class="card-title">Daily Orders</h3>
-                                </div>
-                                <div class="card-body">
-                                    <canvas id="orderChart" style="height: 300px;"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    
                 </div>
             </section>
         </div>
