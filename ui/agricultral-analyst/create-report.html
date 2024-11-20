@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Production Data - GreenGrid</title>
+    <title>Create Report - GreenGrid</title>
     <link rel="icon" type="image/png" href="../../Images/GREENGRID Logo 1.png">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.1/dist/css/adminlte.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
@@ -230,7 +230,7 @@
                 <div class="container-fluid">
                     <div class="row mb-2">
                         <div class="col-sm-6">
-                            <h1 class="m-0">Production Data</h1>
+                            <h1 class="m-0">Create Report</h1>
                         </div>
                         <div class="col-sm-6">
                             <!-- Empty div for potential future content or right-aligned elements -->
@@ -242,61 +242,122 @@
             <!-- Main content -->
             <section class="content">
                 <div class="container-fluid">
-                    
-
-                    <!-- Production Data Table -->
+                    <!-- Report Form Card -->
                     <div class="card">
-                        
+                        <div class="card-header">
+                            <h3 class="card-title">Generate Agricultural Analysis Report</h3>
+                        </div>
                         <div class="card-body">
-                            <table class="table table-bordered table-striped">
-                                <thead>
-                                    <tr>
-                                        <th>Production ID</th>
-                                        <th>Farmer ID</th>
-                                        <th>Name</th>
-                                        <th>Category</th>
-                                        <th>Harvest Date</th>
-                                        <th>Shelf Life (Days)</th>
-                                        <th>Expiration Date</th>
-                                        <th>Quantity (kg)</th>
-                                        <th>Acreage (acres)</th>
-                                        <th>Yield Rate (kg/acre)</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>PRD001</td>
-                                        <td>FRM123</td>
-                                        <td>Rice (Boro)</td>
-                                        <td>Cereal Grains</td>
-                                        <td>2024-03-15</td>
-                                        <td>180</td>
-                                        <td>2024-09-11</td>
-                                        <td>2,500</td>
-                                        <td>5.0</td>
-                                        <td>500</td>
-                                        <td>
-                                            <button class="btn btn-sm btn-info"><i class="fas fa-info-circle"></i> View Details</button>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>PRD002</td>
-                                        <td>FRM456</td>
-                                        <td>Rice (Aman)</td>
-                                        <td>Cereal Grains</td>
-                                        <td>2024-03-10</td>
-                                        <td>90</td>
-                                        <td>2024-06-08</td>
-                                        <td>3,200</td>
-                                        <td>6.4</td>
-                                        <td>500</td>
-                                        <td>
-                                            <button class="btn btn-sm btn-info"><i class="fas fa-info-circle"></i> View Details</button>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                            <form>
+                                <!-- Basic Information -->
+                                <div class="form-group">
+                                    <label for="reportTitle">Report Title</label>
+                                    <input type="text" class="form-control" id="reportTitle" placeholder="Enter report title">
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Report Period</label>
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
+                                                </div>
+                                                <input type="date" class="form-control" id="startDate">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">to</span>
+                                                </div>
+                                                <input type="date" class="form-control" id="endDate">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Report Type</label>
+                                            <select class="form-control">
+                                                <option>Crop Production Analysis</option>
+                                                <option>Yield Performance Report</option>
+                                                <option>Resource Utilization Report</option>
+                                                <option>Quality Assessment Report</option>
+                                                <option>Sustainability Metrics Report</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Analysis Parameters -->
+                                <div class="card card-info">
+                                    <div class="card-header">
+                                        <h3 class="card-title">Analysis Parameters</h3>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label>Crop Type</label>
+                                                    <select class="form-control" multiple>
+                                                        <option>Rice</option>
+                                                        <option>Wheat</option>
+                                                        <option>Corn</option>
+                                                        <option>Soybeans</option>
+                                                        <option>Cotton</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label>Metrics to Include</label>
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" checked>
+                                                        <label class="form-check-label">Yield Data</label>
+                                                    </div>
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" checked>
+                                                        <label class="form-check-label">Resource Usage</label>
+                                                    </div>
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox">
+                                                        <label class="form-check-label">Cost Analysis</label>
+                                                    </div>
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox">
+                                                        <label class="form-check-label">Environmental Impact</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label>Data Visualization</label>
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" checked>
+                                                        <label class="form-check-label">Charts</label>
+                                                    </div>
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" checked>
+                                                        <label class="form-check-label">Tables</label>
+                                                    </div>
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox">
+                                                        <label class="form-check-label">Trend Analysis</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Additional Notes -->
+                                <div class="form-group">
+                                    <label>Additional Notes</label>
+                                    <textarea class="form-control" rows="3" placeholder="Enter any additional notes or comments"></textarea>
+                                </div>
+
+                                <!-- Action Buttons -->
+                                <div class="text-right">
+                                    <button type="button" class="btn btn-default mr-2">Preview</button>
+                                    <button type="submit" class="btn btn-primary">Generate Report</button>
+                                </div>
+                            </form>
                         </div>
                     </div>
                 </div>
