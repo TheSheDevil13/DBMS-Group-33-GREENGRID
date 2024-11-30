@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Nov 27, 2024 at 06:15 PM
+-- Generation Time: Nov 28, 2024 at 10:55 PM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -36,7 +36,9 @@ CREATE TABLE `agriculturalanalyst` (
 --
 
 INSERT INTO `agriculturalanalyst` (`AEmployeeID`) VALUES
-(10);
+(21),
+(23),
+(25);
 
 -- --------------------------------------------------------
 
@@ -55,6 +57,20 @@ CREATE TABLE `agriculturaloffice` (
   `LocalGovtID` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `agriculturaloffice`
+--
+
+INSERT INTO `agriculturaloffice` (`AgriOfficeID`, `AgriOfficeName`, `Number`, `Email`, `Street`, `City`, `PostalCode`, `LocalGovtID`) VALUES
+(12, 'Bangladesh Agricultural Research Institute', '01700000001', 'bari@bangladesh.gov.bd', 'Farmgate, Dhaka', 'Dhaka', '1000', 1),
+(13, 'Department of Agriculture', '01700000002', 'doa@bangladesh.gov.bd', 'Agricultural Zone, Mymensingh', 'Mymensingh', '2200', 2),
+(14, 'Palli Karma-Sahayak Foundation', '01700000003', 'pksp@bangladesh.gov.bd', 'Agricultural Office Road, Chittagong', 'Chittagong', '4000', 3),
+(15, 'Bangladesh Rural Development Board', '01700000004', 'brdb@bangladesh.gov.bd', 'Rajshahi Agro Center, Rajshahi', 'Rajshahi', '6000', 4),
+(16, 'Agricultural Marketing Directorate', '01700000005', 'amd@bangladesh.gov.bd', 'Agro Road, Khulna', 'Khulna', '9000', 5),
+(44, 'Bangladesh Agriculture Research Center', '01700000006', 'barc@bangladesh.gov.bd', 'Farmgate, Dhaka', 'Dhaka', '1205', 1),
+(45, 'Department of Crop Science', '01700000007', 'crop@bangladesh.gov.bd', 'Khamarbari, Dhaka', 'Dhaka', '1216', 1),
+(46, 'Farmers Development Agency', '01700000008', 'fda@bangladesh.gov.bd', 'Shyamoli, Dhaka', 'Dhaka', '1207', 1);
+
 -- --------------------------------------------------------
 
 --
@@ -70,7 +86,8 @@ CREATE TABLE `AgriculturalOfficer` (
 --
 
 INSERT INTO `AgriculturalOfficer` (`OEmployeeID`) VALUES
-(11);
+(22),
+(24);
 
 -- --------------------------------------------------------
 
@@ -83,6 +100,17 @@ CREATE TABLE `Demand` (
   `ProductID` int(11) NOT NULL,
   `RequestedQuantity` decimal(10,2) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `Demand`
+--
+
+INSERT INTO `Demand` (`ShopID`, `ProductID`, `RequestedQuantity`) VALUES
+(1, 5, 150.00),
+(2, 1, 200.00),
+(3, 4, 250.00),
+(4, 3, 300.00),
+(5, 2, 350.00);
 
 -- --------------------------------------------------------
 
@@ -99,6 +127,17 @@ CREATE TABLE `Dispatch` (
   `DispatchStatus` enum('Pending','In Transit','Delivered','Cancelled','Ready for Pickup') DEFAULT NULL,
   `DeliveryStatus` enum('Pending','In Transit','Delivered') DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `Dispatch`
+--
+
+INSERT INTO `Dispatch` (`WarehouseID`, `StockID`, `ShopID`, `DispatchQuantity`, `DispatchDate`, `DispatchStatus`, `DeliveryStatus`) VALUES
+(6, 1, 1, 150.00, '2024-11-29', 'Delivered', 'Delivered'),
+(7, 2, 2, 200.00, '2024-11-28', 'Pending', 'In Transit'),
+(8, 5, 3, 300.00, '2024-11-26', 'Ready for Pickup', 'Pending'),
+(9, 3, 4, 250.00, '2024-11-27', 'Delivered', 'Delivered'),
+(10, 4, 5, 100.00, '2024-11-30', 'In Transit', 'Pending');
 
 -- --------------------------------------------------------
 
@@ -123,9 +162,14 @@ CREATE TABLE `employee` (
 --
 
 INSERT INTO `employee` (`EmployeeID`, `EmployeeName`, `Number`, `Email`, `AgriOfficeID`, `Street`, `City`, `PostalCode`, `EmployeeType`) VALUES
-(10, 'John Doe', '01234567891', 'doe@gmail.com', NULL, NULL, NULL, NULL, 'O'),
-(11, 'Jane Smith', '02099333791', 'smith@gmail.com', NULL, NULL, NULL, NULL, 'A'),
-(12, 'Jane Smith', '07099333771', 'smith2@gmail.com', NULL, NULL, NULL, NULL, 'W');
+(21, 'Mohammad Shakil', '01711223344', 'shakil@bangladesh.gov.bd', 12, 'Farmgate, Dhaka', 'Dhaka', '1000', 'O'),
+(22, 'Sultana Begum', '01722334455', 'sultana@bangladesh.gov.bd', 13, 'Agricultural Zone, Mymensingh', 'Mymensingh', '2200', 'A'),
+(23, 'Rafiqul Islam', '01733445566', 'rafiqul@bangladesh.gov.bd', 14, 'Agricultural Office Road, Chittagong', 'Chittagong', '4000', 'W'),
+(24, 'Sajeda Khatun', '01744556677', 'sajeda@bangladesh.gov.bd', 15, 'Rajshahi Agro Center, Rajshahi', 'Rajshahi', '6000', 'A'),
+(25, 'Tariq Anwar', '01755667788', 'tariq@bangladesh.gov.bd', 16, 'Agro Road, Khulna', 'Khulna', '9000', 'W'),
+(41, 'Rahim Uddin', '01766778899', 'rahim@bangladesh.gov.bd', 44, 'Farmgate, Dhaka', 'Dhaka', '1205', 'O'),
+(42, 'Hasina Parvin', '01777889900', 'hasina@bangladesh.gov.bd', 45, 'Khamarbari, Dhaka', 'Dhaka', '1216', 'A'),
+(43, 'Mohammad Ali', '01788990011', 'mohammadali@bangladesh.gov.bd', 46, 'Shyamoli, Dhaka', 'Dhaka', '1207', 'W');
 
 -- --------------------------------------------------------
 
@@ -148,8 +192,11 @@ CREATE TABLE `farmer` (
 --
 
 INSERT INTO `farmer` (`FarmerID`, `FarmerName`, `Number`, `Email`, `Street`, `City`, `PostalCode`) VALUES
-(1, 'John Doe', '01234567891', 'doe@gmail.com', NULL, NULL, NULL),
-(2, 'Jane Smith', '01099333791', 'smith@gmail.com', NULL, NULL, NULL);
+(1, 'Abdul Karim', '01711223345', 'karim@farmer.com', 'Dhanmondi, Dhaka', 'Dhaka', '1209'),
+(2, 'Fatema Akter', '01722334456', 'fatema@farmer.com', 'Madhupur, Tangail', 'Tangail', '1900'),
+(3, 'Hasan Ali', '01733445567', 'hasan@farmer.com', 'Narsingdi, Dhaka', 'Narsingdi', '1600'),
+(4, 'Shamim Hossain', '01744556678', 'shamim@farmer.com', 'Feni, Chittagong', 'Feni', '3900'),
+(5, 'Salma Begum', '01755667789', 'salma@farmer.com', 'Chandpur, Chittagong', 'Chandpur', '4200');
 
 -- --------------------------------------------------------
 
@@ -166,6 +213,17 @@ CREATE TABLE `farmer_deliver` (
   `DeliveryStatus` enum('Pending','In Transit','Delivered') NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `farmer_deliver`
+--
+
+INSERT INTO `farmer_deliver` (`FarmerID`, `ProductID`, `WarehouseID`, `ProductQuantity`, `PricePerUnit`, `DeliveryStatus`) VALUES
+(1, 5, 10, 50.00, 120.00, 'Delivered'),
+(2, 4, 8, 75.00, 130.00, 'In Transit'),
+(3, 3, 7, 100.00, 125.00, 'Pending'),
+(4, 2, 6, 150.00, 110.00, 'In Transit'),
+(5, 1, 9, 200.00, 115.00, 'Delivered');
+
 -- --------------------------------------------------------
 
 --
@@ -178,6 +236,17 @@ CREATE TABLE `farmer_subsidery` (
   `SubsideryQuantity` varchar(50) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `farmer_subsidery`
+--
+
+INSERT INTO `farmer_subsidery` (`FarmerID`, `OEmployeeID`, `SubsideryQuantity`) VALUES
+(1, 22, '500 kg'),
+(2, 24, '1000 kg'),
+(3, 22, '1500 kg'),
+(4, 24, '2000 kg'),
+(5, 22, '2500 kg');
+
 -- --------------------------------------------------------
 
 --
@@ -189,6 +258,17 @@ CREATE TABLE `farmer_subsidery_type` (
   `OEmployeeID` int(11) NOT NULL,
   `SubsideryType` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `farmer_subsidery_type`
+--
+
+INSERT INTO `farmer_subsidery_type` (`FarmerID`, `OEmployeeID`, `SubsideryType`) VALUES
+(1, 22, 'Seed Subsidy'),
+(2, 24, 'Fertilizer Subsidy'),
+(3, 22, 'Pesticide Subsidy'),
+(4, 24, 'Equipment Subsidy'),
+(5, 22, 'Seed Subsidy');
 
 -- --------------------------------------------------------
 
@@ -211,11 +291,11 @@ CREATE TABLE `localgovernment` (
 --
 
 INSERT INTO `localgovernment` (`LocalGovtID`, `LocalGovtName`, `Number`, `Email`, `Street`, `City`, `PostalCode`) VALUES
-(1, 'Union Agricultural Development Council', '01712345678', 'uadc@example.com', '123 Main Road', 'Dhaka', '1212'),
-(2, 'District Agriculture Office', '01823456789', 'dao@example.com', '45 Green Street', 'Chittagong', '4220'),
-(3, 'Upazila Agro-Resource Center', '01934567890', 'uarc@example.com', '78 Agrarian Avenue', 'Sylhet', '3100'),
-(4, 'Rural Development Office', '01645678901', 'rdo@example.com', '50 Community Lane', 'Khulna', '9100'),
-(5, 'Urban Agro Support Center', '01556789012', 'uasc@example.com', '99 City Park Blvd', 'Rajshahi', '6200');
+(1, 'Dhaka City Corporation', '01721234567', 'dhakacc@bangladesh.gov.bd', 'Purana Paltan, Dhaka', 'Dhaka', '1000'),
+(2, 'Mymensingh City Corporation', '01731234567', 'mymensinghcc@bangladesh.gov.bd', 'Mymensingh Sadar, Mymensingh', 'Mymensingh', '2200'),
+(3, 'Chittagong City Corporation', '01741234567', 'ctgcc@bangladesh.gov.bd', 'Karnaphuli, Chittagong', 'Chittagong', '4000'),
+(4, 'Rajshahi City Corporation', '01751234567', 'rajshahicc@bangladesh.gov.bd', 'Rajshahi Sadar, Rajshahi', 'Rajshahi', '6000'),
+(5, 'Khulna City Corporation', '01761234567', 'khulnacc@bangladesh.gov.bd', 'Khulna Sadar, Khulna', 'Khulna', '9000');
 
 -- --------------------------------------------------------
 
@@ -230,6 +310,17 @@ CREATE TABLE `order` (
   `ShopID` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `order`
+--
+
+INSERT INTO `order` (`OrderID`, `OrderDate`, `OrderStatus`, `ShopID`) VALUES
+(1, '2024-11-01', 'Pending', 1),
+(2, '2024-11-02', 'Processing', 2),
+(3, '2024-11-03', 'Shipped', 3),
+(4, '2024-11-04', 'Delivered', 4),
+(5, '2024-11-05', 'Cancelled', 5);
+
 -- --------------------------------------------------------
 
 --
@@ -241,6 +332,17 @@ CREATE TABLE `order_details` (
   `ProductID` int(11) NOT NULL,
   `OrderQuantity` decimal(10,2) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `order_details`
+--
+
+INSERT INTO `order_details` (`OrderID`, `ProductID`, `OrderQuantity`) VALUES
+(1, 5, 100.00),
+(2, 4, 150.00),
+(3, 3, 200.00),
+(4, 2, 50.00),
+(5, 1, 75.00);
 
 -- --------------------------------------------------------
 
@@ -256,6 +358,17 @@ CREATE TABLE `product` (
   `PricePerUnit` decimal(10,2) NOT NULL,
   `Seasonality` varchar(50) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `product`
+--
+
+INSERT INTO `product` (`ProductID`, `OEmployeeID`, `ProductName`, `Category`, `PricePerUnit`, `Seasonality`) VALUES
+(1, 22, 'BRRI Dhan 28', 'Rice', 40.00, 'Boro'),
+(2, 24, 'Fertilizer Package A', 'Fertilizer', 350.00, 'Year-Round'),
+(3, 22, 'Hybrid Maize', 'Grain', 45.00, 'Kharif'),
+(4, 24, 'Mixed Seeds Package', 'Seeds', 200.00, 'Seasonal'),
+(5, 22, 'Chili Powder', 'Spices', 300.00, 'Rabi');
 
 -- --------------------------------------------------------
 
@@ -274,6 +387,17 @@ CREATE TABLE `productiondata` (
   `FarmerID` int(11) NOT NULL,
   `ProductID` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `productiondata`
+--
+
+INSERT INTO `productiondata` (`ProductionID`, `HarvestDate`, `ProductionCost`, `ShelfLife`, `Acreage`, `YieldRate`, `AEmployeeID`, `FarmerID`, `ProductID`) VALUES
+(1, '2024-04-15', 15000.00, '6 months', 2.50, 8.00, 21, 1, 1),
+(2, '2024-04-20', 18000.00, '3 months', 3.00, 7.50, 21, 2, 2),
+(3, '2024-05-10', 12000.00, '4 months', 4.00, 6.00, 23, 3, 3),
+(4, '2024-06-01', 10000.00, '5 months', 1.50, 9.00, 23, 4, 4),
+(5, '2024-07-15', 5000.00, '2 months', 1.00, 10.00, 25, 5, 5);
 
 -- --------------------------------------------------------
 
@@ -296,8 +420,11 @@ CREATE TABLE `retailshop` (
 --
 
 INSERT INTO `retailshop` (`ShopID`, `ShopName`, `Number`, `Email`, `Street`, `City`, `PostalCode`) VALUES
-(1, 'Unimart', '123', 'unimart@gmail.com', NULL, NULL, NULL),
-(2, 'Meena Bazaar', '1232', 'meenat@gmail.com', NULL, NULL, NULL);
+(1, 'Shwapno', '01800123456', 'shwapno@example.com', 'Road 17, Sector 4', 'Dhaka', '1207'),
+(2, 'Unimart', '01800987654', 'unimart@example.com', 'House 12, Street 5', 'Chittagong', '4203'),
+(3, 'Meena Bazar', '01800223344', 'meena@example.com', 'Block A, Shyamoli', 'Rajshahi', '6201'),
+(4, 'Gulshan Market', '01800334455', 'gulshan@example.com', 'House 5, Road 3', 'Dhaka', '1212'),
+(5, 'Agora', '01800445566', 'agora@example.com', 'Plot 3, Main Road', 'Sylhet', '3100');
 
 -- --------------------------------------------------------
 
@@ -313,6 +440,17 @@ CREATE TABLE `Stock` (
   `WarehouseID` int(11) DEFAULT NULL,
   `ProductID` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `Stock`
+--
+
+INSERT INTO `Stock` (`StockID`, `StockQuantity`, `LastUpdateDate`, `StockAvailability`, `WarehouseID`, `ProductID`) VALUES
+(1, 2000.00, '2024-11-05', 'In Stock', 6, 1),
+(2, 1500.00, '2024-11-04', 'In Stock', 7, 2),
+(3, 1800.00, '2024-11-03', 'Out of Stock', 8, 3),
+(4, 1200.00, '2024-11-02', 'In Stock', 10, 4),
+(5, 1600.00, '2024-11-01', 'In Stock', 9, 5);
 
 -- --------------------------------------------------------
 
@@ -331,6 +469,17 @@ CREATE TABLE `warehouse` (
   `WEmployeeID` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `warehouse`
+--
+
+INSERT INTO `warehouse` (`WarehouseID`, `Street`, `City`, `PostalCode`, `Temperature`, `Humidity`, `LightExposure`, `WEmployeeID`) VALUES
+(6, 'Gulshan, Dhaka', 'Dhaka', '1207', 25.00, 60.00, 300.00, 41),
+(7, 'Chittagong Port', 'Chittagong', '4203', 27.00, 70.00, 250.00, 42),
+(8, 'Rajshahi Warehouse', 'Rajshahi', '6201', 22.00, 65.00, 200.00, 41),
+(9, 'Sylhet Warehouse', 'Sylhet', '3100', 23.00, 62.00, 220.00, 43),
+(10, 'Barisal Depot', 'Barisal', '8200', 24.00, 68.00, 230.00, 42);
+
 -- --------------------------------------------------------
 
 --
@@ -346,7 +495,9 @@ CREATE TABLE `warehousemanager` (
 --
 
 INSERT INTO `warehousemanager` (`WEmployeeID`) VALUES
-(12);
+(41),
+(42),
+(43);
 
 --
 -- Indexes for dumped tables
@@ -503,19 +654,19 @@ ALTER TABLE `warehousemanager`
 -- AUTO_INCREMENT for table `agriculturaloffice`
 --
 ALTER TABLE `agriculturaloffice`
-  MODIFY `AgriOfficeID` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `AgriOfficeID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=47;
 
 --
 -- AUTO_INCREMENT for table `employee`
 --
 ALTER TABLE `employee`
-  MODIFY `EmployeeID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `EmployeeID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=44;
 
 --
 -- AUTO_INCREMENT for table `farmer`
 --
 ALTER TABLE `farmer`
-  MODIFY `FarmerID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `FarmerID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `localgovernment`
@@ -527,7 +678,7 @@ ALTER TABLE `localgovernment`
 -- AUTO_INCREMENT for table `order`
 --
 ALTER TABLE `order`
-  MODIFY `OrderID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `OrderID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `product`
@@ -539,25 +690,25 @@ ALTER TABLE `product`
 -- AUTO_INCREMENT for table `productiondata`
 --
 ALTER TABLE `productiondata`
-  MODIFY `ProductionID` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `ProductionID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `retailshop`
 --
 ALTER TABLE `retailshop`
-  MODIFY `ShopID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `ShopID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `Stock`
 --
 ALTER TABLE `Stock`
-  MODIFY `StockID` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `StockID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `warehouse`
 --
 ALTER TABLE `warehouse`
-  MODIFY `WarehouseID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `WarehouseID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- Constraints for dumped tables

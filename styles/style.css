@@ -3,6 +3,12 @@
     background-color: #2C3333 !important;
 }
 
+
+/* Custom sidebar width */
+.main-sidebar {
+    width: 250px !important; /* Set your desired width */
+}
+
 /* Custom active link color */
 .sidebar-dark-custom .nav-sidebar > .nav-item > .nav-link.active {
     background-color: #2E7D32 !important;
@@ -81,4 +87,10 @@ a:hover {
 body {
     min-height: 100vh;
     margin: 0;
+}
+
+/* Adjust nav link styles */
+.nav-sidebar .nav-item .nav-link {
+    white-space: nowrap; /* Prevents text from wrapping */
+    padding: 5px 10px; /* Reduce padding to create more space */
 }
