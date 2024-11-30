@@ -25,7 +25,7 @@
 <body class="body">
     <div class="login-box">
         <div class="login-logo">
-            <a href=""><b>ADMIN</b></a>
+            <a href=""><b>Welcome to GreenGrid</b></a>
         </div>
         <div class="card">
             <div class="card-body login-card-body">
