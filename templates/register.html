@@ -8,23 +8,33 @@
 </head>
 <body>
     <h1>Register</h1>
-    <form action="register.html" method="POST">
+    <form action="/register" method="POST">
 
-        <label for="name">Name:</label>
-        <input type="text" name="name" id="name" required><br><br>
+        <label for="first_name">First Name:</label>
+        <input type="text" name="first_name" id="first_name" required><br><br>
+
+        <label for="last_name">Last Name:</label>
+        <input type="text" name="last_name" id="last_name" required><br><br>
+
+        <label for="username">Username:</label>
+        <input type="text" name="username" id="username" required><br><br>
 
         <label for="email">Email:</label>
         <input type="email" name="email" id="email" required><br><br>
 
-        <label for="role">Role:</label>
-    <select name="role" id="role" required>
-        <option value="officer">Agricultural Officer</option>
-        <option value="analyst">Agricultural Analyst</option>
-        <option value="manager">Warehouse Manager</option>
-        <option value="manager">Retail Shop Owner</option>
-        <option value="manager">Farmer</option>
-    </select><br><br>
+        <label for="password">Password:</label>
+        <input type="password" name="password" id="password" required><br><br>
         
+        <label for="role">Role:</label>
+        <select name="role" id="role" required>
+            <option value="officer">Agricultural Officer</option>
+            <option value="analyst">Agricultural Analyst</option>
+            <option value="manager">Warehouse Manager</option>
+            <option value="retail">Retail Shop Owner</option> <!-- Changed value to 'retail' -->
+            <option value="farmer">Farmer</option> <!-- Changed value to 'farmer' -->
+        </select><br><br>
+        
+
         <button type="submit" name="register">Register</button>
     </form>
 
