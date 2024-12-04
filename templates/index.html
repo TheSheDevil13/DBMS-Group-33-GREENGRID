@@ -3,39 +3,270 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GreenGrid Homepage</title>
+    <title>GreenGrid - Smart Agricultural Management</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+
         nav {
-            background-color: #333; /* Dark background for the navbar */
-            padding: 10px; /* Padding around the navbar */
-            text-align: right; /* Aligns the content to the right */
+            background-color: white;
+            padding: 1rem 5%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
         }
-        nav ul {
-            list-style-type: none; /* Remove bullet points */
-            margin: 0; /* Remove default margin */
-            padding: 0; /* Remove default padding */
+
+        .logo-container {
+            display: flex;
+            align-items: center;
         }
-        nav ul li {
-            display: inline; /* Display list items in a row */
-            margin-left: 20px; /* Space between items */
+
+        .logo-container img {
+            width: 40px;
+            height: auto;
+            margin-right: 10px;
         }
-        nav ul li a {
-            color: white; /* White text color */
-            text-decoration: none; /* Remove underline from links */
+
+        .logo-container span {
+            color: #28a745;
+            font-size: 24px;
+            font-weight: 300;
         }
-        nav ul li a:hover {
-            text-decoration: underline; /* Underline on hover */
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav-links a {
+            color: #666;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: #28a745;
+            background-color: #f8f9fa;
+        }
+
+        .nav-links a.login {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .nav-links a.login:hover {
+            background-color: #218838;
+            color: white;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            min-height: 100vh;
+            padding: 120px 5% 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 2rem;
+        }
+
+        .hero-content {
+            flex: 1;
+            max-width: 600px;
+        }
+
+        .hero-images {
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            gap: 1rem;
+            max-width: 600px;
+            height: 500px;
+        }
+
+        .hero-image {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        .hero-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .hero-image:hover img {
+            transform: scale(1.05);
+        }
+
+        .hero-image:nth-child(1) {
+            grid-row: 1 / 3;
+            grid-column: 1;
+        }
+
+        .hero-image:nth-child(2) {
+            grid-row: 1;
+            grid-column: 2;
+        }
+
+        .hero-image:nth-child(3) {
+            grid-row: 2;
+            grid-column: 2;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            color: #212529;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: #6c757d;
+            margin-bottom: 2rem;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #218838;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background-color: #f8f9fa;
+            color: #28a745;
+            border: 2px solid #28a745;
+        }
+
+        .btn-secondary:hover {
+            background-color: #28a745;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .features {
+            display: flex;
+            gap: 2rem;
+            margin-top: 4rem;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            flex: 1;
+        }
+
+        .feature-card i {
+            font-size: 2rem;
+            color: #28a745;
+            margin-bottom: 1rem;
+        }
+
+        .feature-card h3 {
+            margin-bottom: 0.5rem;
+            color: #212529;
+        }
+
+        .feature-card p {
+            font-size: 0.9rem;
+            color: #6c757d;
         }
     </style>
 </head>
 <body>
     <nav>
-        <ul>
-            <li><a href="login">Login</a></li>
-            <li><a href="register">Register</a></li>
-        </ul>
+        <div class="logo-container">
+            <img src="{{ url_for('static', filename='images/GREENGRID Logo 1.png') }}" alt="GreenGrid Logo">
+            <span><b>Green</b>Grid</span>
+        </div>
+        <div class="nav-links">
+            <a href="#about">About</a>
+            <a href="#features">Features</a>
+            <a href="#contact">Contact</a>
+            <a href="/register">Register</a>
+            <a href="/login" class="login">Login</a>
+        </div>
     </nav>
-    <h1>Welcome to GreenGrid</h1>
-    <p>My DBMS Project Homepage.</p>
+
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Smart Agricultural Management System</h1>
+            <p>Transform your agricultural operations with GreenGrid's innovative platform. Connect farmers, warehouse managers, and agricultural officers in one unified ecosystem.</p>
+            <div class="cta-buttons">
+                <a href="/register" class="btn btn-primary">Get Started</a>
+                <a href="#features" class="btn btn-secondary">Learn More</a>
+            </div>
+
+            <div class="features">
+                <div class="feature-card">
+                    <i class="fas fa-leaf"></i>
+                    <h3>Sustainable Farming</h3>
+                    <p>Optimize resource usage and implement sustainable farming practices.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-warehouse"></i>
+                    <h3>Inventory Management</h3>
+                    <p>Efficiently manage agricultural products and warehouse operations.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-chart-line"></i>
+                    <h3>Data Analytics</h3>
+                    <p>Make informed decisions with advanced agricultural analytics.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="hero-images">
+            <div class="hero-image">
+                <img src="{{ url_for('static', filename='images/smart-farming.jpg') }}" alt="Smart Farming Technology">
+            </div>
+            <div class="hero-image">
+                <img src="{{ url_for('static', filename='images/agriculture-warehouse.jpg') }}" alt="Modern Warehouse">
+            </div>
+            <div class="hero-image">
+                <img src="{{ url_for('static', filename='images/analytics.webp') }}" alt="Agricultural Analytics">
+            </div>
+        </div>
+    </section>
 </body>
 </html>
