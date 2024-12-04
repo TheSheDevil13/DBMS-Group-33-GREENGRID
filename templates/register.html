@@ -3,41 +3,169 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Register - GreenGrid</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #fff;
+            font-family: Arial, sans-serif;
+        }
+        
+        .logo-container {
+            text-align: center;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-container img {
+            width: 60px;
+            height: auto;
+            margin-right: 10px;
+        }
+
+        .logo-container span {
+            color: #28a745;
+            font-size: 42px;
+            vertical-align: middle;
+        }
+
+        .register-container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .register-title {
+            text-align: center;
+            color: #666;
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 35px 10px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+
+        .form-group i {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+        }
+
+        select.form-control {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 1em;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 10px;
+            background-color: #28a745;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .btn-primary:hover {
+            background-color: #218838;
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .login-link a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
-    <h1>Register</h1>
-    <form action="/register" method="POST">
-
-        <label for="first_name">First Name:</label>
-        <input type="text" name="first_name" id="first_name" required><br><br>
-
-        <label for="last_name">Last Name:</label>
-        <input type="text" name="last_name" id="last_name" required><br><br>
-
-        <label for="username">Username:</label>
-        <input type="text" name="username" id="username" required><br><br>
-
-        <label for="email">Email:</label>
-        <input type="email" name="email" id="email" required><br><br>
-
-        <label for="password">Password:</label>
-        <input type="password" name="password" id="password" required><br><br>
-        
-        <label for="role">Role:</label>
-        <select name="role" id="role" required>
-            <option value="officer">Agricultural Officer</option>
-            <option value="analyst">Agricultural Analyst</option>
-            <option value="manager">Warehouse Manager</option>
-            <option value="retail">Retail Shop Owner</option> <!-- Changed value to 'retail' -->
-            <option value="farmer">Farmer</option> <!-- Changed value to 'farmer' -->
-        </select><br><br>
-        
-
-        <button type="submit" name="register">Register</button>
-    </form>
-
-
+    <div class="logo-container">
+        <img src="{{ url_for('static', filename='images/GREENGRID Logo 1.png') }}" alt="GreenGrid Logo">
+        <span><b>Green</b>Grid</span>
+    </div>
+    
+    <div class="register-container">
+        <div class="register-title">Register a new account</div>
+        {% if error %}
+        <div class="alert alert-danger">
+            {{ error }}
+        </div>
+        {% endif %}
+        <form action="/register-store" method="POST">
+            <div class="form-group">
+                <input type="text" name="first_name" class="form-control" placeholder="First Name" required>
+                <i class="fas fa-user"></i>
+            </div>
+            <div class="form-group">
+                <input type="text" name="last_name" class="form-control" placeholder="Last Name" required>
+                <i class="fas fa-user"></i>
+            </div>
+            <div class="form-group">
+                <input type="text" name="username" class="form-control" placeholder="Username" required>
+                <i class="fas fa-user-circle"></i>
+            </div>
+            <div class="form-group">
+                <input type="email" name="email" class="form-control" placeholder="Email" required>
+                <i class="fas fa-envelope"></i>
+            </div>
+            <div class="form-group">
+                <input type="password" name="password" class="form-control" placeholder="Password" required>
+                <i class="fas fa-lock"></i>
+            </div>
+            <div class="form-group">
+                <select name="role" class="form-control" required>
+                    <option value="" disabled selected>Select Role</option>
+                    <option value="O">Agricultural Officer</option>
+                    <option value="A">Agricultural Analyst</option>
+                    <option value="W">Warehouse Manager</option>
+                    <option value="S">Retail Shop Owner</option>
+                    <option value="F">Farmer</option>
+                </select>
+                <i class="fas fa-user-tag"></i>
+            </div>
+            <button type="submit" class="btn-primary">Register</button>
+        </form>
+        <div class="login-link">
+            <a href="/login">Already have an account? Sign in</a>
+        </div>
+    </div>
 </body>
 </html>
