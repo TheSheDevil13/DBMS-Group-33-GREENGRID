@@ -1,72 +1,138 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GreenGrid</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.1/dist/css/adminlte.min.css">
+    <title>Login - GreenGrid</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
         body {
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
+            justify-content: center;
             min-height: 100vh;
             margin: 0;
+            background-color: #fff;
+            font-family: Arial, sans-serif;
         }
         
-        .login-box {
-            width: 360px;
-            margin: 0;
+        .logo-container {
+            text-align: center;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-container img {
+            width: 60px;
+            height: auto;
+            margin-right: 10px;
+        }
+
+        .logo-container span {
+            color: #28a745;
+            font-size: 42px;
+            vertical-align: middle;
+        }
+
+        .login-container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .login-title {
+            text-align: center;
+            color: #666;
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 35px 10px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+
+        .form-group i {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 10px;
+            background-color: #28a745;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .btn-primary:hover {
+            background-color: #218838;
+        }
+
+        .register-link {
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .register-link a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .register-link a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
-
-<body class="body">
-    <div class="login-box">
-        <div class="login-logo">
-            <a href=""><b>Welcome to GreenGrid</b></a>
+<body>
+    <div class="logo-container">
+        <img src="{{ url_for('static', filename='images/GREENGRID Logo 1.png') }}" alt="GreenGrid Logo">
+        <span><b>Green</b>Grid</span>
+    </div>
+    
+    <div class="login-container">
+        <div class="login-title">Sign in to start your session</div>
+        {% if error %}
+        <div class="alert alert-danger">
+            {{ error }}
         </div>
-        <div class="card">
-            <div class="card-body login-card-body">
-                <p class="login-box-msg">Sign in to start your session</p>
-
-                <form action="" method="post">
-                    <div class="input-group mb-3">
-                        <input type="email" class="form-control" placeholder="Email" fdprocessedid="h3ggo">
-                        <div class="input-group-append">
-                            <div class="input-group-text">
-                                <span class="fas fa-envelope"></span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="input-group mb-3">
-                        <input type="password" class="form-control" placeholder="Password" fdprocessedid="o3boz8"
-                            data-listener-added_3093949f="true">
-                        <div class="input-group-append">
-                            <div class="input-group-text">
-                                <span class="fas fa-lock"></span>
-                            </div>
-                        </div>
-                    </div>
-        
-                        
-                        <!-- /.col -->
-                        <div class="col-4">
-                            <button type="submit" class="btn btn-primary btn-block" fdprocessedid="v6j4yd">Sign
-                                In</button>
-                        </div>
-                        <!-- /.col -->
-                    </div>
-                </form>
-
-                
-
+        {% endif %}
+        <form action="/login-store" method="POST">
+            <div class="form-group">
+                <input type="text" name="email_username" class="form-control" placeholder="Username or Email" required>
+                <i class="fas fa-user"></i>
             </div>
-            <!-- /.login-card-body -->
+            <div class="form-group">
+                <input type="password" name="password" class="form-control" placeholder="Password" required>
+                <i class="fas fa-lock"></i>
+            </div>
+            <button type="submit" class="btn-primary">Sign In</button>
+        </form>
+        <div class="register-link">
+            <a href="/register">Don't have an account? Register here</a>
         </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.1/dist/js/adminlte.min.js"></script>
 </body>
-
 </html>
