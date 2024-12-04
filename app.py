@@ -56,13 +56,13 @@ def login_post():
 
     # Check user credentials (this is a simplified example)
     try:
-        cursor.execute("SELECT PasswordHash FROM users WHERE Email = %s", (email,))
+        cursor.execute("SELECT PasswordHash FROM users WHERE Email = %s OR Username = %s", (email_username, email_username))
         result = cursor.fetchone()
         
         if result and check_password_hash(result[0], password):
             return redirect('/admin-dashboard')  # Redirect to dashboard on successful login
         else:
-            error_message = "Invalid email or password."
+            error_message = "Invalid email/username or password."
     except Exception as e:
         error_message = f"Error: {e}"
 
