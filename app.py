@@ -47,13 +47,6 @@ def login_post():
     # Initialize an error message variable
     error_message = None
 
-    # Validation checks
-    if not email_username or not password:
-        error_message = "Email/Username and password are required."
-    
-    if error_message:
-        return render_template('login.html', error=error_message)
-
     # Check user credentials and get role
     try:
         cursor.execute("SELECT PasswordHash, Role FROM users WHERE Email = %s OR Username = %s", (email_username, email_username))
@@ -137,8 +130,7 @@ def register_post():
         # Execute the query and commit the changes
         cursor.execute(query, (first_name, last_name, username, email, hashed_password, role, status))
         connection.commit()
-        message = "Registration successful!"
-        return redirect('/login')  # Redirect to the login page after successful registration
+        return render_template('register.html', success="Registration successful! Please wait for approval.")
     except Exception as e:
         connection.rollback()  # Rollback in case of error
         print("Error during database operation:", e)  # Print the error for debugging
