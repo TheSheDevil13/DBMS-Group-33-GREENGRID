@@ -17,4 +17,4 @@ cursor = connection.cursor()
 @admin_routes.route('/admin-dashboard', methods=['GET'])
 def admin_dashboard():
     # ... existing code ...
-    return render_template('dashboard.html')  # Pass error to template
+    return render_template('admin-dashboard.html')  # Pass error to template

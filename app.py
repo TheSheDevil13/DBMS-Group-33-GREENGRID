@@ -47,26 +47,42 @@ def login_post():
     # Initialize an error message variable
     error_message = None
 
-    # Validation checks
-    if not email_username or not password:
-        error_message = "Email/Username and password are required."
-    
-    if error_message:
-        return render_template('login.html', error=error_message)  # Pass error to template
-
-    # Check user credentials (this is a simplified example)
+    # Check user credentials and get role
     try:
-        cursor.execute("SELECT PasswordHash FROM users WHERE Email = %s OR Username = %s", (email_username, email_username))
+        cursor.execute("SELECT PasswordHash, Role FROM users WHERE Email = %s OR Username = %s", (email_username, email_username))
         result = cursor.fetchone()
         
         if result and check_password_hash(result[0], password):
-            return redirect('/admin-dashboard')  # Redirect to dashboard on successful login
+            user_role = result[1].upper()  # Get user role and convert to uppercase
+            print(f"Debug - User Role from DB: '{user_role}'")  # Debug print
+            
+            # Special check for admin (both username and email)
+            if email_username.upper() == "ADMIN" or email_username == "greengridadmin@gmail.com":
+                return redirect('/admin/admin-dashboard')
+            
+            # Redirect based on role for other users
+            elif user_role == 'O':
+                print("Debug - Matched officer role")  # Debug print
+                return redirect('/agricultural-officer/officer-dashboard')
+            elif user_role == 'W':
+                print("Debug - Matched warehouse role")  # Debug print
+                return redirect('/warehouse-manager/manager-dashboard')
+            elif user_role == 'A':
+                print("Debug - Matched analyst role")  # Debug print
+                return redirect('/agricultural-analyst/analyst-dashboard')
+           # elif user_role == 'S':
+                #return redirect('/supplier/supplier-dashboard')
+            #elif user_role == 'F':
+               # return redirect('/farmer/farmer-dashboard')
+            else:
+                print(f"Debug - No role match found for '{user_role}'")  # Debug print
+                error_message = f"Invalid user role: '{user_role}'"
         else:
             error_message = "Invalid email/username or password."
     except Exception as e:
         error_message = f"Error: {e}"
 
-    return render_template('login.html', error=error_message)  # Pass error to template
+    return render_template('login.html', error=error_message)
 
 # Route for Register page (handles GET)
 @app.route('/register', methods=['GET'])
@@ -114,14 +130,35 @@ def register_post():
         # Execute the query and commit the changes
         cursor.execute(query, (first_name, last_name, username, email, hashed_password, role, status))
         connection.commit()
-        message = "Registration successful!"
-        return redirect('/login')  # Redirect to the login page after successful registration
+        return render_template('register.html', success="Registration successful! Please wait for approval.")
     except Exception as e:
         connection.rollback()  # Rollback in case of error
         print("Error during database operation:", e)  # Print the error for debugging
         error_message = f"Error: {e}"
     
     return render_template('register.html', error=error_message)  # Pass error to template
+
+# Dashboard routes for different roles
+@app.route('/admin/admin-dashboard')
+def admin_dashboard():
+    return render_template('admin/admin-dashboard.html')
+
+@app.route('/agricultural-officer/officer-dashboard')
+def officer_dashboard():
+    return render_template('agricultural-officer/officer-dashboard.html')
+
+@app.route('/warehouse-manager/manager-dashboard')
+def warehouse_dashboard():
+    return render_template('warehouse-manager/manager-dashboard.html')
+
+@app.route('/agricultural-analyst/analyst-dashboard')
+def analyst_dashboard():
+    return render_template('agricultural-analyst/analyst-dashboard.html')
+
+# Route for logout
+@app.route('/logout')
+def logout():
+    return redirect('/login')
 
 # Register the admin routes
 app.register_blueprint(admin_routes)
