@@ -3,18 +3,37 @@ import pymysql
 
 admin_routes = Blueprint('admin', __name__)
 
-# Connect to the MySQL database
-connection = pymysql.connect(
-    host='localhost',
-    user='root',
-    password='',  # Leave empty if no password
-    database='greengrid'
-)
+def get_db_connection():
+    return pymysql.connect(
+        host='localhost',
+        user='root',
+        password='',  
+        database='greengrid'
+    )
 
-cursor = connection.cursor()
-
-# Route for Login page (handles POST)
-@admin_routes.route('/admin-dashboard', methods=['GET'])
+@admin_routes.route('/admin/admin-dashboard')
 def admin_dashboard():
-    # ... existing code ...
-    return render_template('admin-dashboard.html')  # Pass error to template
+    # Test data without database connection
+    test_pending_users = [
+        {
+            'UserID': 1,
+            'FirstName': 'Test',
+            'LastName': 'User',
+            'Username': 'testuser',
+            'Email': 'test@example.com',
+            'Role': 'F',
+            'Status': 'pending'
+        },
+        {
+            'UserID': 2,
+            'FirstName': 'John',
+            'LastName': 'Doe',
+            'Username': 'johndoe',
+            'Email': 'john@example.com',
+            'Role': 'W',
+            'Status': 'pending'
+        }
+    ]
+    print("Sending test data to template:", test_pending_users)
+    return render_template('admin/admin-dashboard.html', pending_users=test_pending_users)
+
