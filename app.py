@@ -6,6 +6,7 @@ from templates.admin.admin_routes import admin_routes  # Import the admin routes
 # Initialize the Flask app
 app = Flask(__name__)
 app.config['TEMPLATES_AUTO_RELOAD'] = True   # Add this line to disable template caching
+app.secret_key = 'your-secret-key-here'  # Add this line to set the secret key
 
 # Connect to the MySQL database
 connection = pymysql.connect(
@@ -17,6 +18,13 @@ connection = pymysql.connect(
 
 cursor = connection.cursor()
 
+@app.after_request
+def add_no_cache_headers(response):
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
+    
 # Route to test database connection
 @app.route('/test_db')
 def test_db():
@@ -139,10 +147,6 @@ def register_post():
     return render_template('register.html', error=error_message)  # Pass error to template
 
 # Dashboard routes for different roles
-@app.route('/admin/admin-dashboard')
-def admin_dashboard():
-    return render_template('admin/admin-dashboard.html')
-
 @app.route('/agricultural-officer/officer-dashboard')
 def officer_dashboard():
     return render_template('agricultural-officer/officer-dashboard.html')
