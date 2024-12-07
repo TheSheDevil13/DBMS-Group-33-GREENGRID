@@ -54,7 +54,7 @@ def reject_user(user_id):
 def agricultural_officers():
     connection = get_db_connection()
     cursor = connection.cursor()
-    cursor.execute("SELECT UserID, FirstName, LastName, Username, Email, Role, Status FROM users WHERE Status = 'approved' AND Role = 'O'")
+    cursor.execute("SELECT UserID, FirstName, LastName, Username, Email, Role, Status FROM users WHERE Status = 'pending' AND Role = 'O'")
     pending_users = cursor.fetchall()
     # Convert tuple results to dictionaries for easier template access
     pending_users = [

@@ -312,39 +312,42 @@
                     </div>
 
                     <!-- Officers List -->
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">Agricultural Officers Directory</h3>
-                        </div>
-                        <div class="card-body">
-                            <table class="table table-bordered table-striped">
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Name</th>
-                                        <th>Region</th>
-                                        <th>Contact</th>
-                                        <th>Status</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for officer in officers %}
-                                    <tr>
-                                        <td>{{ officer.UserID }}</td>
-                                        <td>{{ officer.FirstName }} {{ officer.LastName }}</td>
-                                        <td>Not Available</td>
-                                        <td>{{ officer.Email }}</td>
-                                        <td><span class="badge badge-success">{{ officer.Status }}</span></td>
-                                        <td>
-                                            <button class="btn btn-sm btn-secondary"><i class="fas fa-edit"></i></button>
-                                            <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
+                    <div class="card-body">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>User ID</th>
+                                    <th>First Name</th>
+                                    <th>Last Name</th>
+                                    <th>Username</th>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user in officers %}
+                                <tr>
+                                    <td>{{ user.UserID }}</td>
+                                    <td>{{ user.FirstName }}</td>
+                                    <td>{{ user.LastName }}</td>
+                                    <td>{{ user.Username }}</td>
+                                    <td>{{ user.Email }}</td>
+                                    <td>{{ user.Role }}</td>
+                                    <td><span class="badge badge-warning">{{ user.Status }}</span></td>
+                                    <td>
+                                        <a href="/admin/approve-user/{{ user.UserID }}" class="btn btn-success btn-sm">
+                                            <i class="fas fa-check"></i> Approve
+                                        </a>
+                                        <a href="/admin/reject-user/{{ user.UserID }}" class="btn btn-danger btn-sm">
+                                            <i class="fas fa-times"></i> Reject
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </section>
