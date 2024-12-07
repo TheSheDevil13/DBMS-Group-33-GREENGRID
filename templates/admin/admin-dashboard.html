@@ -203,7 +203,7 @@
                             </a>
                             <ul class="nav nav-treeview">
                                 <li class="nav-item">
-                                    <a href="agricultural-officer.html" class="nav-link">
+                                    <a href="/admin/employee-directory/agricultural-officers" class="nav-link">
                                         <i class="fas fa-user-plus nav-icon"></i>
                                         <p>Agricultural Officers</p>
                                     </a>
@@ -537,12 +537,12 @@
                                                 <td>{{ user.Role }}</td>
                                                 <td><span class="badge badge-warning">{{ user.Status }}</span></td>
                                                 <td>
-                                                    <button class="btn btn-success btn-sm">
+                                                    <a href="/admin/approve-user/{{ user.UserID }}" class="btn btn-success btn-sm">
                                                         <i class="fas fa-check"></i> Approve
-                                                    </button>
-                                                    <button class="btn btn-danger btn-sm">
+                                                    </a>
+                                                    <a href="/admin/reject-user/{{ user.UserID }}" class="btn btn-danger btn-sm">
                                                         <i class="fas fa-times"></i> Reject
-                                                    </button>
+                                                    </a>
                                                 </td>
                                             </tr>
                                             {% endfor %}
