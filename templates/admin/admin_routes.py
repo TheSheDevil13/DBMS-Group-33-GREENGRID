@@ -15,7 +15,7 @@ def get_db_connection():
 
 @admin_routes.route('/admin/admin-dashboard')
 def admin_dashboard():
-    return render_template('admin/admin-dashboard.html')
+    return render_template('admin/dashboard/admin-dashboard.html')
 
 @admin_routes.route('/admin/employee-directory/agricultural-officers')
 def admin_agricultural_officers():
@@ -29,17 +29,17 @@ def admin_agricultural_officers():
         cursor.execute(query)
         officers = cursor.fetchall()
         
-        return render_template('admin/agricultural-officer.html', officers=officers)
+        return render_template('admin/employee-directory/agricultural-officer/agricultural-officer.html', officers=officers)
     except Exception as e:
         print("Error fetching agricultural officers:", str(e))
-        return render_template('admin/agricultural-officer.html', officers=[])
+        return render_template('admin/employee-directory/agricultural-officer/agricultural-officer.html', officers=[])
     finally:
         cursor.close()
         conn.close()
 
 @admin_routes.route('/admin/employee-directory/agricultural-officers/create', methods=['GET'])
 def create_agricultural_officer():
-    return render_template('admin/create-agricultural-officer.html')
+    return render_template('admin/employee-directory/agricultural-officer/create-agricultural-officer.html')
 
 @admin_routes.route('/admin/employee-directory/agricultural-officers/create-store', methods=['POST'])
 def create_agricultural_officer_post():
@@ -109,17 +109,17 @@ def admin_agricultural_analysts():
         cursor.execute(query)
         analysts = cursor.fetchall()
         
-        return render_template('admin/agricultural-analyst.html', analysts=analysts)
+        return render_template('admin/employee-directory/agricultural-analyst/agricultural-analyst.html', analysts=analysts)
     except Exception as e:
         print("Error fetching agricultural officers:", str(e))
-        return render_template('admin/agricultural-analyst.html', analysts=[])
+        return render_template('admin/employee-directory/agricultural-analyst/agricultural-analyst.html', analysts=[])
     finally:
         cursor.close()
         conn.close()
 
 @admin_routes.route('/admin/employee-directory/agricultural-analysts/create', methods=['GET'])
 def create_agricultural_analyst():
-    return render_template('admin/create-agricultural-analyst.html')
+    return render_template('admin/employee-directory/agricultural-analyst/create-agricultural-analyst.html')
 
 @admin_routes.route('/admin/employee-directory/agricultural-analysts/create-store', methods=['POST'])
 def create_agricultural_analyst_post():
@@ -189,17 +189,17 @@ def admin_warehouse_managers():
         cursor.execute(query)
         managers = cursor.fetchall()
         
-        return render_template('admin/warehouse-manager.html', managers=managers)
+        return render_template('admin/employee-directory/warehouse-manager/warehouse-manager.html', managers=managers)
     except Exception as e:
         print("Error fetching agricultural officers:", str(e))
-        return render_template('admin/warehouse-manager.html', managers=[])
+        return render_template('admin/employee-directory/warehouse-manager/warehouse-manager.html', managers=[])
     finally:
         cursor.close()
         conn.close()
 
 @admin_routes.route('/admin/employee-directory/warehouse-managers/create', methods=['GET'])
 def create_warehouse_manager():
-    return render_template('admin/create-warehouse-manager.html')
+    return render_template('admin/employee-directory/warehouse-manager/create-warehouse-manager.html')
 
 @admin_routes.route('/admin/employee-directory/warehouse-managers/create-store', methods=['POST'])
 def create_warehouse_manager_post():
