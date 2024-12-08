@@ -1,0 +1,156 @@
+{% extends "warehouse_manager/base.html" %}
+
+{% block title %}Dashboard - GreenGrid{% endblock %}
+
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<!-- Warehouse Overview Cards -->
+<div class="row">
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-info">
+            <div class="inner">
+                <h3>3</h3>
+                <p>Total Products</p>
+            </div>
+            <div class="icon">
+                <i class="fas fa-boxes"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-success">
+            <div class="inner">
+                <h3>2300</h3>
+                <p>Total Stock (kg)</p>
+            </div>
+            <div class="icon">
+                <i class="fas fa-warehouse"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-warning">
+            <div class="inner">
+                <h3>2</h3>
+                <p>Pending Dispatches</p>
+            </div>
+            <div class="icon">
+                <i class="fas fa-truck-loading"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-danger">
+            <div class="inner">
+                <h3>1</h3>
+                <p>Low Stock Items</p>
+            </div>
+            <div class="icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row -->
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Product Stock Levels</h3>
+            </div>
+            <div class="card-body">
+                <canvas id="inventoryChart" style="height: 300px;"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Dispatch Status Overview</h3>
+            </div>
+            <div class="card-body">
+                <canvas id="dispatchChart" style="height: 300px;"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Product Stock Levels Chart
+        new Chart(document.getElementById('inventoryChart'), {
+            type: 'bar',
+            data: {
+                labels: ['Rice (Basmati)', 'Wheat', 'Corn'],
+                datasets: [{
+                    label: 'Current Stock (kg)',
+                    data: [1500, 800, 0],
+                    backgroundColor: [
+                        'rgba(60,141,188,0.9)',
+                        'rgba(243,156,18,0.9)',
+                        'rgba(221,75,57,0.9)'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Stock Amount (kg)'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    }
+                }
+            }
+        });
+
+        // Dispatch Status Chart
+        new Chart(document.getElementById('dispatchChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Dispatched', 'Pending', 'Declined'],
+                datasets: [{
+                    data: [10, 5, 2],
+                    backgroundColor: [
+                        'rgba(40, 167, 69, 0.8)',
+                        'rgba(255, 193, 7, 0.8)',
+                        'rgba(220, 53, 69, 0.8)'
+                    ],
+                    borderColor: [
+                        'rgba(40, 167, 69, 1)',
+                        'rgba(255, 193, 7, 1)',
+                        'rgba(220, 53, 69, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    },
+                    title: {
+                        display: true,
+                        text: 'Distribution of Dispatch Status'
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}
