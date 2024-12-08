@@ -1,7 +1,8 @@
 from flask import Flask, render_template, request, redirect
 import pymysql
 from werkzeug.security import generate_password_hash, check_password_hash
-from templates.admin.admin_routes import admin_routes  # Import the admin routes
+from templates.admin.admin_routes import admin_routes 
+from templates.agricultural_officer.officer_routes import officer_routes 
 
 # Initialize the Flask app
 app = Flask(__name__)
@@ -146,18 +147,6 @@ def register_post():
     
     return render_template('register.html', error=error_message)  # Pass error to template
 
-# Dashboard routes for different roles
-@app.route('/agricultural-officer/officer-dashboard')
-def officer_dashboard():
-    return render_template('agricultural-officer/officer-dashboard.html')
-
-@app.route('/warehouse-manager/manager-dashboard')
-def warehouse_dashboard():
-    return render_template('warehouse-manager/manager-dashboard.html')
-
-@app.route('/agricultural-analyst/analyst-dashboard')
-def analyst_dashboard():
-    return render_template('agricultural-analyst/analyst-dashboard.html')
 
 # Route for logout
 @app.route('/logout')
@@ -166,6 +155,7 @@ def logout():
 
 # Register the admin routes
 app.register_blueprint(admin_routes)
+app.register_blueprint(officer_routes)
 
 if __name__ == '__main__':
     app.run(debug=True)
