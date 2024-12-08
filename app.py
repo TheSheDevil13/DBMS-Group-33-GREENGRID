@@ -3,6 +3,7 @@ import pymysql
 from werkzeug.security import generate_password_hash, check_password_hash
 from templates.admin.admin_routes import admin_routes 
 from templates.agricultural_officer.officer_routes import officer_routes 
+from templates.farmer.farmer_routes import farmer_routes 
 
 # Initialize the Flask app
 app = Flask(__name__)
@@ -79,10 +80,10 @@ def login_post():
             elif user_role == 'A':
                 print("Debug - Matched analyst role")  # Debug print
                 return redirect('/agricultural-analyst/analyst-dashboard')
-           # elif user_role == 'S':
-                #return redirect('/supplier/supplier-dashboard')
-            #elif user_role == 'F':
-               # return redirect('/farmer/farmer-dashboard')
+            elif user_role == 'S':
+                    return redirect('/retail-shop/shop-dashboard')
+            elif user_role == 'F':
+                return redirect('/farmer/farmer-dashboard')
             else:
                 print(f"Debug - No role match found for '{user_role}'")  # Debug print
                 error_message = f"Invalid user role: '{user_role}'"
@@ -127,19 +128,19 @@ def register_post():
 
     # Prepare the SQL query to insert user into the database
     query = """
-    INSERT INTO users (FirstName, LastName, Username, Email, PasswordHash, Role, Status)
-    VALUES (%s, %s, %s, %s, %s, %s, %s)
+    INSERT INTO users (FirstName, LastName, Username, Email, PasswordHash, Role)
+    VALUES (%s, %s, %s, %s, %s, %s)
     """
     
     try:
         # Print the query and parameters for debugging
         print("Executing query:", query)
-        print("With parameters:", (first_name, last_name, username, email, hashed_password, role, status))
+        print("With parameters:", (first_name, last_name, username, email, hashed_password, role))
         
         # Execute the query and commit the changes
-        cursor.execute(query, (first_name, last_name, username, email, hashed_password, role, status))
+        cursor.execute(query, (first_name, last_name, username, email, hashed_password, role))
         connection.commit()
-        return render_template('register.html', success="Registration successful! Please wait for approval.")
+        return render_template('register.html', success="Registration successful! You can now log in.")
     except Exception as e:
         connection.rollback()  # Rollback in case of error
         print("Error during database operation:", e)  # Print the error for debugging
@@ -156,6 +157,7 @@ def logout():
 # Register the admin routes
 app.register_blueprint(admin_routes)
 app.register_blueprint(officer_routes)
+app.register_blueprint(farmer_routes)
 
 if __name__ == '__main__':
     app.run(debug=True)
