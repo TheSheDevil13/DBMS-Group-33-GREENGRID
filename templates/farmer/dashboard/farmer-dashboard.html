@@ -1,0 +1,155 @@
+{% extends "farmer/farmer_base.html" %}
+
+{% block title %}Farmer Dashboard - GreenGrid{% endblock %}
+
+{% block content %}
+<!-- Content Header -->
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">Dashboard</h1>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+        <!-- Info boxes -->
+        <div class="row">
+            <div class="col-12 col-sm-6 col-md-3">
+                <div class="info-box">
+                    <span class="info-box-icon bg-info"><i class="fas fa-seedling"></i></span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">Active Crops</span>
+                        <span class="info-box-number">5</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-3">
+                <div class="info-box">
+                    <span class="info-box-icon bg-success"><i class="fas fa-dollar-sign"></i></span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">Total Revenue</span>
+                        <span class="info-box-number">৳50,000</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-3">
+                <div class="info-box">
+                    <span class="info-box-icon bg-warning"><i class="fas fa-hand-holding-usd"></i></span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">Pending Subsidies</span>
+                        <span class="info-box-number">2</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-3">
+                <div class="info-box">
+                    <span class="info-box-icon bg-danger"><i class="fas fa-exclamation-circle"></i></span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">Alerts</span>
+                        <span class="info-box-number">3</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Production Overview</h3>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="productionChart" style="height: 300px;"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Recent Activities</h3>
+                    </div>
+                    <div class="card-body">
+                        <ul class="timeline">
+                            <li class="timeline-item">
+                                <span class="timeline-point timeline-point-success"></span>
+                                <div class="timeline-event">
+                                    <div class="timeline-heading">
+                                        <h6>Crop Added</h6>
+                                    </div>
+                                    <div class="timeline-body">
+                                        <p>Added new crop: Rice (5 acres)</p>
+                                    </div>
+                                    <div class="timeline-footer">
+                                        <p class="text-muted">3 days ago</p>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="timeline-item">
+                                <span class="timeline-point timeline-point-info"></span>
+                                <div class="timeline-event">
+                                    <div class="timeline-heading">
+                                        <h6>Subsidy Approved</h6>
+                                    </div>
+                                    <div class="timeline-body">
+                                        <p>Your subsidy request for ৳10,000 has been approved</p>
+                                    </div>
+                                    <div class="timeline-footer">
+                                        <p class="text-muted">5 days ago</p>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Production Chart
+    const ctx = document.getElementById('productionChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Rice', 'Wheat', 'Corn', 'Potato', 'Tomato'],
+            datasets: [{
+                label: 'Production (Tons)',
+                data: [12, 19, 3, 5, 2],
+                backgroundColor: [
+                    'rgba(75, 192, 192, 0.2)',
+                    'rgba(54, 162, 235, 0.2)',
+                    'rgba(255, 206, 86, 0.2)',
+                    'rgba(255, 99, 132, 0.2)',
+                    'rgba(153, 102, 255, 0.2)'
+                ],
+                borderColor: [
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(153, 102, 255, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}
