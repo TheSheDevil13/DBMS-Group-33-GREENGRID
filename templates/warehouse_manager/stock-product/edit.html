@@ -16,7 +16,7 @@
                 <select class="form-control" id="warehouse_id" name="warehouse_id" required>
                     <option value="">Select Warehouse</option>
                     {% for warehouse in warehouses %}
-                    <option value="{{ warehouse[0] }}" {% if warehouse[0] == stock[4] %}selected{% endif %}>{{ warehouse[1] }}</option>
+                    <option value="{{ warehouse[0] }}" {% if warehouse[0] == stock[1] %}selected{% endif %}>{{ warehouse[1] }}</option>
                     {% endfor %}
                 </select>
             </div>
@@ -25,27 +25,17 @@
                 <select class="form-control" id="product_id" name="product_id" required>
                     <option value="">Select Product</option>
                     {% for product in products %}
-                    <option value="{{ product[0] }}" {% if product[0] == stock[5] %}selected{% endif %}>{{ product[1] }}</option>
+                    <option value="{{ product[0] }}" {% if product[0] == stock[2] %}selected{% endif %}>{{ product[1] }}</option>
                     {% endfor %}
                 </select>
             </div>
             <div class="form-group">
                 <label for="stock_quantity">Stock Quantity</label>
-                <input type="number" class="form-control" id="stock_quantity" name="stock_quantity" value="{{ stock[2] }}" required min="0">
+                <input type="number" class="form-control" id="stock_quantity" name="stock_quantity" value="{{ stock[3] }}" required min="0">
             </div>
             <div class="form-group">
                 <label for="stock_unit">Stock Unit</label>
-                <select class="form-control" id="stock_unit" name="stock_unit" required>
-                    <option value="">Select Unit</option>
-                    <option value="KG" {% if stock[6] == 'KG' %}selected{% endif %}>Kilogram (KG)</option>
-                    <option value="Gram" {% if stock[6] == 'Gram' %}selected{% endif %}>Gram</option>
-                    <option value="Liter" {% if stock[6] == 'Liter' %}selected{% endif %}>Liter</option>
-                    <option value="Piece" {% if stock[6] == 'Piece' %}selected{% endif %}>Piece</option>
-                    <option value="Dozen" {% if stock[6] == 'Dozen' %}selected{% endif %}>Dozen</option>
-                    <option value="Box" {% if stock[6] == 'Box' %}selected{% endif %}>Box</option>
-                    <option value="Crate" {% if stock[6] == 'Crate' %}selected{% endif %}>Crate</option>
-                    <option value="Bag" {% if stock[6] == 'Bag' %}selected{% endif %}>Bag</option>
-                </select>
+                <input type="text" class="form-control" id="stock_unit" name="stock_unit" value="{{ stock[8] }}" readonly>
             </div>
             <div class="form-group">
                 <button type="submit" class="btn btn-primary">Update Stock</button>
@@ -65,6 +55,20 @@
             if (quantity < 0) {
                 e.preventDefault();
                 alert('Quantity cannot be negative');
+            }
+        });
+
+        // Fetch and set product unit when product changes
+        $('#product_id').change(function() {
+            var productId = $(this).val();
+            if (productId) {
+                $.get('/warehouse-manager/get-product-unit/' + productId, function(data) {
+                    $('#stock_unit').val(data.unit);
+                }).fail(function(jqXHR) {
+                    alert('Error fetching product unit');
+                });
+            } else {
+                $('#stock_unit').val('');
             }
         });
     });

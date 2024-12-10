@@ -10,7 +10,6 @@ def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'user_id' not in session or session.get('role') != 'W':
-            flash('Please log in as a warehouse manager to access this page.', 'error')
             return redirect(url_for('login'))
         return f(*args, **kwargs)
     return decorated_function
@@ -22,13 +21,168 @@ def get_db_connection():
         user='root',
         password='',
         database='greengrid',
+        port=3309
     )
 
 # Warehouse Manager Dashboard
 @warehouse_manager_routes.route('/warehouse-manager/manager-dashboard')
 @login_required
 def manager_dashboard():
-    return render_template('warehouse_manager/dashboard/dashboard.html')
+    conn = get_db_connection()
+    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    data = {}
+    
+    try:
+        # Get warehouse and manager details
+        cursor.execute("""
+            SELECT 
+                w.*,
+                CONCAT(e.FirstName, ' ', e.LastName) as ManagerName,
+                e.Email as ManagerEmail
+            FROM warehouse w
+            JOIN users e ON w.WEmployeeID = e.UserID
+            WHERE w.WEmployeeID = %s
+        """, (session.get('user_id'),))
+        data['warehouse_info'] = cursor.fetchone()
+        
+        # Get top 5 products by current stock
+        cursor.execute("""
+            SELECT 
+                p.ProductName,
+                SUM(CASE 
+                    WHEN s.StockAvailability = 'Incoming' THEN s.StockQuantity 
+                    WHEN s.StockAvailability = 'Outgoing' THEN -s.StockQuantity 
+                    ELSE 0 
+                END) as CurrentStock,
+                p.Unit
+            FROM stock s
+            JOIN product p ON s.ProductID = p.ProductID
+            WHERE s.WarehouseID = %s
+            GROUP BY p.ProductID, p.ProductName, p.Unit
+            HAVING CurrentStock > 0
+            ORDER BY CurrentStock DESC
+            LIMIT 5
+        """, (session.get('warehouse_id'),))
+        data['top_products'] = cursor.fetchall()
+        
+        # Get dispatch counts for last 6 months
+        cursor.execute("""
+            SELECT 
+                MONTH(DispatchDate) as MonthNum,
+                COUNT(*) as DispatchCount
+            FROM dispatch 
+            WHERE WarehouseID = %s 
+            AND DispatchDate >= DATE_SUB(CURRENT_DATE(), INTERVAL 6 MONTH)
+            GROUP BY MONTH(DispatchDate)
+            ORDER BY MonthNum
+        """, (session.get('warehouse_id'),))
+        monthly_data = cursor.fetchall()
+        
+        # Convert month numbers to names
+        months = ['January', 'February', 'March', 'April', 'May', 'June', 
+                 'July', 'August', 'September', 'October', 'November', 'December']
+        data['monthly_dispatches'] = [
+            {'Month': months[d['MonthNum']-1], 'DispatchCount': d['DispatchCount']} 
+            for d in monthly_data
+        ]
+        
+        # Get daily stock movements for last 7 days per product
+        cursor.execute("""
+            SELECT 
+                DATE(s.LastUpdateDate) as Date,
+                p.ProductID,
+                p.ProductName,
+                p.Unit,
+                s.StockAvailability,
+                SUM(s.StockQuantity) as Quantity
+            FROM stock s
+            JOIN product p ON s.ProductID = p.ProductID
+            WHERE s.WarehouseID = %s 
+            AND s.LastUpdateDate >= DATE_SUB(CURRENT_DATE(), INTERVAL 7 DAY)
+            GROUP BY DATE(s.LastUpdateDate), p.ProductID, p.ProductName, p.Unit, s.StockAvailability
+            ORDER BY s.LastUpdateDate, p.ProductID
+        """, (session.get('warehouse_id'),))
+        movements = cursor.fetchall()
+        
+        # Process stock movements to get running totals per product
+        products = {}
+        dates = set()
+        
+        # First, collect all unique dates and products
+        for m in movements:
+            dates.add(m['Date'].strftime('%Y-%m-%d'))
+            if m['ProductID'] not in products:
+                products[m['ProductID']] = {
+                    'name': m['ProductName'],
+                    'unit': m['Unit'],
+                    'data': {}
+                }
+        
+        dates = sorted(list(dates))
+        
+        # Initialize all dates for all products with 0
+        for product_id in products:
+            running_total = 0
+            for date in dates:
+                products[product_id]['data'][date] = running_total
+        
+        # Calculate running totals
+        for date in dates:
+            for m in movements:
+                if m['Date'].strftime('%Y-%m-%d') == date:
+                    product_id = m['ProductID']
+                    quantity = m['Quantity']
+                    if m['StockAvailability'] == 'Incoming':
+                        products[product_id]['data'][date] += quantity
+                    else:
+                        products[product_id]['data'][date] -= quantity
+            
+            # Carry forward the running total to next date
+            for product_id in products:
+                if date != dates[-1]:  # If not the last date
+                    next_date = dates[dates.index(date) + 1]
+                    products[product_id]['data'][next_date] = products[product_id]['data'][date]
+        
+        # Format data for the chart
+        data['stock_movements'] = {
+            'dates': dates,
+            'products': [
+                {
+                    'name': product['name'],
+                    'unit': product['unit'],
+                    'data': list(product['data'].values())
+                }
+                for product in products.values()
+            ]
+        }
+        
+        # Get active orders pending dispatch
+        cursor.execute("""
+            SELECT 
+                o.OrderID,
+                o.OrderDate,
+                o.OrderStatus,
+                rs.ShopName,
+                rs.Email as ShopEmail,
+                rs.Street as ShopStreet,
+                rs.City as ShopCity,
+                rs.PostalCode as ShopPostalCode
+            FROM `order` o
+            JOIN retailshop rs ON o.ShopID = rs.ShopID
+            WHERE o.WarehouseID = %s
+            AND o.OrderStatus = 'Accepted'
+            ORDER BY o.OrderDate DESC
+            LIMIT 10
+        """, (session.get('warehouse_id'),))
+        data['active_orders'] = cursor.fetchall()
+        
+        return render_template('warehouse_manager/dashboard/dashboard.html', data=data)
+    except Exception as e:
+        flash(f"Error loading dashboard: {e}", "error")
+        return redirect(url_for('warehouse_manager.list_dispatches'))
+    finally:
+        cursor.close()
+        conn.close()
 
 # Stock Products
 @warehouse_manager_routes.route('/warehouse-manager/stock-products')
@@ -37,24 +191,54 @@ def stock_products():
     conn = get_db_connection()
     cursor = conn.cursor()
     try:
-        cursor.execute("""
+        warehouse_filter = ""
+        params = []
+        if 'warehouse_id' in session:
+            warehouse_filter = "WHERE s.WarehouseID = %s"
+            params = [session['warehouse_id']]
+
+        # Query for individual stocks
+        cursor.execute(f"""
             SELECT 
                 s.StockID,
                 s.StockQuantity,
-                s.StockUnit,
+                p.Unit as StockUnit,
                 s.LastUpdateDate,
                 s.StockAvailability,
-                w.City as WarehouseName,
+                w.Name as WarehouseName,
                 p.ProductName,
                 s.WarehouseID,
                 s.ProductID
             FROM stock s
             JOIN warehouse w ON s.WarehouseID = w.WarehouseID
             JOIN product p ON s.ProductID = p.ProductID
+            {warehouse_filter}
             ORDER BY s.StockID DESC
-        """)
+        """, params)
         stocks = cursor.fetchall()
-        return render_template('warehouse_manager/stock-product/list.html', stocks=stocks)
+
+        # Query for total stock by product
+        cursor.execute(f"""
+            SELECT 
+                p.ProductID,
+                p.ProductName,
+                p.Unit,
+                SUM(CASE 
+                    WHEN s.StockAvailability = 'Incoming' THEN s.StockQuantity 
+                    WHEN s.StockAvailability = 'Outgoing' THEN -s.StockQuantity 
+                    ELSE 0 
+                END) as TotalStock
+            FROM product p
+            LEFT JOIN stock s ON p.ProductID = s.ProductID
+            {warehouse_filter}
+            GROUP BY p.ProductID, p.ProductName, p.Unit
+            ORDER BY p.ProductName
+        """, params)
+        total_stocks = cursor.fetchall()
+
+        return render_template('warehouse_manager/stock-product/list.html', 
+                            stocks=stocks, 
+                            total_stocks=total_stocks)
     except Exception as e:
         flash(f"Error: {e}", "error")
         return redirect('/warehouse-manager/manager-dashboard')
@@ -69,7 +253,7 @@ def create_stock():
         conn = get_db_connection()
         cursor = conn.cursor()
         try:
-            cursor.execute("SELECT WarehouseID, City FROM warehouse")
+            cursor.execute("SELECT WarehouseID, Name FROM warehouse")
             warehouses = cursor.fetchall()
             cursor.execute("SELECT ProductID, ProductName FROM product")
             products = cursor.fetchall()
@@ -88,15 +272,14 @@ def create_stock():
         warehouse_id = request.form['warehouse_id']
         product_id = request.form['product_id']
         stock_quantity = request.form['stock_quantity']
-        stock_unit = request.form['stock_unit']
         
         # Set StockAvailability based on quantity
-        stock_availability = 'In Stock' if float(stock_quantity) > 0 else 'Out of Stock'
+        stock_availability = 'Incoming'
         
         cursor.execute("""
-            INSERT INTO stock (WarehouseID, ProductID, StockQuantity, StockUnit, LastUpdateDate, StockAvailability) 
-            VALUES (%s, %s, %s, %s, CURDATE(), %s)
-        """, (warehouse_id, product_id, stock_quantity, stock_unit, stock_availability))
+            INSERT INTO stock (WarehouseID, ProductID, StockQuantity, LastUpdateDate, StockAvailability) 
+            VALUES (%s, %s, %s, CURDATE(), %s)
+        """, (warehouse_id, product_id, stock_quantity, stock_availability))
         conn.commit()
         flash("Stock added successfully!", "success")
         return redirect(url_for('warehouse_manager.stock_products'))
@@ -117,14 +300,23 @@ def edit_stock(id):
     if request.method == 'GET':
         try:
             cursor.execute("""
-                SELECT s.*, w.City, p.ProductName 
+                SELECT 
+                    s.StockID,
+                    s.WarehouseID,
+                    s.ProductID,
+                    s.StockQuantity,
+                    s.StockAvailability,
+                    s.LastUpdateDate,
+                    w.Name as WarehouseName,
+                    p.ProductName,
+                    p.Unit as StockUnit
                 FROM stock s
                 JOIN warehouse w ON s.WarehouseID = w.WarehouseID
                 JOIN product p ON s.ProductID = p.ProductID
                 WHERE s.StockID = %s
             """, (id,))
             stock = cursor.fetchone()
-            cursor.execute("SELECT WarehouseID, City FROM warehouse")
+            cursor.execute("SELECT WarehouseID, Name FROM warehouse")
             warehouses = cursor.fetchall()
             cursor.execute("SELECT ProductID, ProductName FROM product")
             products = cursor.fetchall()
@@ -145,17 +337,13 @@ def edit_stock(id):
         warehouse_id = request.form['warehouse_id']
         product_id = request.form['product_id']
         stock_quantity = request.form['stock_quantity']
-        stock_unit = request.form['stock_unit']
-        
-        # Set StockAvailability based on quantity
-        stock_availability = 'In Stock' if float(stock_quantity) > 0 else 'Out of Stock'
         
         cursor.execute("""
             UPDATE stock 
             SET WarehouseID = %s, ProductID = %s, StockQuantity = %s, 
-                StockUnit = %s, LastUpdateDate = CURDATE(), StockAvailability = %s
+                LastUpdateDate = CURDATE()
             WHERE StockID = %s
-        """, (warehouse_id, product_id, stock_quantity, stock_unit, stock_availability, id))
+        """, (warehouse_id, product_id, stock_quantity, id))
         conn.commit()
         flash("Stock updated successfully!", "success")
     except Exception as e:
@@ -184,30 +372,55 @@ def delete_stock(id):
     return redirect(url_for('warehouse_manager.stock_products'))
 
 # Dispatch Management Routes
+
+
 @warehouse_manager_routes.route('/warehouse-manager/dispatches')
 @login_required
 def list_dispatches():
     conn = get_db_connection()
     cursor = conn.cursor(pymysql.cursors.DictCursor)
     try:
-        cursor.execute("""
+        # Query for accepted orders
+        warehouse_filter = ""
+        params = []
+        if 'warehouse_id' in session:
+            warehouse_filter = "AND o.WarehouseID = %s"
+            params = [session['warehouse_id']]
+
+        cursor.execute(f"""
             SELECT 
-                d.WarehouseID,
-                d.ShopID,
-                d.DispatchQuantity,
-                d.DispatchUnit,
-                d.DispatchDate,
                 o.OrderID,
+                o.OrderDate,
+                o.OrderStatus,
                 rs.ShopName,
-                o.OrderStatus
+                rs.ShopID
+            FROM `order` o
+            JOIN retailshop rs ON o.ShopID = rs.ShopID
+            WHERE o.OrderStatus = 'Accepted' {warehouse_filter}
+            ORDER BY o.OrderDate DESC
+        """, params)
+        accepted_orders = cursor.fetchall()
+
+        # Query for dispatches
+        cursor.execute("""
+            SELECT DISTINCT
+                d.DispatchID,
+                d.WarehouseID,
+                d.OrderID,
+                d.DispatchDate,
+                o.OrderStatus,
+                rs.ShopName
             FROM dispatch d
-            JOIN `order` o ON d.WarehouseID = o.WarehouseID AND d.ShopID = o.ShopID
-            JOIN retailshop rs ON d.ShopID = rs.ShopID
+            JOIN `order` o ON d.OrderID = o.OrderID
+            JOIN retailshop rs ON o.ShopID = rs.ShopID
             WHERE d.WarehouseID = %s
             ORDER BY d.DispatchDate DESC
         """, (session.get('warehouse_id'),))
         dispatches = cursor.fetchall()
-        return render_template('warehouse_manager/dispatch/list.html', dispatches=dispatches)
+        
+        return render_template('warehouse_manager/dispatch/list.html', 
+                             dispatches=dispatches,
+                             accepted_orders=accepted_orders)
     except Exception as e:
         flash(f"Error: {e}", "error")
         return redirect('/warehouse-manager/manager-dashboard')
@@ -222,7 +435,6 @@ def create_dispatch():
         order_id = request.form.get('order')
         product_ids = request.form.getlist('product_ids[]')
         quantities = request.form.getlist('quantities[]')
-        units = request.form.getlist('units[]')
         
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -238,27 +450,27 @@ def create_dispatch():
             """, (order_id,))
             order = cursor.fetchone()
             
+            # Create dispatch entry
+            cursor.execute("""
+                INSERT INTO dispatch 
+                (WarehouseID, OrderID, DispatchDate)
+                VALUES (%s, %s, CURDATE())
+            """, (order[0], order_id))
+            
+            # Create stock entries for each product
+            for i in range(len(product_ids)):
+                cursor.execute("""
+                    INSERT INTO stock 
+                    (StockQuantity, LastUpdateDate, StockAvailability, WarehouseID, ProductID)
+                    VALUES (%s, CURDATE(), 'Outgoing', %s, %s)
+                """, (quantities[i], order[0], product_ids[i]))
+            
             # Update order status to Delivered
             cursor.execute("""
                 UPDATE `order`
                 SET OrderStatus = 'Delivered' 
                 WHERE OrderID = %s
             """, (order_id,))
-            
-            # Create dispatch entries
-            for i in range(len(product_ids)):
-                cursor.execute("""
-                    INSERT INTO dispatch 
-                    (WarehouseID, ShopID, DispatchQuantity, DispatchUnit, DispatchDate)
-                    VALUES (%s, %s, %s, %s, CURDATE())
-                """, (order[0], order[1], quantities[i], units[i]))
-                
-                # Update stock quantity
-                cursor.execute("""
-                    UPDATE stock 
-                    SET StockQuantity = StockQuantity - %s 
-                    WHERE WarehouseID = %s AND ProductID = %s
-                """, (quantities[i], order[0], product_ids[i]))
             
             conn.commit()
             flash("Dispatch created successfully!", "success")
@@ -301,28 +513,74 @@ def create_dispatch():
             cursor.close()
             conn.close()
 
-@warehouse_manager_routes.route('/warehouse-manager/get-order-details')
+@warehouse_manager_routes.route('/warehouse-manager/dispatch/view/<int:id>')
 @login_required
-def get_order_details():
-    order_id = request.args.get('order_id')
+def view_dispatch(id):
     conn = get_db_connection()
     cursor = conn.cursor(pymysql.cursors.DictCursor)
     try:
+        # Get dispatch details
         cursor.execute("""
             SELECT 
-                od.ProductID,
-                p.ProductName as product_name,
-                od.OrderQuantity as ordered_quantity,
-                od.Unit as unit,
-                s.StockQuantity as available_quantity
-            FROM order_details od
-            JOIN product p ON od.ProductID = p.ProductID
-            JOIN `order` o ON od.OrderID = o.OrderID
-            LEFT JOIN stock s ON od.ProductID = s.ProductID AND o.WarehouseID = s.WarehouseID
-            WHERE od.OrderID = %s
-        """, (order_id,))
+                d.DispatchID,
+                d.WarehouseID,
+                d.OrderID,
+                d.DispatchDate,
+                o.OrderStatus,
+                rs.ShopName,
+                CONCAT(rs.Street, ', ', rs.City, ' ', rs.PostalCode) as ShopAddress,
+                o.OrderDate
+            FROM dispatch d
+            JOIN `order` o ON d.OrderID = o.OrderID
+            JOIN retailshop rs ON o.ShopID = rs.ShopID
+            WHERE d.DispatchID = %s AND d.WarehouseID = %s
+        """, (id, session.get('warehouse_id')))
+        dispatch = cursor.fetchone()
+        
+        if not dispatch:
+            flash("Dispatch not found.", "error")
+            return redirect(url_for('warehouse_manager.list_dispatches'))
+        
+        # Get dispatched products
+        cursor.execute("""
+            SELECT 
+                p.ProductName,
+                p.ProductID,
+                p.Unit,
+                s.StockQuantity as DispatchQuantity
+            FROM stock s
+            JOIN product p ON s.ProductID = p.ProductID
+            WHERE s.WarehouseID = %s 
+            AND s.StockAvailability = 'Outgoing'
+            AND EXISTS (
+                SELECT 1 FROM dispatch d 
+                WHERE d.DispatchID = %s 
+                AND DATE(s.LastUpdateDate) = d.DispatchDate
+            )
+        """, (session.get('warehouse_id'), id))
         products = cursor.fetchall()
-        return jsonify({'products': products})
+            
+        return render_template('warehouse_manager/dispatch/view.html', 
+                             dispatch=dispatch,
+                             products=products)
+    except Exception as e:
+        flash(f"Error: {e}", "error")
+        return redirect(url_for('warehouse_manager.list_dispatches'))
+    finally:
+        cursor.close()
+        conn.close()
+
+@warehouse_manager_routes.route('/warehouse-manager/get-product-unit/<int:product_id>')
+@login_required
+def get_product_unit(product_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("SELECT Unit FROM product WHERE ProductID = %s", (product_id,))
+        result = cursor.fetchone()
+        if result:
+            return jsonify({'unit': result[0]})
+        return jsonify({'error': 'Product not found'}), 404
     except Exception as e:
         return jsonify({'error': str(e)}), 500
     finally:
@@ -330,10 +588,65 @@ def get_order_details():
         conn.close()
 
 # Settings
-@warehouse_manager_routes.route('/warehouse-manager/settings')
+@warehouse_manager_routes.route('/warehouse-manager/settings', methods=['GET', 'POST'])
 @login_required
 def settings():
-    return render_template('warehouse_manager/settings/settings.html')
+    conn = get_db_connection()
+    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    
+    try:
+        if request.method == 'POST':
+            # Get form data
+            name = request.form.get('name')
+            street = request.form.get('street')
+            city = request.form.get('city')
+            postal_code = request.form.get('postal_code')
+            temperature = request.form.get('temperature')
+            humidity = request.form.get('humidity')
+            light_exposure = request.form.get('light_exposure')
+            
+            # Update warehouse information
+            cursor.execute("""
+                UPDATE warehouse 
+                SET Name = %s,
+                    Street = %s,
+                    City = %s,
+                    PostalCode = %s,
+                    Temperature = %s,
+                    Humidity = %s,
+                    LightExposure = %s
+                WHERE WarehouseID = %s
+            """, (name, street, city, postal_code, temperature, 
+                  humidity, light_exposure, session.get('warehouse_id')))
+            
+            conn.commit()
+            flash('Warehouse information updated successfully!', 'success')
+            return redirect(url_for('warehouse_manager.settings'))
+        
+        # Get current warehouse information
+        cursor.execute("""
+            SELECT 
+                WarehouseID,
+                Name,
+                Street,
+                City,
+                PostalCode,
+                Temperature,
+                Humidity,
+                LightExposure
+            FROM warehouse 
+            WHERE WarehouseID = %s
+        """, (session.get('warehouse_id'),))
+        
+        warehouse = cursor.fetchone()
+        return render_template('warehouse_manager/settings/settings.html', warehouse=warehouse)
+        
+    except Exception as e:
+        flash(f'Error: {str(e)}', 'error')
+        return redirect(url_for('warehouse_manager.settings'))
+    finally:
+        cursor.close()
+        conn.close()
 
 # Warehouse Management Routes
 @warehouse_manager_routes.route('/warehouse-manager/warehouses')
@@ -576,13 +889,14 @@ def create_product():
         product_name = request.form['product_name']
         category = request.form['category']
         price_per_unit = request.form['price_per_unit']
+        unit = request.form['unit']
         seasonality = request.form['seasonality']
         
         # Insert new product
         cursor.execute("""
-            INSERT INTO product (ProductName, Category, PricePerUnit, Seasonality) 
-            VALUES (%s, %s, %s, %s)
-        """, (product_name, category, price_per_unit, seasonality))
+            INSERT INTO product (ProductName, Category, PricePerUnit, Unit, Seasonality) 
+            VALUES (%s, %s, %s, %s, %s)
+        """, (product_name, category, price_per_unit, unit, seasonality))
         conn.commit()
         flash("New product added successfully!", "success")
         return redirect(url_for('warehouse_manager.list_products'))
@@ -620,14 +934,15 @@ def edit_product(id):
         product_name = request.form['product_name']
         category = request.form['category']
         price_per_unit = request.form['price_per_unit']
+        unit = request.form['unit']
         seasonality = request.form['seasonality']
         
         # Update product
         cursor.execute("""
             UPDATE product 
-            SET ProductName = %s, Category = %s, PricePerUnit = %s, Seasonality = %s
+            SET ProductName = %s, Category = %s, PricePerUnit = %s, Unit = %s, Seasonality = %s
             WHERE ProductID = %s
-        """, (product_name, category, price_per_unit, seasonality, id))
+        """, (product_name, category, price_per_unit, unit, seasonality, id))
         conn.commit()
         flash("Product updated successfully!", "success")
     except Exception as e:
@@ -788,7 +1103,7 @@ def list_orders():
         # Get product details for each order
         for i, order in enumerate(orders):
             cursor.execute("""
-                SELECT od.OrderID, od.ProductID, od.OrderQuantity, od.Unit, p.ProductName
+                SELECT od.OrderID, od.ProductID, od.OrderQuantity, p.Unit, p.ProductName
                 FROM order_details od
                 JOIN product p ON od.ProductID = p.ProductID
                 WHERE od.OrderID = %s
@@ -835,7 +1150,6 @@ def create_order():
         order_status = request.form['order_status']
         products = request.form.getlist('products[]')
         quantities = request.form.getlist('quantities[]')
-        units = request.form.getlist('units[]')
 
         # Insert main order
         cursor.execute("""
@@ -848,9 +1162,9 @@ def create_order():
         # Insert order details
         for i in range(len(products)):
             cursor.execute("""
-                INSERT INTO order_details (OrderID, ProductID, OrderQuantity, Unit)
-                VALUES (%s, %s, %s, %s)
-            """, (order_id, products[i], quantities[i], units[i]))
+                INSERT INTO order_details (OrderID, ProductID, OrderQuantity)
+                VALUES (%s, %s, %s)
+            """, (order_id, products[i], quantities[i]))
 
         conn.commit()
         flash("Order created successfully!", "success")
@@ -887,9 +1201,9 @@ def edit_order(id):
                 flash("Order not found", "error")
                 return redirect('/warehouse-manager/orders')
 
-            # Get product details
+            # Get product details with unit from product table
             cursor.execute("""
-                SELECT od.OrderID, od.ProductID, od.OrderQuantity, od.Unit, p.ProductName
+                SELECT od.OrderID, od.ProductID, od.OrderQuantity, p.Unit, p.ProductName
                 FROM order_details od
                 JOIN product p ON od.ProductID = p.ProductID
                 WHERE od.OrderID = %s
@@ -929,7 +1243,6 @@ def edit_order(id):
             warehouse_id = request.form.get('warehouse_id') if status == 'Accepted' else None
             product_ids = request.form.getlist('product_id[]')
             quantities = request.form.getlist('quantity[]')
-            units = request.form.getlist('unit[]')
 
             # Start transaction
             conn.begin()
@@ -955,9 +1268,9 @@ def edit_order(id):
             for i in range(len(product_ids)):
                 if product_ids[i] and quantities[i]:  # Only insert if product and quantity are provided
                     cursor.execute("""
-                        INSERT INTO order_details (OrderID, ProductID, OrderQuantity, Unit)
-                        VALUES (%s, %s, %s, %s)
-                    """, (id, product_ids[i], quantities[i], units[i]))
+                        INSERT INTO order_details (OrderID, ProductID, OrderQuantity)
+                        VALUES (%s, %s, %s)
+                    """, (id, product_ids[i], quantities[i]))
 
             conn.commit()
             flash("Order updated successfully", "success")
@@ -1018,7 +1331,7 @@ def view_order(id):
 
         # Get product details
         cursor.execute("""
-            SELECT p.ProductName, od.OrderQuantity, od.Unit
+            SELECT p.ProductName, od.OrderQuantity, p.Unit
             FROM order_details od
             JOIN product p ON od.ProductID = p.ProductID
             WHERE od.OrderID = %s
@@ -1032,6 +1345,40 @@ def view_order(id):
     except Exception as e:
         flash(f"Error: {e}", "error")
         return redirect('/warehouse-manager/orders')
+    finally:
+        cursor.close()
+        conn.close()
+
+@warehouse_manager_routes.route('/warehouse-manager/get-order-details')
+@login_required
+def get_order_details():
+    order_id = request.args.get('order_id')
+    conn = get_db_connection()
+    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    try:
+        cursor.execute("""
+            SELECT 
+                od.ProductID,
+                od.OrderID,
+                p.ProductName as product_name,
+                od.OrderQuantity as ordered_quantity,
+                p.Unit as unit,
+                SUM(CASE 
+                    WHEN s.StockAvailability = 'Incoming' THEN s.StockQuantity 
+                    WHEN s.StockAvailability = 'Outgoing' THEN -s.StockQuantity 
+                    ELSE 0 
+                END) as available_quantity
+            FROM order_details od
+            JOIN product p ON od.ProductID = p.ProductID
+            JOIN `order` o ON od.OrderID = o.OrderID
+            LEFT JOIN stock s ON od.ProductID = s.ProductID AND o.WarehouseID = s.WarehouseID
+            WHERE od.OrderID = %s
+            GROUP BY od.ProductID, p.ProductName, p.Unit
+        """, (order_id,))
+        products = cursor.fetchall()
+        return jsonify({'products': products})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
     finally:
         cursor.close()
         conn.close()
