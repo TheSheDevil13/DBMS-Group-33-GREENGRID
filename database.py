@@ -12,8 +12,6 @@ def get_db_connection():
         user='root',
         password='',  # Leave empty if no password
         database='greengrid',
-        cursorclass=DictCursor,  # Use DictCursor by default for easier data handling
-        port=3309,
     )
 
 def get_db_cursor(connection=None):

@@ -24,8 +24,7 @@ connection = pymysql.connect(
     host='localhost',
     user='root',
     password='',  # Leave empty if no password
-    database='greengrid',
-    port=3309   
+    database='greengrid', 
 )
 
 cursor = connection.cursor()

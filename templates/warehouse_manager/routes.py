@@ -21,7 +21,6 @@ def get_db_connection():
         user='root',
         password='',
         database='greengrid',
-        port=3309
     )
 
 # Warehouse Manager Dashboard

@@ -10,8 +10,7 @@ def get_db_connection():
         host='localhost',
         user='root',
         password='',  
-        database='greengrid',
-        port=3309
+        database='greengrid'
     )
 
 @admin_routes.route('/admin/admin-dashboard')
