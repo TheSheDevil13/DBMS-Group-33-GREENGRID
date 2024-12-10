@@ -3,11 +3,7 @@ import pymysql
 from werkzeug.security import generate_password_hash, check_password_hash
 from templates.admin.admin_routes import admin_routes 
 from templates.agricultural_officer.officer_routes import officer_routes 
-# <<<<<<< mymuna
-# from templates.farmer.farmer_routes import farmer_routes 
-# =======
-# from templates.warehouse_manager.routes import warehouse_manager_routes
-# >>>>>>> main
+from templates.farmer.farmer_routes import farmer_routes 
 
 # Initialize the Flask app
 app = Flask(__name__)
@@ -110,15 +106,9 @@ def login_post():
                 print("Debug - Matched analyst role")  # Debug print
                 return redirect('/agricultural-analyst/analyst-dashboard')
             elif user_role == 'S':
-# <<<<<<< mymuna
-#                     return redirect('/retail-shop/shop-dashboard')
-#             elif user_role == 'F':
-#                 return redirect('/farmer/farmer-dashboard')
-# =======
-#                 return redirect('/supplier/supplier-dashboard')
-#             elif user_role == 'F':
-#                return redirect('/farmer/farmer-dashboard')
-# >>>>>>> main
+                    return redirect('/retail-shop/shop-dashboard')
+            elif user_role == 'F':
+                return redirect('/farmer/farmer-dashboard')
             else:
                 print(f"Debug - No role match found for '{user_role}'")  # Debug print
                 error_message = f"Invalid user role: '{user_role}'"
@@ -194,11 +184,7 @@ def logout():
 # Register the admin routes
 app.register_blueprint(admin_routes)
 app.register_blueprint(officer_routes)
-# <<<<<<< mymuna
-# app.register_blueprint(farmer_routes)
-# =======
-# app.register_blueprint(warehouse_manager_routes)
-# >>>>>>> main
+app.register_blueprint(farmer_routes)
 
 if __name__ == '__main__':
     app.run(debug=True)
