@@ -1,0 +1,190 @@
+{% extends "warehouse_manager/base.html" %}
+
+{% block title %}Edit Order - GreenGrid{% endblock %}
+
+{% block page_title %}Edit Order{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Edit Order #{{ order[0] }}</h3>
+        <div class="card-tools">
+            <a href="{{ url_for('warehouse_manager.list_orders') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Orders
+            </a>
+        </div>
+    </div>
+    <form method="POST">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="shop_id">Shop</label>
+                        <select name="shop_id" id="shop_id" class="form-control select2" required>
+                            {% for shop in shops %}
+                            <option value="{{ shop[0] }}" {% if shop[0] == order[3] %}selected{% endif %}>
+                                {{ shop[1] }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="status">Status</label>
+                        <select name="status" id="status" class="form-control" required onchange="toggleWarehouse()">
+                            <option value="Pending" {% if order[2] == 'Pending' %}selected{% endif %}>Pending</option>
+                            <option value="Accepted" {% if order[2] == 'Accepted' %}selected{% endif %}>Accepted</option>
+                            <option value="Delivered" {% if order[2] == 'Delivered' %}selected{% endif %}>Delivered</option>
+                            <option value="Cancelled" {% if order[2] == 'Cancelled' %}selected{% endif %}>Cancelled</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row warehouse-section" style="display: none;">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="warehouse_id">Warehouse</label>
+                        <select name="warehouse_id" id="warehouse_id" class="form-control select2">
+                            <option value="">Select Warehouse</option>
+                            {% for warehouse in warehouses %}
+                            <option value="{{ warehouse[0] }}" {% if warehouse[0] == order[6] %}selected{% endif %}>
+                                {{ warehouse[1] }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-4">
+                <div class="col-12">
+                    <h5>Products</h5>
+                    <table class="table table-bordered" id="productsTable">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Quantity</th>
+                                <th>Unit</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for product in order_products %}
+                            <tr>
+                                <td>
+                                    <select name="product_id[]" class="form-control select2" required>
+                                        {% for p in all_products %}
+                                        <option value="{{ p[0] }}" {% if p[0] == product[1] %}selected{% endif %}>
+                                            {{ p[1] }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </td>
+                                <td>
+                                    <input type="number" name="quantity[]" class="form-control" value="{{ product[2] }}" required min="1">
+                                </td>
+                                <td>
+                                    <select name="unit[]" class="form-control" required>
+                                        <option value="KG" {% if product[3] == 'KG' %}selected{% endif %}>KG</option>
+                                        <option value="Gram" {% if product[3] == 'Gram' %}selected{% endif %}>Gram</option>
+                                        <option value="Liter" {% if product[3] == 'Liter' %}selected{% endif %}>Liter</option>
+                                        <option value="Piece" {% if product[3] == 'Piece' %}selected{% endif %}>Piece</option>
+                                        <option value="Box" {% if product[3] == 'Box' %}selected{% endif %}>Box</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this)">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <button type="button" class="btn btn-success" onclick="addProductRow()">
+                        <i class="fas fa-plus"></i> Add Product
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer">
+            <button type="submit" class="btn btn-primary">Update Order</button>
+        </div>
+    </form>
+</div>
+
+<!-- Template for new product row -->
+<template id="productRowTemplate">
+    <tr>
+        <td>
+            <select name="product_id[]" class="form-control select2" required>
+                <option value="">Select Product</option>
+                {% for product in all_products %}
+                <option value="{{ product[0] }}">{{ product[1] }}</option>
+                {% endfor %}
+            </select>
+        </td>
+        <td>
+            <input type="number" name="quantity[]" class="form-control" required min="1">
+        </td>
+        <td>
+            <select name="unit[]" class="form-control" required>
+                <option value="KG">KG</option>
+                <option value="Gram">Gram</option>
+                <option value="Liter">Liter</option>
+                <option value="Piece">Piece</option>
+                <option value="Box">Box</option>
+            </select>
+        </td>
+        <td>
+            <button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this)">
+                <i class="fas fa-trash"></i>
+            </button>
+        </td>
+    </tr>
+</template>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    $(document).ready(function() {
+        $('.select2').select2();
+        toggleWarehouse(); // Call on page load
+    });
+
+    function toggleWarehouse() {
+        const status = $('#status').val();
+        const warehouseSection = $('.warehouse-section');
+        const warehouseSelect = $('#warehouse_id');
+        
+        if (status === 'Accepted') {
+            warehouseSection.show();
+            warehouseSelect.prop('required', true);
+        } else {
+            warehouseSection.hide();
+            warehouseSelect.prop('required', false);
+        }
+    }
+
+    function addProductRow() {
+        const template = document.getElementById('productRowTemplate');
+        const tbody = document.querySelector('#productsTable tbody');
+        const clone = template.content.cloneNode(true);
+        tbody.appendChild(clone);
+        
+        // Initialize Select2 on the new row
+        $(tbody.lastElementChild).find('.select2').select2();
+    }
+
+    function removeRow(button) {
+        const tbody = document.querySelector('#productsTable tbody');
+        if (tbody.children.length > 1) {
+            button.closest('tr').remove();
+        } else {
+            alert('At least one product is required.');
+        }
+    }
+</script>
+{% endblock %}

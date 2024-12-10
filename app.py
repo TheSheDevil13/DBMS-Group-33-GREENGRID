@@ -1,32 +1,39 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, session, url_for, flash
 import pymysql
 from werkzeug.security import generate_password_hash, check_password_hash
 from templates.admin.admin_routes import admin_routes 
 from templates.agricultural_officer.officer_routes import officer_routes 
-from templates.farmer.farmer_routes import farmer_routes 
+# <<<<<<< mymuna
+# from templates.farmer.farmer_routes import farmer_routes 
+# =======
+# from templates.warehouse_manager.routes import warehouse_manager_routes
+# >>>>>>> main
 
 # Initialize the Flask app
 app = Flask(__name__)
-app.config['TEMPLATES_AUTO_RELOAD'] = True   # Add this line to disable template caching
-app.secret_key = 'your-secret-key-here'  # Add this line to set the secret key
+app.config['TEMPLATES_AUTO_RELOAD'] = True
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0  # Prevents Flask from caching static files
+app.secret_key = 'your-secret-key-here'  # Add a secret key for session management
+
+# Disable caching in development
+@app.after_request
+def add_header(response):
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '-1'
+    return response
 
 # Connect to the MySQL database
 connection = pymysql.connect(
     host='localhost',
     user='root',
     password='',  # Leave empty if no password
-    database='greengrid'
+    database='greengrid',
+    
 )
 
 cursor = connection.cursor()
 
-@app.after_request
-def add_no_cache_headers(response):
-    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0"
-    response.headers["Pragma"] = "no-cache"
-    response.headers["Expires"] = "0"
-    return response
-    
 # Route to test database connection
 @app.route('/test_db')
 def test_db():
@@ -66,6 +73,20 @@ def login_post():
             user_role = result[1].upper()  # Get user role and convert to uppercase
             print(f"Debug - User Role from DB: '{user_role}'")  # Debug print
             
+            # Get full user details
+            cursor.execute("""
+                SELECT UserID, FirstName, LastName, Username, Email, Role 
+                FROM users 
+                WHERE (Email = %s OR Username = %s)
+            """, (email_username, email_username))
+            user_details = cursor.fetchone()
+            
+            # Store user information in session
+            session['user_id'] = user_details[0]
+            session['username'] = user_details[3]
+            session['email'] = user_details[4]
+            session['role'] = user_details[5]
+            
             # Special check for admin (both username and email)
             if email_username.upper() == "ADMIN" or email_username == "greengridadmin@gmail.com":
                 return redirect('/admin/admin-dashboard')
@@ -76,14 +97,29 @@ def login_post():
                 return redirect('/agricultural-officer/officer-dashboard')
             elif user_role == 'W':
                 print("Debug - Matched warehouse role")  # Debug print
+                # Get warehouse manager's warehouse ID
+                cursor.execute("""
+                    SELECT WarehouseID 
+                    FROM warehouse 
+                    WHERE WEmployeeID = %s
+                """, (user_details[0],))
+                warehouse = cursor.fetchone()
+                if warehouse:
+                    session['warehouse_id'] = warehouse[0]
                 return redirect('/warehouse-manager/manager-dashboard')
             elif user_role == 'A':
                 print("Debug - Matched analyst role")  # Debug print
                 return redirect('/agricultural-analyst/analyst-dashboard')
             elif user_role == 'S':
-                    return redirect('/retail-shop/shop-dashboard')
-            elif user_role == 'F':
-                return redirect('/farmer/farmer-dashboard')
+# <<<<<<< mymuna
+#                     return redirect('/retail-shop/shop-dashboard')
+#             elif user_role == 'F':
+#                 return redirect('/farmer/farmer-dashboard')
+# =======
+#                 return redirect('/supplier/supplier-dashboard')
+#             elif user_role == 'F':
+#                return redirect('/farmer/farmer-dashboard')
+# >>>>>>> main
             else:
                 print(f"Debug - No role match found for '{user_role}'")  # Debug print
                 error_message = f"Invalid user role: '{user_role}'"
@@ -152,12 +188,18 @@ def register_post():
 # Route for logout
 @app.route('/logout')
 def logout():
-    return redirect('/login')
+    # Clear all session data
+    session.clear()
+    return redirect(url_for('login'))
 
 # Register the admin routes
 app.register_blueprint(admin_routes)
 app.register_blueprint(officer_routes)
-app.register_blueprint(farmer_routes)
+# <<<<<<< mymuna
+# app.register_blueprint(farmer_routes)
+# =======
+# app.register_blueprint(warehouse_manager_routes)
+# >>>>>>> main
 
 if __name__ == '__main__':
     app.run(debug=True)
