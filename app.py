@@ -106,10 +106,10 @@ def login_post():
             elif user_role == 'A':
                 print("Debug - Matched analyst role")  # Debug print
                 return redirect('/agricultural-analyst/analyst-dashboard')
-           # elif user_role == 'S':
-                #return redirect('/supplier/supplier-dashboard')
-            #elif user_role == 'F':
-               # return redirect('/farmer/farmer-dashboard')
+            elif user_role == 'S':
+                return redirect('/supplier/supplier-dashboard')
+            elif user_role == 'F':
+               return redirect('/farmer/farmer-dashboard')
             else:
                 print(f"Debug - No role match found for '{user_role}'")  # Debug print
                 error_message = f"Invalid user role: '{user_role}'"
