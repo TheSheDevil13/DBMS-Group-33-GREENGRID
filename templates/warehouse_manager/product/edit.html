@@ -34,6 +34,18 @@
                 <input type="text" class="form-control" id="price_per_unit" name="price_per_unit" value="{{ product[3] }}" required>
             </div>
             <div class="form-group">
+                <label for="unit">Unit</label>
+                <select class="form-control" id="unit" name="unit" required>
+                    <option value="">Select Unit</option>
+                    <option value="Kilogram (kg)" {% if product[5] == 'Kilogram (kg)' %}selected{% endif %}>Kilogram (kg)</option>
+                    <option value="Gram (g)" {% if product[5] == 'Gram (g)' %}selected{% endif %}>Gram (g)</option>
+                    <option value="Liter (l)" {% if product[5] == 'Liter (l)' %}selected{% endif %}>Liter (l)</option>
+                    <option value="Milliliter (ml)" {% if product[5] == 'Milliliter (ml)' %}selected{% endif %}>Milliliter (ml)</option>
+                    <option value="Pieces (pcs)" {% if product[5] == 'Pieces (pcs)' %}selected{% endif %}>Pieces (pcs)</option>
+                    <option value="Dozen" {% if product[5] == 'Dozen' %}selected{% endif %}>Dozen</option>
+                </select>
+            </div>
+            <div class="form-group">
                 <label for="seasonality">Seasonality</label>
                 <select class="form-control" id="seasonality" name="seasonality" required>
                     <option value="">Select Seasonality</option>

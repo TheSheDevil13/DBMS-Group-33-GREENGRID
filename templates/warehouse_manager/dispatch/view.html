@@ -1,0 +1,75 @@
+{% extends "warehouse_manager/base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Dispatch Details</h3>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Order Information</h5>
+                    <table class="table">
+                        <tr>
+                            <th>Order Date:</th>
+                            <td>{{ dispatch.OrderDate }}</td>
+                        </tr>
+                        <tr>
+                            <th>Order Status:</th>
+                            <td>{{ dispatch.OrderStatus }}</td>
+                        </tr>
+                        <tr>
+                            <th>Shop Name:</th>
+                            <td>{{ dispatch.ShopName }}</td>
+                        </tr>
+                        <tr>
+                            <th>Shop Address:</th>
+                            <td>{{ dispatch.ShopAddress }}</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="col-md-6">
+                    <h5>Dispatch Information</h5>
+                    <table class="table">
+                        <tr>
+                            <th>Dispatch ID:</th>
+                            <td>{{ dispatch.DispatchID }}</td>
+                        </tr>
+                        <tr>
+                            <th>Dispatch Date:</th>
+                            <td>{{ dispatch.DispatchDate }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="mt-4">
+                <h5>Dispatched Products</h5>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Product Name</th>
+                            <th>Quantity</th>
+                            <th>Unit</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in products %}
+                        <tr>
+                            <td>{{ product.ProductName }}</td>
+                            <td>{{ product.DispatchQuantity }}</td>
+                            <td>{{ product.Unit }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="mt-4">
+                <a href="{{ url_for('warehouse_manager.list_dispatches') }}" class="btn btn-secondary">Back to List</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

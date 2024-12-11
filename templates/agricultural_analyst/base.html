@@ -34,16 +34,15 @@
                 <li class="nav-item dropdown">
                     <a class="nav-link" data-toggle="dropdown" href="#">
                         <i class="far fa-envelope"></i>
-                        <span class="badge badge-success navbar-badge">4</span>
+                        <span class="badge badge-success navbar-badge">3</span>
                     </a>
                     <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-                        <span class="dropdown-item dropdown-header">4 New Messages</span>
+                        <span class="dropdown-item dropdown-header">3 New Messages</span>
                         <div class="dropdown-divider"></div>
                         <a href="#" class="dropdown-item">
-                            <i class="fas fa-envelope mr-2"></i> Order #1234 Request
+                            <i class="fas fa-envelope mr-2"></i> New Report Request
                             <span class="float-right text-muted text-sm">3 mins</span>
                         </a>
-                        <!-- Add more message items as needed -->
                         <div class="dropdown-divider"></div>
                         <a href="#" class="dropdown-item dropdown-footer">See All Messages</a>
                     </div>
@@ -53,7 +52,7 @@
                 <li class="nav-item dropdown">
                     <a class="nav-link" data-toggle="dropdown" href="#">
                         <i class="far fa-bell"></i>
-                        <span class="badge badge-warning navbar-badge">8</span>
+                        <span class="badge badge-warning navbar-badge">6</span>
                     </a>
                     <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
                         <!-- Add notification items -->
@@ -64,7 +63,7 @@
                 <li class="nav-item dropdown">
                     <a class="nav-link" data-toggle="dropdown" href="#">
                         <i class="fas fa-exclamation-circle"></i>
-                        <span class="badge badge-danger navbar-badge">5</span>
+                        <span class="badge badge-danger navbar-badge">3</span>
                     </a>
                     <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
                         <!-- Add alert items -->
@@ -83,7 +82,7 @@
         <!-- Main Sidebar Container -->
         <aside class="main-sidebar sidebar-dark-custom elevation-4">
             <!-- Brand Logo -->
-            <a href="{{ url_for('warehouse_manager.manager_dashboard') }}" class="brand-link">
+            <a href="/agricultural-analyst/analyst-dashboard" class="brand-link">
                 <img src="{{ url_for('static', filename='images/GREENGRID Logo 1.png') }}" alt="GreenGrid Logo" 
                     class="brand-image img-circle elevation-3" style="opacity: .8">
                 <span class="brand-text font-weight-light"><b>GreenGrid</b></span>
@@ -94,23 +93,10 @@
                 <!-- Sidebar user panel -->
                 <div class="user-panel mt-3 pb-3 mb-3 d-flex">
                     <div class="image">
-                        <i class="fa-solid fa-person-shelter" style="font-size: 2rem;color: #ffffff;"></i>
+                        <i class="fas fa-user-tie" style="font-size: 2rem;color: #ffffff;"></i>
                     </div>
                     <div class="info">
-                        <a href="#" class="d-block">Warehouse Manager</a>
-                    </div>
-                </div>
-
-                <!-- SidebarSearch Form -->
-                <div class="form-inline">
-                    <div class="input-group" data-widget="sidebar-search">
-                        <input class="form-control form-control-sidebar" type="search" placeholder="Search"
-                            aria-label="Search">
-                        <div class="input-group-append">
-                            <button class="btn btn-sidebar">
-                                <i class="fas fa-search fa-fw"></i>
-                            </button>
-                        </div>
+                        <a href="#" class="d-block">Agricultural Analyst</a>
                     </div>
                 </div>
 
@@ -119,63 +105,26 @@
                     <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
                         data-accordion="false">
                         <li class="nav-item">
-                            <a href="{{ url_for('warehouse_manager.manager_dashboard') }}" class="nav-link {% if request.endpoint == 'warehouse_manager.manager_dashboard' %}active{% endif %}">
+                            <a href="/agricultural-analyst/analyst-dashboard" class="nav-link {% if request.endpoint == 'agricultural_analyst.analyst_dashboard' %}active{% endif %}">
                                 <i class="nav-icon fas fa-tachometer-alt"></i>
                                 <p>Dashboard</p>
                             </a>
                         </li>
+                        
                         <li class="nav-item">
-                            <a href="{{ url_for('warehouse_manager.stock_products') }}" class="nav-link {% if 'warehouse_manager.stock_products' in request.endpoint %}active{% endif %}">
-                                <i class="nav-icon fas fa-boxes"></i>
-                                <p>Stock Management</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{{ url_for('warehouse_manager.list_dispatches') }}" class="nav-link {% if 'warehouse_manager.list_dispatches' in request.endpoint %}active{% endif %}">
-                                <i class="nav-icon fas fa-truck"></i>
-                                <p>Dispatch Management</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{{ url_for('warehouse_manager.settings') }}" class="nav-link {% if 'warehouse_manager.settings' in request.endpoint %}active{% endif %}">
-                                <i class="nav-icon fas fa-cog"></i>
-                                <p>Settings</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{{ url_for('logout') }}" class="nav-link">
-                                <i class="nav-icon fas fa-sign-out-alt"></i>
-                                <p>Logout</p>
+                            <a href="/agricultural-analyst/production-data" class="nav-link {% if request.endpoint == 'agricultural_analyst.analyst_dashboard' %}active{% endif %}">
+                                <i class="nav-icon fas fa-industry"></i>
+                                <p>Production Data</p>
                             </a>
                         </li>
 
                         
-                        <!--
                         <li class="nav-item">
-                            <a href="{{ url_for('warehouse_manager.list_warehouses') }}" class="nav-link {% if 'warehouse_manager.list_warehouses' in request.endpoint %}active{% endif %}">
-                                <i class="nav-icon fas fa-warehouse"></i>
-                                <p>Warehouse Management</p>
+                            <a href="/logout" class="nav-link">
+                                <i class="nav-icon fas fa-sign-out-alt"></i>
+                                <p>Logout</p>
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a href="{{ url_for('warehouse_manager.list_products') }}" class="nav-link {% if 'warehouse_manager.list_products' in request.endpoint %}active{% endif %}">
-                                <i class="nav-icon fas fa-box"></i>
-                                <p>Products</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{{ url_for('warehouse_manager.list_orders') }}" class="nav-link {% if 'warehouse_manager.list_orders' in request.endpoint %}active{% endif %}">
-                                <i class="nav-icon fas fa-shopping-cart"></i>
-                                <p>Order Management</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{{ url_for('warehouse_manager.list_shops') }}" class="nav-link">
-                                <i class="nav-icon fas fa-store"></i>
-                                <p>Shop Management</p>
-                            </a>
-                        </li>
-                        -->
                     </ul>
                 </nav>
             </div>
@@ -183,43 +132,26 @@
 
         <!-- Content Wrapper -->
         <div class="content-wrapper">
-
-            <!-- Flash Messages -->
-            <div class="container-fluid">
-                {% with messages = get_flashed_messages() %}
-                    {% if messages %}
-                        {% for message in messages %}
-                            <div class="alert alert-info alert-dismissible fade show" role="alert">
-                                {{ message }}
-                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
-                            </div>
-                        {% endfor %}
-                    {% endif %}
-                {% endwith %}
-            </div>
             <!-- Content Header -->
             <div class="content-header">
                 <div class="container-fluid">
-                    <h1 class="m-0">{% block page_title %}{% endblock %}</h1>
+                    {% block content_header %}{% endblock %}
                 </div>
             </div>
 
             <!-- Main content -->
-            <section class="content">
+            <div class="content">
                 <div class="container-fluid">
                     {% block content %}{% endblock %}
                 </div>
-            </section>
+            </div>
         </div>
     </div>
 
     <!-- Required Scripts -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-ajax-unobtrusive/3.2.6/jquery.unobtrusive-ajax.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.1/dist/js/adminlte.min.js"></script>
-    {% block extra_scripts %}{% endblock %}
+    {% block extra_js %}{% endblock %}
 </body>
 </html>

@@ -1,0 +1,69 @@
+{% extends "agricultural_analyst/base.html" %}
+
+{% block title %}Create Production Data - GreenGrid{% endblock %}
+
+{% block content %}
+<section class="content">
+    <div class="container-fluid">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Create Production Data</h3>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="farmer_id">Farmer</label>
+                                <select class="form-control" id="farmer_id" name="farmer_id" required>
+                                    <option value="">Select Farmer</option>
+                                    {% for farmer in farmers %}
+                                    <option value="{{ farmer[0] }}">{{ farmer[1] }} - {{ farmer[2] }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="product_id">Product</label>
+                                <select class="form-control" id="product_id" name="product_id" required>
+                                    <option value="">Select Product</option>
+                                    {% for product in products %}
+                                    <option value="{{ product[0] }}">{{ product[1] }} - {{ product[2] }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="harvest_date">Harvest Date</label>
+                                <input type="date" class="form-control" id="harvest_date" name="harvest_date" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="production_cost">Production Cost</label>
+                                <input type="number" step="0.01" class="form-control" id="production_cost" name="production_cost" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="shelf_life">Shelf Life (Days)</label>
+                                <input type="number" class="form-control" id="shelf_life" name="shelf_life" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="acreage">Acreage</label>
+                                <input type="number" step="0.01" class="form-control" id="acreage" name="acreage" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="yield_rate">Yield Rate</label>
+                                <input type="number" step="0.01" class="form-control" id="yield_rate" name="yield_rate" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <a href="{{ url_for('analyst.production_data') }}" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary float-right">Create Production Data</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

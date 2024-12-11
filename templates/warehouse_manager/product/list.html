@@ -22,6 +22,7 @@
                     <th>Product Name</th>
                     <th>Category</th>
                     <th>Price Per Unit</th>
+                    <th>Unit</th>
                     <th>Seasonality</th>
                     <th>Actions</th>
                 </tr>
@@ -34,6 +35,7 @@
                     <td>{{ product[2] }}</td>
                     <td>{{ product[3] }}</td>
                     <td>{{ product[4] }}</td>
+                    <td>{{ product[5] }}</td>
                     <td>
                         <a href="{{ url_for('warehouse_manager.edit_product', id=product[0]) }}" class="btn btn-sm btn-info">
                             <i class="fas fa-edit"></i> Edit
