@@ -1,0 +1,117 @@
+{% extends "warehouse_manager/base.html" %}
+
+{% block title %}Create Dispatch - GreenGrid{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Create New Dispatch</h3>
+    </div>
+    <div class="card-body">
+        <form method="POST" id="dispatchForm">
+            <div class="form-group">
+                <label for="order">Select Order</label>
+                <select class="form-control select2" id="order" name="order" required>
+                    <option value="">Select Order</option>
+                    {% for order in orders %}
+                    <option value="{{ order.OrderID }}">
+                        Order #{{ order.OrderID }} - {{ order.ShopName }} ({{ order.OrderDate.strftime('%Y-%m-%d') }})
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div id="orderDetails" class="d-none mt-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Order Products</h3>
+                        <div class="card-tools">
+                            <span class="text-muted">Products will be marked as outgoing stock upon dispatch</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Ordered Quantity</th>
+                                        <th>Available Stock</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="orderDetailsBody">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group mt-4">
+                    <button type="submit" class="btn btn-primary" id="dispatchBtn" disabled>Create Dispatch</button>
+                    <a href="{{ url_for('warehouse_manager.list_dispatches') }}" class="btn btn-secondary">Cancel</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+$(document).ready(function() {
+    $('#order').change(function() {
+        const orderId = $(this).val();
+        if (!orderId) {
+            $('#orderDetails').addClass('d-none');
+            return;
+        }
+
+        // Fetch order details using AJAX
+        $.ajax({
+            url: "{{ url_for('warehouse_manager.get_order_details') }}",
+            data: { order_id: orderId },
+            method: 'GET',
+            success: function(response) {
+                $('#orderDetails').removeClass('d-none');
+                const tbody = $('#orderDetailsBody');
+                tbody.empty();
+
+                let canDispatch = true;
+                response.products.forEach(function(product) {
+                    const hasStock = parseFloat(product.available_quantity) >= parseFloat(product.ordered_quantity);
+                    const statusClass = hasStock ? 'text-success' : 'text-danger';
+                    const statusText = hasStock ? 'Available' : 'Insufficient Stock';
+                    if (!hasStock) canDispatch = false;
+
+                    tbody.append(`
+                        <tr>
+                            <td>${product.product_name}</td>
+                            <td>${product.ordered_quantity} ${product.unit}</td>
+                            <td>${product.available_quantity} ${product.unit}</td>
+                            <td class="${statusClass}">
+                                <i class="fas fa-${hasStock ? 'check' : 'times'} mr-1"></i>
+                                ${statusText}
+                                <input type="hidden" name="product_ids[]" value="${product.ProductID}">
+                                <input type="hidden" name="quantities[]" value="${product.ordered_quantity}">
+                            </td>
+                        </tr>
+                    `);
+                });
+
+                $('#dispatchBtn').prop('disabled', !canDispatch);
+            },
+            error: function(xhr, status, error) {
+                toastr.error('Error fetching order details: ' + error);
+            }
+        });
+    });
+
+    $('#dispatchForm').submit(function(e) {
+        if (!confirm('Are you sure you want to create this dispatch? This will:\n- Create a dispatch record\n- Create outgoing stock entries\n- Mark the order as delivered')) {
+            e.preventDefault();
+        }
+    });
+});
+</script>
+{% endblock %}

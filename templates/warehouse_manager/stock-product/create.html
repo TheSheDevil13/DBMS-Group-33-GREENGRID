@@ -1,0 +1,76 @@
+{% extends "warehouse_manager/base.html" %}
+
+{% block title %}Add Stock - GreenGrid{% endblock %}
+
+{% block page_title %}Add New Stock{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Add New Stock</h3>
+    </div>
+    <div class="card-body">
+        <form action="{{ url_for('warehouse_manager.create_stock') }}" method="POST">
+            <div class="form-group">
+                <label for="warehouse_id">Warehouse</label>
+                <select class="form-control" id="warehouse_id" name="warehouse_id" required>
+                    <option value="">Select Warehouse</option>
+                    {% for warehouse in warehouses %}
+                    <option value="{{ warehouse[0] }}" {% if session.get('warehouse_id')|string == warehouse[0]|string %}selected{% endif %}>{{ warehouse[1] }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="product_id">Product</label>
+                <select class="form-control" id="product_id" name="product_id" required>
+                    <option value="">Select Product</option>
+                    {% for product in products %}
+                    <option value="{{ product[0] }}">{{ product[1] }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="stock_quantity">Stock Quantity</label>
+                <input type="number" class="form-control" id="stock_quantity" name="stock_quantity" required min="0">
+            </div>
+            <div class="form-group">
+                <label for="stock_unit">Stock Unit</label>
+                <input type="text" class="form-control" id="stock_unit" name="stock_unit" readonly>
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">Add Stock</button>
+                <a href="{{ url_for('warehouse_manager.stock_products') }}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    $(document).ready(function() {
+        // Add form validation if needed
+        $('form').submit(function(e) {
+            var quantity = parseFloat($('#stock_quantity').val());
+            if (quantity < 0) {
+                e.preventDefault();
+                alert('Quantity cannot be negative');
+            }
+        });
+
+        // Fetch and set product unit when product changes
+        $('#product_id').change(function() {
+            var productId = $(this).val();
+            if (productId) {
+                $.get('/warehouse-manager/get-product-unit/' + productId, function(data) {
+                    $('#stock_unit').val(data.unit);
+                }).fail(function(jqXHR) {
+                    alert('Error fetching product unit');
+                });
+            } else {
+                $('#stock_unit').val('');
+            }
+        });
+    });
+</script>
+{% endblock %}

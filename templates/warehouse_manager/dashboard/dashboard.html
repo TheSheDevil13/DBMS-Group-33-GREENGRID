@@ -1,0 +1,199 @@
+{% extends "warehouse_manager/base.html" %}
+
+{% block title %}Dashboard - GreenGrid{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Warehouse Info Card -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3 class="card-title">Warehouse Information</h3>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h4>{{ data.warehouse_info.Name }}</h4>
+                    <p>{{ data.warehouse_info.Street }}, {{ data.warehouse_info.City }}, {{ data.warehouse_info.PostalCode }}</p>
+                    <p><strong>Manager:</strong> {{ data.warehouse_info.ManagerName }}</p>
+                    <p><strong>Email:</strong> {{ data.warehouse_info.ManagerEmail }}</p>
+                </div>
+                <div class="col-md-6">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="info-box">
+                                <span class="info-box-icon bg-info"><i class="fas fa-thermometer-half"></i></span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text">Temperature</span>
+                                    <span class="info-box-number">{{ data.warehouse_info.Temperature }}°C</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="info-box">
+                                <span class="info-box-icon bg-warning"><i class="fas fa-tint"></i></span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text">Humidity</span>
+                                    <span class="info-box-number">{{ data.warehouse_info.Humidity }}%</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="info-box">
+                                <span class="info-box-icon bg-success"><i class="fas fa-sun"></i></span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text">Light</span>
+                                    <span class="info-box-number">{{ data.warehouse_info.LightExposure }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Top Products Chart -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Top Products by Stock Level</h3>
+                </div>
+                <div class="card-body">
+                    <canvas id="topProductsChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Monthly Dispatches Chart -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Monthly Dispatches</h3>
+                </div>
+                <div class="card-body">
+                    <canvas id="monthlyDispatchesChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <!-- Active Orders Table -->
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Active Orders for Dispatch</h3>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Order Date</th>
+                                    <th>Shop Name</th>
+                                    <th>Shop Address</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for order in data.active_orders %}
+                                <tr>
+                                    <td>{{ order.OrderID }}</td>
+                                    <td>{{ order.OrderDate.strftime('%Y-%m-%d') }}</td>
+                                    <td>{{ order.ShopName }}</td>
+                                    <td>{{ order.ShopStreet }}, {{ order.ShopCity }} - {{ order.ShopPostalCode }}</td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="5" class="text-center">No active orders found</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Prepare data for charts
+    const topProducts = {{ data.top_products|tojson }};
+    const monthlyDispatches = {{ data.monthly_dispatches|tojson }};
+
+    // Top Products Chart
+    new Chart(document.getElementById('topProductsChart'), {
+        type: 'bar',
+        data: {
+            labels: topProducts.map(p => p.ProductName),
+            datasets: [{
+                label: 'Current Stock',
+                data: topProducts.map(p => p.CurrentStock),
+                backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Quantity'
+                    }
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const product = topProducts[context.dataIndex];
+                            return `${product.CurrentStock} ${product.Unit}`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Monthly Dispatches Chart
+    new Chart(document.getElementById('monthlyDispatchesChart'), {
+        type: 'line',
+        data: {
+            labels: monthlyDispatches.map(d => d.Month),
+            datasets: [{
+                label: 'Number of Dispatches',
+                data: monthlyDispatches.map(d => d.DispatchCount),
+                fill: false,
+                borderColor: 'rgb(75, 192, 192)',
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    },
+                    title: {
+                        display: true,
+                        text: 'Number of Dispatches'
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

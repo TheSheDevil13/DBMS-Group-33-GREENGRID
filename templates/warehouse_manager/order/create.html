@@ -1,0 +1,151 @@
+{% extends "warehouse_manager/base.html" %}
+
+{% block title %}Create Order - GreenGrid{% endblock %}
+
+{% block page_title %}Create Order{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Create New Order</h3>
+    </div>
+    <div class="card-body">
+        <form action="{{ url_for('warehouse_manager.create_order') }}" method="POST" id="orderForm">
+            <div class="form-group">
+                <label for="shop_id">Shop</label>
+                <select class="form-control select2" id="shop_id" name="shop_id" required>
+                    <option value="">Select Shop</option>
+                    {% for shop in shops %}
+                    <option value="{{ shop[0] }}">{{ shop[1] }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="order_status">Order Status</label>
+                <select class="form-control" id="order_status" name="order_status" required>
+                    <option value="Pending" selected>Pending</option>
+                </select>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Order Products</h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-primary btn-sm" onclick="addProductRow()">
+                            <i class="fas fa-plus"></i> Add Product
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="productRows">
+                        <!-- Product rows will be added here -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group mt-4">
+                <button type="submit" class="btn btn-primary">Create Order</button>
+                <a href="{{ url_for('warehouse_manager.list_orders') }}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Product Row Template (hidden) -->
+<template id="productRowTemplate">
+    <div class="row product-row mb-3">
+        <div class="col-md-4">
+            <select class="form-control select2 product-select" name="products[]" required>
+                <option value="">Select Product</option>
+                {% for product in products %}
+                <option value="{{ product[0] }}">{{ product[1] }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3">
+            <input type="number" class="form-control" name="quantities[]" placeholder="Quantity" required min="1" step="0.01">
+        </div>
+        <div class="col-md-3">
+            <input class="form-control" name="unit" value="Unit" readonly>
+        </div>
+        <div class="col-md-2">
+            <button type="button" class="btn btn-danger" onclick="removeProductRow(this)">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
+    </div>
+</template>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    $(document).ready(function() {
+        // Add first product row by default
+        addProductRow();
+
+        // Add event listener for product selection
+        $(document).on('change', '.product-select', function() {
+            const productId = $(this).val();
+            const unitInput = $(this).closest('.product-row').find('input[name="unit"]');
+            
+            if (productId) {
+                $.ajax({
+                    url: '/warehouse-manager/get-product-unit/' + productId,
+                    method: 'GET',
+                    success: function(response) {
+                        unitInput.val(response.unit);
+                    },
+                    error: function(xhr) {
+                        console.error('Error fetching unit:', xhr.responseText);
+                        unitInput.val('Unit');
+                    }
+                });
+            } else {
+                unitInput.val('Unit');
+            }
+        });
+    });
+
+    function addProductRow() {
+        const template = document.querySelector('#productRowTemplate');
+        const clone = template.content.cloneNode(true);
+        document.querySelector('#productRows').appendChild(clone);
+    }
+
+    function removeProductRow(button) {
+        const productRows = document.querySelectorAll('.product-row');
+        if (productRows.length > 1) {
+            button.closest('.product-row').remove();
+        } else {
+            alert('At least one product is required.');
+        }
+    }
+
+    // Form validation
+    document.getElementById('orderForm').addEventListener('submit', function(e) {
+        const productRows = document.getElementById('productRows');
+        if (productRows.children.length < 1) {
+            e.preventDefault();
+            alert('Please add at least one product to the order.');
+            return;
+        }
+
+        // Check for duplicate products
+        const products = new Set();
+        let hasDuplicate = false;
+        document.querySelectorAll('.product-select').forEach(select => {
+            const value = select.value;
+            if (value && products.has(value)) {
+                hasDuplicate = true;
+            }
+            products.add(value);
+        });
+
+        if (hasDuplicate) {
+            e.preventDefault();
+            alert('Please remove duplicate products from the order.');
+        }
+    });
+</script>
+{% endblock %}

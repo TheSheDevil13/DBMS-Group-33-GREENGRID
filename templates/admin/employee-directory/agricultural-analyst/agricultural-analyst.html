@@ -1,0 +1,56 @@
+{% extends "admin/admin_base.html" %}
+
+{% block title %}Agricultural Analysts - GreenGrid{% endblock %}
+
+{% block content %}
+
+
+<!-- Content Wrapper -->
+<div class="content-header">
+    <div class="container-fluid">
+        <h1 class="m-0">Agricultural Analysts</h1>
+    </div>
+</div>
+
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+        <div class="mb-3">
+            <a href="/admin/employee-directory/agricultural-analysts/create" class="btn btn-success">
+                <i class="fas fa-plus"></i> Add New Analyst
+            </a>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <table class="table table-bordered bg-white">
+                    <thead>
+                        <tr>
+                            <th>User ID</th>
+                            <th>First Name</th>
+                            <th>Last Name</th>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in analysts %}
+                        <tr>
+                            <td>{{ user.UserID }}</td>
+                            <td>{{ user.FirstName }}</td>
+                            <td>{{ user.LastName }}</td>
+                            <td>{{ user.Username }}</td>
+                            <td>{{ user.Email }}</td>
+                            <td>{{ user.Role }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

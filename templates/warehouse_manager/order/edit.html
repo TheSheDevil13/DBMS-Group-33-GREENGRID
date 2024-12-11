@@ -1,0 +1,255 @@
+{% extends "warehouse_manager/base.html" %}
+
+{% block title %}Edit Order - GreenGrid{% endblock %}
+
+{% block page_title %}Edit Order{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Edit Order #{{ order[0] }}</h3>
+        <div class="card-tools">
+            <a href="{{ url_for('warehouse_manager.list_orders') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Orders
+            </a>
+        </div>
+    </div>
+    <form method="POST">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="shop_id">Shop</label>
+                        <select name="shop_id" id="shop_id" class="form-control select2" required>
+                            {% for shop in shops %}
+                            <option value="{{ shop[0] }}" {% if shop[0] == order[3] %}selected{% endif %}>
+                                {{ shop[1] }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="status">Status</label>
+                        <select name="status" id="status" class="form-control" required onchange="toggleWarehouse()">
+                            <option value="Pending" {% if order[2] == 'Pending' %}selected{% endif %}>Pending</option>
+                            <option value="Accepted" {% if order[2] == 'Accepted' %}selected{% endif %}>Accepted</option>
+                            <option value="Delivered" {% if order[2] == 'Delivered' %}selected{% endif %}>Delivered</option>
+                            <option value="Cancelled" {% if order[2] == 'Cancelled' %}selected{% endif %}>Cancelled</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row warehouse-section" style="display: none;">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="warehouse_id">Warehouse</label>
+                        <select name="warehouse_id" id="warehouse_id" class="form-control select2">
+                            <option value="">Select Warehouse</option>
+                            {% for warehouse in warehouses %}
+                            <option value="{{ warehouse[0] }}" {% if warehouse[0] == order[6] %}selected{% endif %}>
+                                {{ warehouse[1] }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-4">
+                <div class="col-12">
+                    <h5>Products</h5>
+                    <table class="table table-bordered" id="productsTable">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Quantity</th>
+                                <th>Unit</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productRows">
+                            {% for product in order_products %}
+                            <tr class="product-row">
+                                <td>
+                                    <select name="product_id[]" class="form-control select2 product-select" required>
+                                        {% for p in all_products %}
+                                        <option value="{{ p[0] }}" {% if p[0] == product[1] %}selected{% endif %}>
+                                            {{ p[1] }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </td>
+                                <td>
+                                    <input type="number" name="quantity[]" class="form-control" value="{{ product[2] }}" required min="1">
+                                </td>
+                                <td>
+                                    <input type="text" name="unit[]" class="form-control product-unit" readonly>
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this)">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <button type="button" class="btn btn-success" onclick="addRow()">
+                        <i class="fas fa-plus"></i> Add Product
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer">
+            <button type="submit" class="btn btn-primary">Update Order</button>
+        </div>
+    </form>
+</div>
+
+<!-- Template for new product row -->
+<template id="productRowTemplate">
+    <tr class="product-row">
+        <td>
+            <select name="product_id[]" class="form-control select2 product-select" required>
+                <option value="">Select Product</option>
+                {% for product in all_products %}
+                <option value="{{ product[0] }}">{{ product[1] }}</option>
+                {% endfor %}
+            </select>
+        </td>
+        <td>
+            <input type="number" name="quantity[]" class="form-control" required min="1">
+        </td>
+        <td>
+            <input type="text" name="unit[]" class="form-control product-unit" readonly>
+        </td>
+        <td>
+            <button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this)">
+                <i class="fas fa-trash"></i>
+            </button>
+        </td>
+    </tr>
+</template>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    $(document).ready(function() {
+        // Add event listener for product selection
+        $(document).on('change', '.product-select', function() {
+            const productId = $(this).val();
+            const unitInput = $(this).closest('.product-row').find('input[name="unit"]');
+            
+            if (productId) {
+                $.ajax({
+                    url: '/warehouse-manager/get-product-unit/' + productId,
+                    method: 'GET',
+                    success: function(response) {
+                        unitInput.val(response.unit);
+                    },
+                    error: function(xhr) {
+                        console.error('Error fetching unit:', xhr.responseText);
+                        unitInput.val('Unit');
+                    }
+                });
+            } else {
+                unitInput.val('Unit');
+            }
+        });
+    });
+
+    function addRow() {
+        const tbody = document.getElementById('productRows');
+        const newRow = document.createElement('tr');
+        newRow.className = 'product-row';
+        newRow.innerHTML = `
+            <td>
+                <select name="product_id[]" class="form-control select2 product-select" required>
+                    <option value="">Select Product</option>
+                    {% for p in all_products %}
+                    <option value="{{ p[0] }}">{{ p[1] }}</option>
+                    {% endfor %}
+                </select>
+            </td>
+            <td>
+                <input type="number" name="quantity[]" class="form-control" required min="1">
+            </td>
+            <td>
+                <input type="text" name="unit[]" class="form-control product-unit" readonly>
+            </td>
+            <td>
+                <button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this)">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </td>
+        `;
+        tbody.appendChild(newRow);
+        // Add change event listener to the new select
+        const newSelect = newRow.querySelector('.product-select');
+        newSelect.addEventListener('change', function() {
+            updateProductUnit(this);
+        });
+    }
+
+    function removeRow(button) {
+        const productRows = document.querySelectorAll('.product-row');
+        if (productRows.length > 1) {
+            button.closest('.product-row').remove();
+        } else {
+            alert('At least one product is required.');
+        }
+    }
+
+    function toggleWarehouse() {
+        const status = $('#status').val();
+        const warehouseSection = $('.warehouse-section');
+        const warehouseSelect = $('#warehouse_id');
+        
+        if (status === 'Accepted') {
+            warehouseSection.show();
+            warehouseSelect.prop('required', true);
+        } else {
+            warehouseSection.hide();
+            warehouseSelect.prop('required', false);
+        }
+    }
+
+    function updateProductUnit(selectElement) {
+        const row = selectElement.closest('.product-row');
+        const unitInput = row.querySelector('.product-unit');
+        const productId = selectElement.value;
+
+        // Make AJAX call to get product unit
+        fetch(`/warehouse-manager/get-product-unit/${productId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.unit) {
+                    unitInput.value = data.unit;
+                } else {
+                    unitInput.value = '';
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching unit:', error);
+                unitInput.value = '';
+            });
+    }
+
+    // Add event listeners to all product selects
+    document.addEventListener('DOMContentLoaded', function() {
+        const productSelects = document.querySelectorAll('.product-select');
+        productSelects.forEach(select => {
+            // Update unit for initial values
+            updateProductUnit(select);
+            
+            // Add change event listener
+            select.addEventListener('change', function() {
+                updateProductUnit(this);
+            });
+        });
+    });
+</script>
+{% endblock %}
