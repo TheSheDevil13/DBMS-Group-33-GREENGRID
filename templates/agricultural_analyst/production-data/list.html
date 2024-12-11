@@ -1,0 +1,118 @@
+{% extends "agricultural_analyst/base.html" %}
+
+{% block title %}Production Data - GreenGrid{% endblock %}
+
+{% block content %}
+<section class="content">
+    <div class="container-fluid">
+        <div class="row mb-3">
+            <div class="col-12">
+                <a href="{{ url_for('analyst.create_production_data') }}" class="btn btn-primary float-right">
+                    <i class="fas fa-plus"></i> Add New Production Data
+                </a>
+            </div>
+        </div>
+
+        <!-- Production Data Table -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Production Data List</h3>
+            </div>
+            <div class="card-body">
+                <table class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>Production ID</th>
+                            <th>Farmer Name</th>
+                            <th>Product Name</th>
+                            <th>Category</th>
+                            <th>Harvest Date</th>
+                            <th>Production Cost</th>
+                            <th>Shelf Life (Days)</th>
+                            <th>Acreage (acres)</th>
+                            <th>Yield Rate (kg/acre)</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in production_data %}
+                        <tr>
+                            <td>{{ item[0] }}</td>
+                            <td>{{ item[8] }}</td>
+                            <td>{{ item[9] }}</td>
+                            <td>{{ item[10] }}</td>
+                            <td>{{ item[1] }}</td>
+                            <td>{{ item[2] }}</td>
+                            <td>{{ item[3] }}</td>
+                            <td>{{ item[4] }}</td>
+                            <td>{{ item[5] }}</td>
+                            <td>
+                                <a href="{{ url_for('analyst.edit_production_data', id=item[0]) }}" 
+                                   class="btn btn-sm btn-info">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+                                <button class="btn btn-sm btn-danger" 
+                                        onclick="deleteProductionData({{ item[0] }})">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Delete</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this production data?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <form id="deleteForm" method="POST" style="display: inline;">
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function deleteProductionData(id) {
+    if (confirm('Are you sure you want to delete this production data?')) {
+        fetch(`/agricultural-analyst/production-data/delete/${id}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error deleting production data');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error deleting production data');
+        });
+    }
+}
+</script>
+{% endblock %}
