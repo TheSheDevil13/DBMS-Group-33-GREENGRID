@@ -67,14 +67,7 @@
             <input type="number" class="form-control" name="quantities[]" placeholder="Quantity" required min="1" step="0.01">
         </div>
         <div class="col-md-3">
-            <select class="form-control" name="units[]" required>
-                <option value="">Select Unit</option>
-                <option value="KG">Kilogram (KG)</option>
-                <option value="Gram">Gram</option>
-                <option value="Liter">Liter</option>
-                <option value="Piece">Piece</option>
-                <option value="Box">Box</option>
-            </select>
+            <input class="form-control" name="unit" value="Unit" readonly>
         </div>
         <div class="col-md-2">
             <button type="button" class="btn btn-danger" onclick="removeProductRow(this)">
@@ -88,33 +81,44 @@
 {% block extra_scripts %}
 <script>
     $(document).ready(function() {
-        $('.select2').select2({
-            theme: 'bootstrap4'
-        });
         // Add first product row by default
         addProductRow();
+
+        // Add event listener for product selection
+        $(document).on('change', '.product-select', function() {
+            const productId = $(this).val();
+            const unitInput = $(this).closest('.product-row').find('input[name="unit"]');
+            
+            if (productId) {
+                $.ajax({
+                    url: '/warehouse-manager/get-product-unit/' + productId,
+                    method: 'GET',
+                    success: function(response) {
+                        unitInput.val(response.unit);
+                    },
+                    error: function(xhr) {
+                        console.error('Error fetching unit:', xhr.responseText);
+                        unitInput.val('Unit');
+                    }
+                });
+            } else {
+                unitInput.val('Unit');
+            }
+        });
     });
 
     function addProductRow() {
-        const template = document.getElementById('productRowTemplate');
-        const productRows = document.getElementById('productRows');
+        const template = document.querySelector('#productRowTemplate');
         const clone = template.content.cloneNode(true);
-        
-        productRows.appendChild(clone);
-        
-        // Initialize Select2 for the new row
-        $(productRows.lastElementChild).find('.select2').select2({
-            theme: 'bootstrap4'
-        });
+        document.querySelector('#productRows').appendChild(clone);
     }
 
     function removeProductRow(button) {
-        const row = button.closest('.product-row');
-        const productRows = document.getElementById('productRows');
-        
-        // Don't remove if it's the last row
-        if (productRows.children.length > 1) {
-            row.remove();
+        const productRows = document.querySelectorAll('.product-row');
+        if (productRows.length > 1) {
+            button.closest('.product-row').remove();
+        } else {
+            alert('At least one product is required.');
         }
     }
 

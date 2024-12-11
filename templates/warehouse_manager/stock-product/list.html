@@ -7,6 +7,32 @@
 {% block content %}
 <div class="card">
     <div class="card-header">
+        <h3 class="card-title">Total Stock by Product</h3>
+    </div>
+    <div class="card-body">
+        <table class="table table-bordered table-striped" id="totalStockTable">
+            <thead>
+                <tr>
+                    <th>Product Name</th>
+                    <th>Total Stock</th>
+                    <th>Unit</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for stock in total_stocks %}
+                <tr>
+                    <td>{{ stock[1] }}</td>  <!-- ProductName -->
+                    <td>{{ "%.2f"|format(stock[3] if stock[3] else 0) }}</td>  <!-- TotalStock -->
+                    <td>{{ stock[2] }}</td>  <!-- Unit -->
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
         <h3 class="card-title">Stock Products List</h3>
         <div class="card-tools">
             <a href="{{ url_for('warehouse_manager.create_stock') }}" class="btn btn-primary">
@@ -38,7 +64,7 @@
                     <td>{{ stock[2] }}</td>  <!-- StockUnit -->
                     <td>{{ stock[3] }}</td>  <!-- LastUpdateDate -->
                     <td>
-                        <span class="badge {% if stock[4] == 'In Stock' %}badge-success{% else %}badge-danger{% endif %}">
+                        <span class="badge {% if stock[4] == 'Incoming' %}badge-success{% else %}badge-danger{% endif %}">
                             {{ stock[4] }}  <!-- StockAvailability -->
                         </span>
                     </td>

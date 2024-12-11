@@ -25,6 +25,9 @@
                 <div class="card">
                     <div class="card-header">
                         <h3 class="card-title">Order Products</h3>
+                        <div class="card-tools">
+                            <span class="text-muted">Products will be marked as outgoing stock upon dispatch</span>
+                        </div>
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
@@ -35,7 +38,6 @@
                                         <th>Ordered Quantity</th>
                                         <th>Available Stock</th>
                                         <th>Status</th>
-                                        <th>Action</th>
                                     </tr>
                                 </thead>
                                 <tbody id="orderDetailsBody">
@@ -60,7 +62,6 @@
 $(document).ready(function() {
     $('#order').change(function() {
         const orderId = $(this).val();
-        console.log(orderId);
         if (!orderId) {
             $('#orderDetails').addClass('d-none');
             return;
@@ -78,7 +79,7 @@ $(document).ready(function() {
 
                 let canDispatch = true;
                 response.products.forEach(function(product) {
-                    const hasStock = product.available_quantity >= product.ordered_quantity;
+                    const hasStock = parseFloat(product.available_quantity) >= parseFloat(product.ordered_quantity);
                     const statusClass = hasStock ? 'text-success' : 'text-danger';
                     const statusText = hasStock ? 'Available' : 'Insufficient Stock';
                     if (!hasStock) canDispatch = false;
@@ -91,11 +92,8 @@ $(document).ready(function() {
                             <td class="${statusClass}">
                                 <i class="fas fa-${hasStock ? 'check' : 'times'} mr-1"></i>
                                 ${statusText}
-                            </td>
-                            <td>
-                                <input type="hidden" name="product_ids[]" value="${product.product_id}">
+                                <input type="hidden" name="product_ids[]" value="${product.ProductID}">
                                 <input type="hidden" name="quantities[]" value="${product.ordered_quantity}">
-                                <input type="hidden" name="units[]" value="${product.unit}">
                             </td>
                         </tr>
                     `);
@@ -110,7 +108,7 @@ $(document).ready(function() {
     });
 
     $('#dispatchForm').submit(function(e) {
-        if (!confirm('Are you sure you want to create this dispatch? This will mark the order as delivered.')) {
+        if (!confirm('Are you sure you want to create this dispatch? This will:\n- Create a dispatch record\n- Create outgoing stock entries\n- Mark the order as delivered')) {
             e.preventDefault();
         }
     });
