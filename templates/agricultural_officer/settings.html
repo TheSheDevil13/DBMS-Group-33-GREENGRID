@@ -1,0 +1,120 @@
+{% extends "agricultural_officer/base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Agricultural Officer Settings</h3>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('agricultural_officer.settings') }}">
+                        <!-- Personal Information -->
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <h4>Personal Information</h4>
+                                <hr>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="name">Full Name</label>
+                                    <input type="text" class="form-control" id="name" name="name"
+                                        value="{{ officer.Name }}" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="email">Email Address</label>
+                                    <input type="email" class="form-control" id="email" name="email"
+                                        value="{{ officer.Email }}" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Contact Information -->
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <h4>Contact Information</h4>
+                                <hr>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="phone">Phone Number</label>
+                                    <input type="tel" class="form-control" id="phone" name="phone"
+                                        value="{{ officer.Phone }}" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="emergency_contact">Emergency Contact</label>
+                                    <input type="tel" class="form-control" id="emergency_contact" name="emergency_contact"
+                                        value="{{ officer.EmergencyContact }}">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Professional Information -->
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <h4>Professional Information</h4>
+                                <hr>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="designation">Designation</label>
+                                    <input type="text" class="form-control" id="designation" name="designation"
+                                        value="{{ officer.Designation }}" required>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="department">Department</label>
+                                    <input type="text" class="form-control" id="department" name="department"
+                                        value="{{ officer.Department }}" required>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="employee_id">Employee ID</label>
+                                    <input type="text" class="form-control" id="employee_id" name="employee_id"
+                                        value="{{ officer.EmployeeID }}" required readonly>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Area of Responsibility -->
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <h4>Area of Responsibility</h4>
+                                <hr>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="region">Region</label>
+                                    <input type="text" class="form-control" id="region" name="region"
+                                        value="{{ officer.Region }}" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="district">District</label>
+                                    <input type="text" class="form-control" id="district" name="district"
+                                        value="{{ officer.District }}" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="row">
+                            <div class="col-md-12">
+                                <button type="submit" class="btn btn-primary">Update Settings</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
