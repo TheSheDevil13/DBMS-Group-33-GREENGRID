@@ -4,9 +4,11 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from templates.admin.admin_routes import admin_routes 
 from templates.agricultural_officer.officer_routes import officer_routes 
 from templates.farmer.farmer_routes import farmer_routes 
+from templates.agricultural_analyst.analyst_route import analyst_routes
+from templates.warehouse_manager.routes import warehouse_manager_routes
 
 # Initialize the Flask app
-app = Flask(__name__)
+app = Flask(__name__, template_folder='templates')
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0  # Prevents Flask from caching static files
 app.secret_key = 'your-secret-key-here'  # Add a secret key for session management
@@ -24,7 +26,7 @@ connection = pymysql.connect(
     host='localhost',
     user='root',
     password='',  # Leave empty if no password
-    database='greengrid', 
+    database='greengrid',
 )
 
 cursor = connection.cursor()
@@ -185,6 +187,8 @@ def logout():
 app.register_blueprint(admin_routes)
 app.register_blueprint(officer_routes)
 app.register_blueprint(farmer_routes)
+app.register_blueprint(analyst_routes)
+app.register_blueprint(warehouse_manager_routes)
 
 if __name__ == '__main__':
     app.run(debug=True)
