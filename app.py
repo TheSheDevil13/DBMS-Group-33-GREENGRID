@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, session, url_for, f
 import pymysql
 from werkzeug.security import generate_password_hash, check_password_hash
 from templates.admin.admin_routes import admin_routes 
-from templates.agricultural_officer.officer_routes import officer_routes 
+from templates.agricultural_officer.routes.officer_routes import officer_routes 
 from templates.farmer.farmer_routes import farmer_routes 
 from templates.agricultural_analyst.analyst_route import analyst_routes
 from templates.warehouse_manager.routes import warehouse_manager_routes
