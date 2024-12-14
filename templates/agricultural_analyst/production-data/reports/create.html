@@ -1,0 +1,40 @@
+{% extends "agricultural_analyst/base.html" %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Create Report</h1>
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-plus me-1"></i>
+            New Report
+        </div>
+        <div class="card-body">
+            <form method="POST">
+                <div class="mb-3">
+                    <label for="title" class="form-label">Title</label>
+                    <input type="text" class="form-control" id="title" name="title" required>
+                </div>
+                <div class="mb-3">
+                    <label for="details" class="form-label">Details</label>
+                    <textarea class="form-control" id="details" name="details" rows="4" required></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="type" class="form-label">Type</label>
+                    <select class="form-control" id="type" name="type" required>
+                        <option value="Production">Production</option>
+                        <option value="Analysis">Analysis</option>
+                        <option value="Forecast">Forecast</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="report_date" class="form-label">Report Date</label>
+                    <input type="date" class="form-control" id="report_date" name="report_date" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Create Report</button>
+                <a href="{{ url_for('analyst.list_reports') }}" class="btn btn-secondary">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
