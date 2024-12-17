@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, flash, url_for, jsonify
+from flask import Blueprint, render_template, request, redirect, flash, url_for, jsonify, session
 from werkzeug.security import generate_password_hash
 import pymysql
 import sys
@@ -181,3 +181,71 @@ def delete_production(production_id):
     except Exception as e:
         print(f"Error deleting production record: {e}")
         return jsonify({'success': False, 'error': str(e)})
+
+# @farmer_routes.route('/farmer/request-subsidery', methods=['GET'])
+# def request_subsidery():
+#     return render_template('farmer/request-subsidery/subsidery.html')
+
+@farmer_routes.route('/farmer/request-subsidery', methods=['GET', 'POST'])
+def request_subsidery():
+    if request.method == 'GET':
+        connection = None
+        try:
+            connection = get_db_connection()
+            cursor = connection.cursor(pymysql.cursors.DictCursor)
+            
+            # Fetch users with Role 'O' (Agricultural Officers)
+            cursor.execute("""
+                SELECT UserID, CONCAT(FirstName, ' ', LastName) as OfficerName 
+                FROM users 
+                WHERE Role = 'O'
+            """)
+            officers = cursor.fetchall()
+            
+            return render_template('farmer/request-subsidery/subsidery.html', officers=officers)
+            
+        except Exception as e:
+            flash(f'Error loading officers: {str(e)}', 'danger')
+            return redirect('farmer/request-subsidery/subsidery.html')
+        finally:
+            if connection:
+                connection.close()
+                
+    elif request.method == 'POST':
+        connection = None
+        try:
+            subsidy_types = request.form.getlist('subsidyTypes[]')
+            quantity = request.form.get('subsideryQuantity')
+            officer_id = request.form.get('officerID')
+            farmer_id = session['UserID']  # Get farmer ID from session
+
+            
+            
+            connection = get_db_connection()
+            cursor = connection.cursor()
+            
+            # Insert into main subsidery table
+            cursor.execute("""
+                INSERT INTO farmer_subsidery (FarmerID, OEmployeeID, SubsideryQuantity)
+                VALUES (%s, %s, %s)
+            """, (farmer_id, officer_id, quantity))
+
+             # Insert subsidy types
+            for subsidy_type in subsidy_types:
+                cursor.execute("""
+                    INSERT INTO farmer_subsidery_type (FarmerID, OEmployeeID, SubsideryType)
+                    VALUES (%s, %s, %s)
+                """, (farmer_id, officer_id, subsidy_type))
+            
+            connection.commit()
+            flash('Subsidy request submitted successfully!', 'success')
+            return redirect('farmer/request-subsidery/subsidery.html')
+            
+        except Exception as e:
+            if connection:
+                connection.rollback()
+            flash(f'Error submitting request: {str(e)}', 'danger')
+            return redirect(farmer/request-subsidery/subsidery.html)
+        finally:
+            if connection:
+                connection.close()
