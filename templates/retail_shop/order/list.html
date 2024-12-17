@@ -9,7 +9,7 @@
     <div class="card-header">
         <h3 class="card-title">Orders List</h3>
         <div class="card-tools">
-            <a href="{{ url_for('warehouse_manager.create_order') }}" class="btn btn-primary">
+            <a href="{{ url_for('shop.create_order') }}" class="btn btn-primary">
                 <i class="fas fa-plus"></i> Create Order
             </a>
         </div>
@@ -44,10 +44,10 @@
                         </span>
                     </td>
                     <td>
-                        <a href="{{ url_for('warehouse_manager.view_order', id=order[0]) }}" class="btn btn-sm btn-primary">
+                        <a href="{{ url_for('shop.view_order', id=order[0]) }}" class="btn btn-sm btn-primary">
                             <i class="fas fa-eye"></i>
                         </a>
-                        <a href="{{ url_for('warehouse_manager.edit_order', id=order[0]) }}" class="btn btn-sm btn-info">
+                        <a href="{{ url_for('shop.edit_order', id=order[0]) }}" class="btn btn-sm btn-info">
                             <i class="fas fa-edit"></i>
                         </a>
                         <a href="#" class="btn btn-sm btn-danger" onclick="deleteOrder({{ order[0] }})">

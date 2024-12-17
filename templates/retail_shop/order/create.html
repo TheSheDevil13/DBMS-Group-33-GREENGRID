@@ -10,7 +10,7 @@
         <h3 class="card-title">Create New Order</h3>
     </div>
     <div class="card-body">
-        <form action="{{ url_for('warehouse_manager.create_order') }}" method="POST" id="orderForm">
+        <form action="{{ url_for('shop.create_order') }}" method="POST" id="orderForm">
             <div class="form-group">
                 <label for="shop_id">Shop</label>
                 <select class="form-control select2" id="shop_id" name="shop_id" required>
@@ -46,7 +46,7 @@
 
             <div class="form-group mt-4">
                 <button type="submit" class="btn btn-primary">Create Order</button>
-                <a href="{{ url_for('warehouse_manager.list_orders') }}" class="btn btn-secondary">Cancel</a>
+                <a href="{{ url_for('shop.list_orders') }}" class="btn btn-secondary">Cancel</a>
             </div>
         </form>
     </div>
