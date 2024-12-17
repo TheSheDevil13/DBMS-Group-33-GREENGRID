@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}GreenGrid Farmer{% endblock %}</title>
-    <link rel="icon" type="image/png" href="../../static/images/GREENGRID Logo 1.png">
+    <title>{% block title %}GreenGrid Shop{% endblock %}</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/GREENGRID Logo 1.png') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.1/dist/css/adminlte.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
-    <link rel="stylesheet" href="../../static/styles/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.1/dist/js/adminlte.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/style.css') }}">
     {% block extra_css %}{% endblock %}
 </head>
 <body class="hold-transition sidebar-mini">
@@ -46,7 +47,7 @@
         <aside class="main-sidebar sidebar-dark-custom elevation-4">
             <!-- Brand Logo -->
             <a href="#" class="brand-link">
-                <img src="../../static/images/GREENGRID Logo 1.png" alt="GreenGrid Logo"
+                <img src="{{ url_for('static', filename='images/GREENGRID Logo 1.png') }}" alt="GreenGrid Logo"
                     class="brand-image img-circle elevation-3" style="opacity: .8">
                 <span class="brand-text font-weight-light"><b>GreenGrid</b></span>
             </a>
@@ -105,12 +106,6 @@
         </footer>
     </div>
 
-    <!-- jQuery -->
-    <script src="/static/plugins/jquery/jquery.min.js"></script>
-    <!-- Bootstrap 4 -->
-    <script src="/static/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <!-- AdminLTE App -->
-    <script src="/static/dist/js/adminlte.min.js"></script>
     {% block scripts %}{% endblock %}
 </body>
 </html>
