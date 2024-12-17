@@ -102,8 +102,15 @@ def login_post():
                     WHERE WEmployeeID = %s
                 """, (user_details[0],))
                 warehouse = cursor.fetchone()
+                print(f"Debug - Login: Warehouse query result: {warehouse}")  # Debug print
                 if warehouse:
                     session['warehouse_id'] = warehouse[0]
+                    print(f"Debug - Login: Set warehouse_id in session to: {warehouse[0]}")  # Debug print
+                else:
+                    print("Debug - Login: No warehouse found for this manager")  # Debug print
+                    flash('No warehouse assigned to this manager', 'error')
+                    return redirect('/login')
+                print(f"Debug - Login: Final session state: {session}")  # Debug print
                 return redirect('/warehouse-manager/manager-dashboard')
             elif user_role == 'A':
                 print("Debug - Matched analyst role")  # Debug print
