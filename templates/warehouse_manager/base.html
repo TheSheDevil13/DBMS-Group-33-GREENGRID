@@ -148,34 +148,6 @@
                                 <p>Logout</p>
                             </a>
                         </li>
-
-                        
-                        <!--
-                        <li class="nav-item">
-                            <a href="{{ url_for('warehouse_manager.list_warehouses') }}" class="nav-link {% if 'warehouse_manager.list_warehouses' in request.endpoint %}active{% endif %}">
-                                <i class="nav-icon fas fa-warehouse"></i>
-                                <p>Warehouse Management</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{{ url_for('warehouse_manager.list_products') }}" class="nav-link {% if 'warehouse_manager.list_products' in request.endpoint %}active{% endif %}">
-                                <i class="nav-icon fas fa-box"></i>
-                                <p>Products</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{{ url_for('warehouse_manager.list_orders') }}" class="nav-link {% if 'warehouse_manager.list_orders' in request.endpoint %}active{% endif %}">
-                                <i class="nav-icon fas fa-shopping-cart"></i>
-                                <p>Order Management</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{{ url_for('warehouse_manager.list_shops') }}" class="nav-link">
-                                <i class="nav-icon fas fa-store"></i>
-                                <p>Shop Management</p>
-                            </a>
-                        </li>
-                        -->
                     </ul>
                 </nav>
             </div>
@@ -183,7 +155,6 @@
 
         <!-- Content Wrapper -->
         <div class="content-wrapper">
-
             <!-- Flash Messages -->
             <div class="container-fluid">
                 {% with messages = get_flashed_messages() %}

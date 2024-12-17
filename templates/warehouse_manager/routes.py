@@ -9,8 +9,18 @@ warehouse_manager_routes = Blueprint('warehouse_manager', __name__)
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if 'user_id' not in session or session.get('role') != 'W':
-            return redirect(url_for('login'))
+        print("Debug - Login Required: Checking authorization")
+        print(f"Debug - Login Required: Session contents: {session}")
+        print(f"Debug - Login Required: user_id in session: {'user_id' in session}")
+        print(f"Debug - Login Required: role: {session.get('role')}")
+        print(f"Debug - Login Required: warehouse_id: {session.get('warehouse_id')}")
+        
+        if 'user_id' not in session:
+            print("Debug - Login Required: No user_id in session")
+            return redirect('/login')
+        if session.get('role') != 'W':
+            print(f"Debug - Login Required: Invalid role: {session.get('role')}")
+            return redirect('/login')
         return f(*args, **kwargs)
     return decorated_function
 
@@ -27,6 +37,17 @@ def get_db_connection():
 @warehouse_manager_routes.route('/warehouse-manager/manager-dashboard')
 @login_required
 def manager_dashboard():
+    print("\nDebug - Manager Dashboard: Function entry")
+    print(f"Debug - Manager Dashboard: Full session data: {session}")
+    print(f"Debug - Manager Dashboard: user_id: {session.get('user_id')}")
+    print(f"Debug - Manager Dashboard: warehouse_id: {session.get('warehouse_id')}")
+    print(f"Debug - Manager Dashboard: role: {session.get('role')}")
+    
+    if not session.get('warehouse_id'):
+        print("Debug - Manager Dashboard: No warehouse_id in session")
+        flash('No warehouse assigned to this manager', 'error')
+        return redirect('/login')
+        
     conn = get_db_connection()
     cursor = conn.cursor(pymysql.cursors.DictCursor)
     data = {}
@@ -43,6 +64,10 @@ def manager_dashboard():
             WHERE w.WEmployeeID = %s
         """, (session.get('user_id'),))
         data['warehouse_info'] = cursor.fetchone()
+        
+        if not data['warehouse_info']:
+            flash('Could not find warehouse information', 'error')
+            return redirect('/login')
         
         # Get top 5 products by current stock
         cursor.execute("""
@@ -79,7 +104,7 @@ def manager_dashboard():
         
         # Convert month numbers to names
         months = ['January', 'February', 'March', 'April', 'May', 'June', 
-                 'July', 'August', 'September', 'October', 'November', 'December']
+                  'July', 'August', 'September', 'October', 'November', 'December']
         data['monthly_dispatches'] = [
             {'Month': months[d['MonthNum']-1], 'DispatchCount': d['DispatchCount']} 
             for d in monthly_data
@@ -177,8 +202,9 @@ def manager_dashboard():
         
         return render_template('warehouse_manager/dashboard/dashboard.html', data=data)
     except Exception as e:
-        flash(f"Error loading dashboard: {e}", "error")
-        return redirect(url_for('warehouse_manager.list_dispatches'))
+        print(f"Debug - Manager Dashboard: Error occurred: {str(e)}")  # Debug print
+        flash(f"Error loading dashboard: {str(e)}", "error")
+        return redirect('/login')
     finally:
         cursor.close()
         conn.close()
@@ -187,6 +213,9 @@ def manager_dashboard():
 @warehouse_manager_routes.route('/warehouse-manager/stock-products')
 @login_required
 def stock_products():
+    print("\n=== Debug Stock Products ===")
+    print(f"Session data: {session}")
+    
     conn = get_db_connection()
     cursor = conn.cursor()
     try:
@@ -195,9 +224,17 @@ def stock_products():
         if 'warehouse_id' in session:
             warehouse_filter = "WHERE s.WarehouseID = %s"
             params = [session['warehouse_id']]
+            print(f"Using warehouse filter: {warehouse_filter} with params: {params}")
+        else:
+            print("No warehouse_id in session!")
+
+        # First, let's check if we have any stock data at all
+        cursor.execute("SELECT COUNT(*) FROM stock")
+        total_stock_count = cursor.fetchone()[0]
+        print(f"Total stock records in database: {total_stock_count}")
 
         # Query for individual stocks
-        cursor.execute(f"""
+        stock_query = f"""
             SELECT 
                 s.StockID,
                 s.StockQuantity,
@@ -213,11 +250,15 @@ def stock_products():
             JOIN product p ON s.ProductID = p.ProductID
             {warehouse_filter}
             ORDER BY s.StockID DESC
-        """, params)
+        """
+        print(f"Executing stock query: {stock_query}")
+        print(f"With params: {params}")
+        cursor.execute(stock_query, params)
         stocks = cursor.fetchall()
+        print(f"Found {len(stocks)} stock records")
 
         # Query for total stock by product
-        cursor.execute(f"""
+        total_query = f"""
             SELECT 
                 p.ProductID,
                 p.ProductName,
@@ -232,13 +273,18 @@ def stock_products():
             {warehouse_filter}
             GROUP BY p.ProductID, p.ProductName, p.Unit
             ORDER BY p.ProductName
-        """, params)
+        """
+        print(f"Executing total query: {total_query}")
+        print(f"With params: {params}")
+        cursor.execute(total_query, params)
         total_stocks = cursor.fetchall()
+        print(f"Found {len(total_stocks)} total stock records")
 
         return render_template('warehouse_manager/stock-product/list.html', 
                             stocks=stocks, 
                             total_stocks=total_stocks)
     except Exception as e:
+        print(f"Error in stock_products: {str(e)}")
         flash(f"Error: {e}", "error")
         return redirect('/warehouse-manager/manager-dashboard')
     finally:
@@ -252,12 +298,10 @@ def create_stock():
         conn = get_db_connection()
         cursor = conn.cursor()
         try:
-            cursor.execute("SELECT WarehouseID, Name FROM warehouse")
-            warehouses = cursor.fetchall()
             cursor.execute("SELECT ProductID, ProductName FROM product")
             products = cursor.fetchall()
             return render_template('warehouse_manager/stock-product/create.html', 
-                                warehouses=warehouses, products=products)
+                                products=products)
         except Exception as e:
             flash(f"Error loading data: {e}", "error")
             return redirect(url_for('warehouse_manager.stock_products'))
@@ -268,13 +312,19 @@ def create_stock():
     conn = get_db_connection()
     cursor = conn.cursor()
     try:
-        warehouse_id = request.form['warehouse_id']
+        # Get warehouse_id from session instead of form
+        warehouse_id = session.get('warehouse_id')
+        if not warehouse_id:
+            flash("No warehouse assigned to user!", "error")
+            return redirect(url_for('warehouse_manager.stock_products'))
+
         product_id = request.form['product_id']
         stock_quantity = request.form['stock_quantity']
         
         # Set StockAvailability based on quantity
         stock_availability = 'Incoming'
         
+        print(f"Debug - Creating stock: warehouse_id={warehouse_id}, product_id={product_id}, quantity={stock_quantity}")
         cursor.execute("""
             INSERT INTO stock (WarehouseID, ProductID, StockQuantity, LastUpdateDate, StockAvailability) 
             VALUES (%s, %s, %s, CURDATE(), %s)
@@ -283,6 +333,7 @@ def create_stock():
         flash("Stock added successfully!", "success")
         return redirect(url_for('warehouse_manager.stock_products'))
     except Exception as e:
+        print(f"Debug - Error creating stock: {str(e)}")
         conn.rollback()
         flash(f"Error adding stock: {e}", "error")
         return redirect(url_for('warehouse_manager.create_stock'))
