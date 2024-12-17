@@ -1,9 +1,24 @@
-from flask import Blueprint, render_template, request, redirect, flash, url_for
+from flask import Blueprint, render_template, request, redirect, flash, url_for, jsonify, session
 from werkzeug.security import generate_password_hash
 import pymysql
 import sys
+from functools import wraps
+
 
 admin_routes = Blueprint('admin', __name__)
+
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        print("Debug - Login Required: Checking authorization")
+        print(f"Debug - Login Required: Session contents: {session}")
+        print(f"Debug - Login Required: user_id in session: {'user_id' in session}")
+        
+        if 'user_id' not in session:
+            print("Debug - Login Required: No user_id in session")
+            return redirect('/login')
+        return f(*args, **kwargs)
+    return decorated_function
 
 def get_db_connection():
     return pymysql.connect(
@@ -255,3 +270,214 @@ def create_warehouse_manager_post():
             conn.close()
 
     return redirect("/admin/employee-directory/warehouse-managers")
+
+# Warehouse Management Routes
+@admin_routes.route('/admin/warehouses')
+@login_required
+def list_warehouses():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            SELECT w.*, u.Username 
+            FROM warehouse w 
+            LEFT JOIN users u ON w.WEmployeeID = u.UserID
+            ORDER BY w.WarehouseID
+        """)
+        warehouses = cursor.fetchall()
+        return render_template('admin/warehouse-management/list.html', warehouses=warehouses)
+    except Exception as e:
+        flash(f"Error: {e}", "error")
+        return redirect('/admin/admin-dashboard')
+    finally:
+        cursor.close()
+        conn.close()
+
+@admin_routes.route('/admin/warehouses/create', methods=['GET', 'POST'])
+@login_required
+def create_warehouse():
+    if request.method == 'GET':
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        try:
+            cursor.execute("SELECT UserID, Username FROM users WHERE Role = 'W'")
+            employees = cursor.fetchall()
+            return render_template('admin/warehouse-management/create.html', employees=employees)
+        except Exception as e:
+            flash(f"Error loading employees: {e}", "error")
+            return redirect(url_for('admin.list_warehouses'))
+        finally:
+            cursor.close()
+            conn.close()
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        # Get form data
+        name = request.form['name'][:255]  # Limit to varchar(255)
+        street = request.form['street']
+        city = request.form['city']
+        postal_code = request.form['postal_code']
+        
+        try:
+            temperature = float(request.form['temperature'])
+            humidity = float(request.form['humidity'])
+            light_exposure = float(request.form['light_exposure'])
+        except ValueError:
+            flash("Invalid numeric value for temperature, humidity, or light exposure", "error")
+            return redirect(url_for('admin.create_warehouses'))
+        
+        employee_id = request.form['employee_id']
+        
+        # Validate data
+        if not name or len(name.strip()) == 0:
+            flash("Warehouse name is required", "error")
+            return redirect(url_for('admin.create_warehouses'))
+            
+        if len(postal_code) != 6:
+            flash("Postal code must be exactly 6 characters long", "error")
+            return redirect(url_for('admin.create_warehouses'))
+            
+        # Validate decimal ranges
+        if not (-999.99 <= temperature <= 999.99):
+            flash("Temperature must be between -999.99 and 999.99", "error")
+            return redirect(url_for('admin.create_warehouses'))
+            
+        if not (0 <= humidity <= 100):
+            flash("Humidity must be between 0 and 100", "error")
+            return redirect(url_for('admin.create_warehouses'))
+            
+        if not (0 <= light_exposure <= 9999.99):
+            flash("Light exposure must be between 0 and 9999.99", "error")
+            return redirect(url_for('admin.create_warehouses'))
+        
+        # Validate employee exists and has role 'W'
+        cursor.execute("SELECT UserID FROM users WHERE UserID = %s AND Role = 'W'", (employee_id,))
+        if not cursor.fetchone():
+            flash("Invalid warehouse employee selected", "error")
+            return redirect(url_for('admin.create_warehouses'))
+        
+        # Insert new warehouse
+        cursor.execute("""
+            INSERT INTO warehouse (Name, Street, City, PostalCode, Temperature, Humidity, LightExposure, WEmployeeID) 
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        """, (name, street, city, postal_code, temperature, humidity, light_exposure, employee_id))
+        conn.commit()
+        flash("New warehouse added successfully!", "success")
+        return redirect(url_for('admin.list_warehouses'))
+    except Exception as e:
+        conn.rollback()
+        flash(f"Error adding warehouse: {e}", "error")
+        return redirect(url_for('admin.create_warehouses'))
+    finally:
+        cursor.close()
+        conn.close()
+
+@admin_routes.route('/admin/warehouses/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
+def edit_warehouse(id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    if request.method == 'GET':
+        try:
+            # Get warehouse data
+            cursor.execute("SELECT * FROM warehouse WHERE WarehouseID = %s", (id,))
+            warehouse = cursor.fetchone()
+            
+            # Get employees for dropdown
+            cursor.execute("SELECT UserID, Username FROM users WHERE Role = 'W'")
+            employees = cursor.fetchall()
+            
+            if warehouse:
+                return render_template('admin/warehouse-management/edit.html', 
+                                    warehouse=warehouse, employees=employees)
+            flash("Warehouse not found!", "error")
+            return redirect(url_for('admin.list_warehouses'))
+        except Exception as e:
+            flash(f"Error: {e}", "error")
+            return redirect(url_for('admin.list_warehouses'))
+        finally:
+            cursor.close()
+            conn.close()
+    
+    try:
+        # Get form data
+        name = request.form['name'][:255]  # Limit to varchar(255)
+        street = request.form['street']
+        city = request.form['city']
+        postal_code = request.form['postal_code']
+        
+        try:
+            temperature = float(request.form['temperature'])
+            humidity = float(request.form['humidity'])
+            light_exposure = float(request.form['light_exposure'])
+        except ValueError:
+            flash("Invalid numeric value for temperature, humidity, or light exposure", "error")
+            return redirect(url_for('admin.edit_warehouse', id=id))
+        
+        employee_id = request.form['employee_id']
+        
+        # Validate data
+        if not name or len(name.strip()) == 0:
+            flash("Warehouse name is required", "error")
+            return redirect(url_for('admin.edit_warehouse', id=id))
+            
+        if len(postal_code) != 6:
+            flash("Postal code must be exactly 6 characters long", "error")
+            return redirect(url_for('admin.edit_warehouse', id=id))
+            
+        # Validate decimal ranges
+        if not (-999.99 <= temperature <= 999.99):
+            flash("Temperature must be between -999.99 and 999.99", "error")
+            return redirect(url_for('admin.edit_warehouse', id=id))
+            
+        if not (0 <= humidity <= 100):
+            flash("Humidity must be between 0 and 100", "error")
+            return redirect(url_for('admin.edit_warehouse', id=id))
+            
+        if not (0 <= light_exposure <= 9999.99):
+            flash("Light exposure must be between 0 and 9999.99", "error")
+            return redirect(url_for('admin.edit_warehouse', id=id))
+        
+        # Validate employee exists and has role 'W'
+        cursor.execute("SELECT UserID FROM users WHERE UserID = %s AND Role = 'W'", (employee_id,))
+        if not cursor.fetchone():
+            flash("Invalid warehouse employee selected", "error")
+            return redirect(url_for('admin.edit_warehouse', id=id))
+        
+        # Update warehouse
+        cursor.execute("""
+            UPDATE warehouse 
+            SET Name = %s, Street = %s, City = %s, PostalCode = %s, 
+                Temperature = %s, Humidity = %s, LightExposure = %s,
+                WEmployeeID = %s
+            WHERE WarehouseID = %s
+        """, (name, street, city, postal_code, temperature, humidity, light_exposure, employee_id, id))
+        conn.commit()
+        flash("Warehouse updated successfully!", "success")
+        return redirect(url_for('admin.list_warehouses'))
+    except Exception as e:
+        conn.rollback()
+        flash(f"Error updating warehouse: {e}", "error")
+        return redirect(url_for('admin.edit_warehouse', id=id))
+    finally:
+        cursor.close()
+        conn.close()
+
+@admin_routes.route('/admin/warehouses/delete/<int:id>', methods=['POST'])
+@login_required
+def delete_warehouse(id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("DELETE FROM warehouse WHERE WarehouseID = %s", (id,))
+        conn.commit()
+        flash("Warehouse deleted successfully!", "success")
+    except Exception as e:
+        conn.rollback()
+        flash(f"Error deleting warehouse: {e}", "error")
+    finally:
+        cursor.close()
+        conn.close()
+    return redirect(url_for('admin.list_warehouses'))
