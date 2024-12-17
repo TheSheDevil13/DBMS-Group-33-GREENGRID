@@ -1,0 +1,73 @@
+{% extends "admin/admin_base.html" %}
+
+{% block title %}Create Shop - GreenGrid{% endblock %}
+
+{% block page_title %}Create Shop{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Create New Shop</h3>
+        </div>
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('admin.create_shop') }}">
+                <div class="form-group">
+                    <label for="shop_name">Shop Name</label>
+                    <input type="text" class="form-control" id="shop_name" name="shop_name" required>
+                </div>
+                <div class="form-group">
+                    <label for="street">Street</label>
+                    <input type="text" class="form-control" id="street" name="street" required>
+                </div>
+                <div class="form-group">
+                    <label for="number">Number</label>
+                    <input type="text" class="form-control" id="number" name="number" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" class="form-control" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="postal_code">Postal Code</label>
+                    <input type="text" class="form-control" id="postal_code" name="postal_code" required>
+                </div>
+                <div class="form-group">
+                    <label for="city">City</label>
+                    <input type="text" class="form-control" id="city" name="city" required>
+                </div>
+                <div class="form-group">
+                    <label for="owner_id">Shop Owner</label>
+                    <select class="form-control" id="owner_id" name="owner_id" required>
+                        <option value="">Select Owner</option>
+                        {% for owner in shop_owners %}
+                        <option value="{{ owner[0] }}">{{ owner[1] }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="text-end">
+                    <a href="{{ url_for('admin.list_shops') }}" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary">Create Shop</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    $(document).ready(function() {
+        // Add client-side validation
+        $('form').submit(function(e) {
+            var contact = $('#contact').val();
+            
+            if (contact && !contact.match(/^[0-9]{11}$/)) {
+                e.preventDefault();
+                alert('Please enter a valid 11-digit contact number');
+                return;
+            }
+        });
+    });
+</script>
+{% endblock %}

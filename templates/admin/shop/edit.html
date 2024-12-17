@@ -1,0 +1,73 @@
+{% extends "admin/admin_base.html" %}
+
+{% block title %}Edit Shop - GreenGrid{% endblock %}
+
+{% block page_title %}Edit Shop{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Edit Shop</h3>
+        </div>
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('admin.edit_shop', id=shop[0]) }}">
+                <div class="form-group">
+                    <label for="shop_name">Shop Name</label>
+                    <input type="text" class="form-control" id="shop_name" name="shop_name" value="{{ shop[1] }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="street">Street</label>
+                    <input type="text" class="form-control" id="street" name="street" value="{{ shop[2] }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="number">Number</label>
+                    <input type="text" class="form-control" id="number" name="number" value="{{ shop[3] }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" class="form-control" id="email" name="email" value="{{ shop[4] }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="postal_code">Postal Code</label>
+                    <input type="text" class="form-control" id="postal_code" name="postal_code" value="{{ shop[5] }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="city">City</label>
+                    <input type="text" class="form-control" id="city" name="city" value="{{ shop[6] }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="owner_id">Shop Owner</label>
+                    <select class="form-control" id="owner_id" name="owner_id" required>
+                        <option value="">Select Owner</option>
+                        {% for owner in shop_owners %}
+                        <option value="{{ owner[0] }}" {% if shop[7] == owner[0] %}selected{% endif %}>{{ owner[1] }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="text-end">
+                    <a href="{{ url_for('admin.list_shops') }}" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary">Update Shop</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        // Add client-side validation
+        $('form').submit(function(e) {
+            var email = $('#email').val();
+            
+            if (email && !email.match(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/)) {
+                e.preventDefault();
+                alert('Please enter a valid email address');
+                return;
+            }
+        });
+    });
+</script>
+{% endblock %}

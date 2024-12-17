@@ -481,3 +481,147 @@ def delete_warehouse(id):
         cursor.close()
         conn.close()
     return redirect(url_for('admin.list_warehouses'))
+
+# Shop Management Routes
+@admin_routes.route('/admin/shops')
+@login_required
+def list_shops():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            SELECT s.ShopID, s.ShopName, s.Street, s.Number, s.Email, s.PostalCode, s.City, u.Username 
+            FROM retailshop s 
+            LEFT JOIN users u ON s.OwnerID = u.UserID
+            ORDER BY s.ShopID DESC
+        """)
+        shops = cursor.fetchall()
+        return render_template('admin/shop/list.html', shops=shops)
+    except Exception as e:
+        flash(f"Error: {e}", "error")
+        return redirect('/admin/admin-dashboard')
+    finally:
+        cursor.close()
+        conn.close()
+
+@admin_routes.route('/admin/shops/create', methods=['GET', 'POST'])
+@login_required
+def create_shop():
+    if request.method == 'GET':
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        try:
+            # Get all users with shop owner role
+            cursor.execute("""
+                SELECT UserID, Username 
+                FROM users 
+                WHERE Role = 'S'
+                ORDER BY Username
+            """)
+            shop_owners = cursor.fetchall()
+            return render_template('admin/shop/create.html', shop_owners=shop_owners)
+        finally:
+            cursor.close()
+            conn.close()
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        shop_name = request.form['shop_name']
+        street = request.form['street']
+        number = request.form['number']
+        email = request.form['email']
+        postal_code = request.form['postal_code']
+        city = request.form['city']
+        owner_id = request.form['owner_id']
+        
+        cursor.execute("""
+            INSERT INTO retailshop (ShopName, Street, Number, Email, PostalCode, City, OwnerID)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+        """, (shop_name, street, number, email, postal_code, city, owner_id))
+        conn.commit()
+        flash("Shop added successfully!", "success")
+        return redirect(url_for('admin.list_shops'))
+    except Exception as e:
+        conn.rollback()
+        flash(f"Error adding shop: {e}", "error")
+        return redirect(url_for('admin.create_shop'))
+    finally:
+        cursor.close()
+        conn.close()
+
+@admin_routes.route('/admin/shops/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
+def edit_shop(id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    if request.method == 'GET':
+        try:
+            # Get shop details
+            cursor.execute("""
+                SELECT ShopID, ShopName, Location, ContactNumber 
+                FROM retailshop 
+                WHERE ShopID = %s
+            """, (id,))
+            shop = cursor.fetchone()
+            
+            # Get all users with shop owner role
+            cursor.execute("""
+                SELECT UserID, Username 
+                FROM users 
+                WHERE Role = 'S'
+                ORDER BY Username
+            """)
+            shop_owners = cursor.fetchall()
+            
+            if shop:
+                return render_template('admin/shop/edit.html', shop=shop, shop_owners=shop_owners)
+            flash("Shop not found!", "error")
+            return redirect(url_for('admin.list_shops'))
+        except Exception as e:
+            flash(f"Error: {e}", "error")
+            return redirect(url_for('admin.list_shops'))
+        finally:
+            cursor.close()
+            conn.close()
+    
+    try:
+        shop_name = request.form['shop_name']
+        location = request.form['location']
+        contact = request.form['contact']
+        owner_id = request.form['owner_id']
+        
+        cursor.execute("""
+            UPDATE retailshop 
+            SET ShopName = %s, Location = %s, ContactNumber = %s, 
+                OwnerID = %s
+            WHERE ShopID = %s
+        """, (shop_name, location, contact, owner_id, id))
+        conn.commit()
+        flash("Shop updated successfully!", "success")
+        return redirect(url_for('admin.list_shops'))
+    except Exception as e:
+        conn.rollback()
+        flash(f"Error updating shop: {e}", "error")
+        return redirect(url_for('admin.edit_shop', id=id))
+    finally:
+        cursor.close()
+        conn.close()
+
+@admin_routes.route('/admin/shops/delete/<int:id>', methods=['POST'])
+@login_required
+def delete_shop(id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("DELETE FROM retailshop WHERE ShopID = %s", (id,))
+        conn.commit()
+        flash("Shop deleted successfully!", "success")
+    except Exception as e:
+        conn.rollback()
+        flash(f"Error deleting shop: {e}", "error")
+    finally:
+        cursor.close()
+        conn.close()
+    return redirect(url_for('admin.list_shops'))
