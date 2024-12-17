@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GreenGrid</title>
-    <link rel="icon" type="image/png" href="../../staticimages/GREENGRID Logo 1.png">
+    <link rel="icon" type="image/png" href="../../static/images/GREENGRID Logo 1.png">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.1/dist/css/adminlte.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -143,8 +143,8 @@
     <aside class="main-sidebar sidebar-dark-custom elevation-4">
         <!-- Brand Logo -->
         <a href="index3.html" class="brand-link">
-            <img src="../../static/images/GREENGRID Logo 1.png" alt="GreenGrid Logo"
-                class="brand-image img-circle elevation-3" style="opacity: .8">
+            <img src="../../static/images/GREENGRID Logo 1.png" alt="GreenGrid Logo" class="brand-image img-circle elevation-3"
+                style="opacity: .8">
             <span class="brand-text font-weight-light"><b>GreenGrid</b></span>
         </a>
 
@@ -183,10 +183,9 @@
 
             <!-- Simplified sidebar menu -->
             <nav class="mt-2">
-                <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
-                    data-accordion="false">
+                <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
                     <li class="nav-item">
-                        <a href="officer-dashboard.html" class="nav-link">
+                        <a href="/agricultural-officer/officer-dashboard" class="nav-link">
                             <i class="nav-icon fas fa-tachometer-alt"></i>
                             <p>Dashboard</p>
                         </a>
@@ -194,9 +193,9 @@
 
                     <!-- Product Insight -->
                     <li class="nav-item">
-                        <a href="production-monitoring.html" class="nav-link">
+                        <a href="/agricultural-officer/products" class="nav-link">
                             <i class="nav-icon fas fa-box"></i>
-                            <p>Production Monitoring</p>
+                            <p>Products</p>
                         </a>
                     </li>
 
@@ -232,7 +231,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="login.html" class="nav-link">
+                        <a href="/logout" class="nav-link">
                             <i class="nav-icon fas fa-sign-out-alt"></i>
                             <p>Logout</p>
                         </a>
@@ -243,79 +242,22 @@
         </div>
         <!-- /.sidebar -->
     </aside>
+    {% block content %}{% endblock %}
 
-    <!-- Content Wrapper -->
-    <div class="content-wrapper">
-        <!-- Content Header -->
-        <div class="content-header">
-            <div class="container-fluid">
-                <div class="row mb-2">
-                    <div class="col-sm-6">
-                        <h1 class="m-0">Production Monitoring</h1>
-                    </div>
-                </div>
-            </div>
+    <footer class="main-footer">
+        <div class="float-right d-none d-sm-block">
+            <b>Version</b> 1.0.0
         </div>
+        <strong>Copyright &copy; 2024 <a href="#">GreenGrid</a>.</strong> All rights reserved.
+    </footer>
+</div>
 
-        <!-- Main content -->
-        <section class="content">
-            <div class="container-fluid">
-                <!-- Production Data Table -->
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Production Overview</h3>
-                    </div>
-                    <div class="card-body">
-                        <table class="table table-bordered table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Production ID</th>
-                                    <th>Farmer ID</th>
-                                    <th>Name</th>
-                                    <th>Category</th>
-                                    <th>Harvest Date</th>
-                                    <th>Shelf Life (Days)</th>
-                                    <th>Expiration Date</th>
-                                    <th>Quantity (kg)</th>
-                                    <th>Acreage (acres)</th>
-                                    <th>Yield Rate (kg/acre)</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>PRD001</td>
-                                    <td>FRM123</td>
-                                    <td>Rice (Boro)</td>
-                                    <td>Cereal Grains</td>
-                                    <td>2024-03-15</td>
-                                    <td>180</td>
-                                    <td>2024-09-11</td>
-                                    <td>2,500</td>
-                                    <td>5.0</td>
-                                    <td>500</td>
-                                </tr>
-                                <tr>
-                                    <td>PRD002</td>
-                                    <td>FRM456</td>
-                                    <td>Rice (Aman)</td>
-                                    <td>Cereal Grains</td>
-                                    <td>2024-03-10</td>
-                                    <td>90</td>
-                                    <td>2024-06-08</td>
-                                    <td>3,200</td>
-                                    <td>6.4</td>
-                                    <td>500</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </div>
-
-    <!-- Add necessary scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    </body>
-
+<!-- jQuery -->
+<script src="/static/plugins/jquery/jquery.min.js"></script>
+<!-- Bootstrap 4 -->
+<script src="/static/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+<!-- AdminLTE App -->
+<script src="/static/dist/js/adminlte.min.js"></script>
+{% block scripts %}{% endblock %}
+</body>
 </html>
