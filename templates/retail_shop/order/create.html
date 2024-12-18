@@ -1,4 +1,4 @@
-{% extends "warehouse_manager/base.html" %}
+{% extends "retail_shop/shop_base.html" %}
 
 {% block title %}Create Order - GreenGrid{% endblock %}
 
@@ -11,7 +11,7 @@
     </div>
     <div class="card-body">
         <form action="{{ url_for('shop.create_order') }}" method="POST" id="orderForm">
-            <div class="form-group">
+            <!-- <div class="form-group">
                 <label for="shop_id">Shop</label>
                 <select class="form-control select2" id="shop_id" name="shop_id" required>
                     <option value="">Select Shop</option>
@@ -19,7 +19,7 @@
                     <option value="{{ shop[0] }}">{{ shop[1] }}</option>
                     {% endfor %}
                 </select>
-            </div>
+            </div> -->
 
             <div class="form-group">
                 <label for="order_status">Order Status</label>
@@ -91,7 +91,7 @@
             
             if (productId) {
                 $.ajax({
-                    url: '/warehouse-manager/get-product-unit/' + productId,
+                    url: '/shop/get-product-unit/' + productId,
                     method: 'GET',
                     success: function(response) {
                         unitInput.val(response.unit);

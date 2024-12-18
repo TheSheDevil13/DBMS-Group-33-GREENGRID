@@ -1,4 +1,4 @@
-{% extends "warehouse_manager/base.html" %}
+{% extends "retail_shop/shop_base.html" %}
 
 {% block title %}Edit Order - GreenGrid{% endblock %}
 
@@ -16,8 +16,8 @@
     </div>
     <form method="POST">
         <div class="card-body">
-            <div class="row">
-                <div class="col-md-6">
+            <!-- <div class="row"> -->
+                <!-- <div class="col-md-6">
                     <div class="form-group">
                         <label for="shop_id">Shop</label>
                         <select name="shop_id" id="shop_id" class="form-control select2" required>
@@ -40,7 +40,7 @@
                         </select>
                     </div>
                 </div>
-            </div>
+            </div> -->
             
             <div class="row warehouse-section" style="display: none;">
                 <div class="col-md-6">
@@ -86,7 +86,7 @@
                                     <input type="number" name="quantity[]" class="form-control" value="{{ product[2] }}" required min="1">
                                 </td>
                                 <td>
-                                    <input type="text" name="unit[]" class="form-control product-unit" readonly>
+                                    <input type="text" name="unit[]"value="{{ product[3] }}" class="form-control product-unit" readonly>
                                 </td>
                                 <td>
                                     <button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this)">
@@ -145,7 +145,7 @@
             
             if (productId) {
                 $.ajax({
-                    url: '/warehouse-manager/get-product-unit/' + productId,
+                    url: '/shop/get-product-unit/' + productId,
                     method: 'GET',
                     success: function(response) {
                         unitInput.val(response.unit);
@@ -223,7 +223,7 @@
         const productId = selectElement.value;
 
         // Make AJAX call to get product unit
-        fetch(`/warehouse-manager/get-product-unit/${productId}`)
+        fetch(`/shop/get-product-unit/${productId}`)
             .then(response => response.json())
             .then(data => {
                 if (data.unit) {

@@ -1,4 +1,4 @@
-{% extends "warehouse_manager/base.html" %}
+{% extends "retail_shop/shop_base.html" %}
 
 {% block title %}Orders - GreenGrid{% endblock %}
 
@@ -79,7 +79,7 @@
 
     function deleteOrder(orderId) {
         if (confirm('Are you sure you want to delete this order?')) {
-            window.location.href = "{{ url_for('warehouse_manager.delete_order', id=0) }}".replace('0', orderId);
+            window.location.href = "{{ url_for('shop.delete_order', id=0) }}".replace('0', orderId);
         }
     }
 </script>

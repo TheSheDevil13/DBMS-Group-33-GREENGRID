@@ -116,7 +116,22 @@ def login_post():
                 print("Debug - Matched analyst role")  # Debug print
                 return redirect('/agricultural-analyst/analyst-dashboard')
             elif user_role == 'S':
-                    return redirect('/shop/shop-dashboard')
+                                # Get shop's ID
+                cursor.execute("""
+                    SELECT ShopID 
+                    FROM retailshop 
+                    WHERE OwnerID = %s
+                """, (user_details[0],))
+                shop = cursor.fetchone()
+                print(f"Debug - Login: Shop query result: {shop}")  # Debug print
+                if shop:
+                    session['shop_id'] = shop[0]
+                    print(f"Debug - Login: Set shop_id in session to: {shop[0]}")  # Debug print
+                else:
+                    print("Debug - Login: No shop found for this owner")  # Debug print
+                    flash('No shop assigned to this owner', 'error')
+                    return redirect('/login')
+                return redirect('/shop/shop-dashboard')
             elif user_role == 'F':
                 return redirect('/farmer/farmer-dashboard')
             else:
