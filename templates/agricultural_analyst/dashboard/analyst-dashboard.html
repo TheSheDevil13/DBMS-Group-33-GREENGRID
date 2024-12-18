@@ -5,176 +5,152 @@
 {% block extra_css %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+    .small-box {
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s;
+    }
+    .small-box:hover {
+        transform: translateY(-5px);
+    }
+    .small-box .inner {
+        padding: 10px;
+    }
+    .small-box .icon {
+        position: absolute;
+        right: 15px;
+        top: 15px;
+        font-size: 2.5em;
+        opacity: 0.3;
+    }
+    .card {
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+    }
+    .card-header {
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+    }
+    .loading {
+        text-align: center;
+        padding: 20px;
+    }
+</style>
 {% endblock %}
 
 {% block content %}
-<section class="content">
-    <div class="container-fluid">
-        <!-- Small Stat Boxes -->
-        <div class="row">
-            <div class="col-lg-3 col-6">
-                <div class="small-box bg-info">
-                    <div class="inner">
-                        <h3>15,240</h3>
-                        <p>Total Production (kg)</p>
-                    </div>
-                    <div class="icon">
-                        <i class="fas fa-weight"></i>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-lg-3 col-6">
-                <div class="small-box bg-success">
-                    <div class="inner">
-                        <h3>85%</h3>
-                        <p>Average Yield Rate</p>
-                    </div>
-                    <div class="icon">
-                        <i class="fas fa-percentage"></i>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-lg-3 col-6">
-                <div class="small-box bg-warning">
-                    <div class="inner">
-                        <h3>$2.45</h3>
-                        <p>Production Cost/kg</p>
-                    </div>
-                    <div class="icon">
-                        <i class="fas fa-dollar-sign"></i>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-lg-3 col-6">
-                <div class="small-box bg-danger">
-                    <div class="inner">
-                        <h3>14 days</h3>
-                        <p>Avg. Shelf Life</p>
-                    </div>
-                    <div class="icon">
-                        <i class="fas fa-clock"></i>
-                    </div>
-                </div>
-            </div>
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Dashboard</h1>
+    
+    <!-- User Information Card -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-user me-1"></i>
+            User Information
         </div>
-
-        <!-- Charts Row -->
-        <div class="row">
-            <!-- Production Trends -->
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Production Trends</h3>
-                    </div>
-                    <div class="card-body">
-                        <canvas id="productionChart" style="height: 300px;"></canvas>
-                    </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Name:</strong> {{ user_info[1] }} {{ user_info[2] }}</p>
+                    <p><strong>Username:</strong> {{ user_info[3] }}</p>
                 </div>
-            </div>
-
-            <!-- Yield Analysis -->
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Yield Analysis</h3>
-                    </div>
-                    <div class="card-body">
-                        <canvas id="yieldChart" style="height: 300px;"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Quality Metrics Row -->
-        <div class="row">
-            <!-- Shelf Life Analysis -->
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Shelf Life Analysis</h3>
-                    </div>
-                    <div class="card-body">
-                        <canvas id="shelfLifeChart" style="height: 300px;"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Cost Analysis -->
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Production Cost Analysis</h3>
-                    </div>
-                    <div class="card-body">
-                        <canvas id="costChart" style="height: 300px;"></canvas>
-                    </div>
+                <div class="col-md-6">
+                    <p><strong>Email:</strong> {{ user_info[4] }}</p>
+                    <p><strong>Role:</strong> {{ user_info[5] }}</p>
                 </div>
             </div>
         </div>
     </div>
-</section>
-{% endblock %}
 
-{% block extra_js %}
+    <!-- Statistics Cards -->
+    <div class="row">
+        <div class="col-xl-4 col-md-6">
+            <div class="card bg-primary text-white mb-4">
+                <div class="card-body">
+                    <h2>{{ total_products }}</h2>
+                    <div>Total Products</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-4 col-md-6">
+            <div class="card bg-success text-white mb-4">
+                <div class="card-body">
+                    <h2>{{ total_categories }}</h2>
+                    <div>Product Categories</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-4 col-md-6">
+            <div class="card bg-info text-white mb-4">
+                <div class="card-body">
+                    <h2>{{ total_farmers }}</h2>
+                    <div>Total Farmers</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Production Chart -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-chart-bar me-1"></i>
+            Production by Product
+        </div>
+        <div class="card-body">
+            <canvas id="productionChart" width="100%" height="40"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js Script -->
 <script>
-    // Production Trends Chart
-    new Chart(document.getElementById('productionChart'), {
-        type: 'line',
-        data: {
-            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-            datasets: [{
-                label: 'Monthly Production (kg)',
-                data: [12000, 13500, 14800, 15240, 14900, 15100],
-                borderColor: 'rgb(75, 192, 192)',
-                tension: 0.1
-            }]
-        }
-    });
-
-    // Yield Analysis Chart
-    new Chart(document.getElementById('yieldChart'), {
+document.addEventListener('DOMContentLoaded', function() {
+    var ctx = document.getElementById('productionChart');
+    var productionData = {{ production_chart_data|tojson }};
+    
+    var labels = productionData.map(item => item[0]); // ProductName
+    var data = productionData.map(item => item[1]); // TotalProduction
+    var units = productionData.map(item => item[3]); // Unit
+    
+    new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: ['Rice', 'Wheat', 'Corn', 'Soybeans'],
+            labels: labels,
             datasets: [{
-                label: 'Yield Rate (%)',
-                data: [85, 78, 92, 88],
-                backgroundColor: 'rgb(75, 192, 192)'
+                label: 'Total Production',
+                data: data,
+                backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
             }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Production Amount'
+                    }
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            var index = context.dataIndex;
+                            return context.dataset.label + ': ' + context.parsed.y + ' ' + units[index];
+                        }
+                    }
+                }
+            }
         }
     });
-
-    // Shelf Life Chart
-    new Chart(document.getElementById('shelfLifeChart'), {
-        type: 'doughnut',
-        data: {
-            labels: ['0-7 days', '8-14 days', '15-21 days', '22+ days'],
-            datasets: [{
-                data: [20, 45, 25, 10],
-                backgroundColor: [
-                    'rgb(255, 99, 132)',
-                    'rgb(54, 162, 235)',
-                    'rgb(255, 205, 86)',
-                    'rgb(75, 192, 192)'
-                ]
-            }]
-        }
-    });
-
-    // Cost Analysis Chart
-    new Chart(document.getElementById('costChart'), {
-        type: 'bar',
-        data: {
-            labels: ['Raw Materials', 'Labor', 'Equipment', 'Storage', 'Transport'],
-            datasets: [{
-                label: 'Cost Distribution ($)',
-                data: [0.8, 0.6, 0.4, 0.35, 0.3],
-                backgroundColor: 'rgb(153, 102, 255)'
-            }]
-        }
-    });
+});
 </script>
 {% endblock %}

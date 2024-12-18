@@ -46,12 +46,16 @@
                                 <input type="number" class="form-control" id="shelf_life" name="shelf_life" required>
                             </div>
                             <div class="form-group">
-                                <label for="acreage">Acreage</label>
+                                <label for="acreage">Acreage (acres)</label>
                                 <input type="number" step="0.01" class="form-control" id="acreage" name="acreage" required>
                             </div>
                             <div class="form-group">
-                                <label for="yield_rate">Yield Rate</label>
-                                <input type="number" step="0.01" class="form-control" id="yield_rate" name="yield_rate" required>
+                                <label for="total_production">Total Production <span id="unit-display"></span></label>
+                                <input type="number" step="0.01" class="form-control" id="total_production" name="total_production" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="yield_rate">Yield Rate <span id="yield-unit-display"></span></label>
+                                <input type="number" step="0.01" class="form-control" id="yield_rate" name="yield_rate" readonly>
                             </div>
                         </div>
                     </div>
@@ -66,4 +70,47 @@
         </div>
     </div>
 </section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const productSelect = document.getElementById('product_id');
+    const totalProductionInput = document.getElementById('total_production');
+    const acreageInput = document.getElementById('acreage');
+    const yieldRateInput = document.getElementById('yield_rate');
+    const unitDisplay = document.getElementById('unit-display');
+    const yieldUnitDisplay = document.getElementById('yield-unit-display');
+
+    function updateUnit() {
+        const productId = productSelect.value;
+        if (productId) {
+            fetch(`/agricultural-analyst/get-product-unit/${productId}`)
+                .then(response => response.json())
+                .then(data => {
+                    const unit = data.unit;
+                    unitDisplay.textContent = `(${unit})`;
+                    yieldUnitDisplay.textContent = `(${unit}/acre)`;
+                });
+        } else {
+            unitDisplay.textContent = '';
+            yieldUnitDisplay.textContent = '';
+        }
+    }
+
+    function calculateYieldRate() {
+        const totalProduction = parseFloat(totalProductionInput.value) || 0;
+        const acreage = parseFloat(acreageInput.value) || 0;
+        
+        if (acreage > 0) {
+            const yieldRate = totalProduction / acreage;
+            yieldRateInput.value = yieldRate.toFixed(2);
+        } else {
+            yieldRateInput.value = '';
+        }
+    }
+
+    productSelect.addEventListener('change', updateUnit);
+    totalProductionInput.addEventListener('input', calculateYieldRate);
+    acreageInput.addEventListener('input', calculateYieldRate);
+});
+</script>
 {% endblock %}
