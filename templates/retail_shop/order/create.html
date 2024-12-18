@@ -4,148 +4,245 @@
 
 {% block page_title %}Create Order{% endblock %}
 
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap4.min.css">
+<style>
+    .product-row { 
+        padding: 15px;
+        margin-bottom: 15px;
+        border-bottom: 1px solid #dee2e6;
+    }
+    .select2-container--bootstrap4 .select2-selection--single {
+        height: calc(2.25rem + 2px);
+        padding: .375rem .75rem;
+        line-height: 1.5;
+        border: 1px solid #ced4da;
+    }
+    .select2-container--bootstrap4 .select2-selection--single .select2-selection__rendered {
+        line-height: 1.5;
+        padding-left: 0;
+    }
+    .select2-container--bootstrap4 .select2-selection--single .select2-selection__arrow {
+        height: calc(2.25rem + 2px);
+    }
+    .card-body {
+        padding: 1.5rem;
+    }
+    .table-responsive {
+        margin: 15px 0;
+    }
+    .select2-container {
+        width: 100% !important;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="card">
-    <div class="card-header">
-        <h3 class="card-title">Create New Order</h3>
-    </div>
-    <div class="card-body">
-        <form action="{{ url_for('shop.create_order') }}" method="POST" id="orderForm">
-            <!-- <div class="form-group">
-                <label for="shop_id">Shop</label>
-                <select class="form-control select2" id="shop_id" name="shop_id" required>
-                    <option value="">Select Shop</option>
-                    {% for shop in shops %}
-                    <option value="{{ shop[0] }}">{{ shop[1] }}</option>
-                    {% endfor %}
-                </select>
-            </div> -->
-
-            <div class="form-group">
-                <label for="order_status">Order Status</label>
-                <select class="form-control" id="order_status" name="order_status" required>
-                    <option value="Pending" selected>Pending</option>
-                </select>
-            </div>
-
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">Order Products</h3>
-                    <div class="card-tools">
-                        <button type="button" class="btn btn-primary btn-sm" onclick="addProductRow()">
-                            <i class="fas fa-plus"></i> Add Product
-                        </button>
-                    </div>
+                    <h3 class="card-title">Create New Order</h3>
                 </div>
                 <div class="card-body">
-                    <div id="productRows">
-                        <!-- Product rows will be added here -->
-                    </div>
+                    <form action="{{ url_for('shop.create_order') }}" method="POST" id="orderForm">
+                        <div class="card">
+                            <div class="card-header bg-light">
+                                <h3 class="card-title">Order Products</h3>
+                                <div class="card-tools">
+                                    <button type="button" class="btn btn-primary" id="addProductBtn">
+                                        <i class="fas fa-plus"></i> Add Product
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-bordered" id="productsTable">
+                                        <thead>
+                                            <tr>
+                                                <th width="40%">Product</th>
+                                                <th width="25%">Quantity</th>
+                                                <th width="25%">Unit</th>
+                                                <th width="10%">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="productRows">
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div id="validation-messages" class="alert alert-danger" style="display:none;">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Create Order
+                            </button>
+                            <a href="{{ url_for('shop.list_orders') }}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
                 </div>
             </div>
-
-            <div class="form-group mt-4">
-                <button type="submit" class="btn btn-primary">Create Order</button>
-                <a href="{{ url_for('shop.list_orders') }}" class="btn btn-secondary">Cancel</a>
-            </div>
-        </form>
+        </div>
     </div>
 </div>
 
-<!-- Product Row Template (hidden) -->
+<!-- Product Row Template -->
 <template id="productRowTemplate">
-    <div class="row product-row mb-3">
-        <div class="col-md-4">
+    <tr class="product-row">
+        <td>
             <select class="form-control select2 product-select" name="products[]" required>
                 <option value="">Select Product</option>
                 {% for product in products %}
                 <option value="{{ product[0] }}">{{ product[1] }}</option>
                 {% endfor %}
             </select>
-        </div>
-        <div class="col-md-3">
-            <input type="number" class="form-control" name="quantities[]" placeholder="Quantity" required min="1" step="0.01">
-        </div>
-        <div class="col-md-3">
-            <input class="form-control" name="unit" value="Unit" readonly>
-        </div>
-        <div class="col-md-2">
-            <button type="button" class="btn btn-danger" onclick="removeProductRow(this)">
+        </td>
+        <td>
+            <input type="number" class="form-control" name="quantities[]" 
+                   placeholder="Enter quantity" required min="1" step="0.01">
+        </td>
+        <td>
+            <input type="text" class="form-control" name="unit" readonly>
+        </td>
+        <td class="text-center">
+            <button type="button" class="btn btn-danger btn-sm btn-remove-product">
                 <i class="fas fa-trash"></i>
             </button>
-        </div>
-    </div>
+        </td>
+    </tr>
 </template>
 {% endblock %}
 
-{% block extra_scripts %}
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
-    $(document).ready(function() {
-        // Add first product row by default
+$(document).ready(function() {
+    initSelect2();
+    addProductRow();
+
+    $('#addProductBtn').on('click', function() {
         addProductRow();
-
-        // Add event listener for product selection
-        $(document).on('change', '.product-select', function() {
-            const productId = $(this).val();
-            const unitInput = $(this).closest('.product-row').find('input[name="unit"]');
-            
-            if (productId) {
-                $.ajax({
-                    url: '/shop/get-product-unit/' + productId,
-                    method: 'GET',
-                    success: function(response) {
-                        unitInput.val(response.unit);
-                    },
-                    error: function(xhr) {
-                        console.error('Error fetching unit:', xhr.responseText);
-                        unitInput.val('Unit');
-                    }
-                });
-            } else {
-                unitInput.val('Unit');
-            }
-        });
     });
 
-    function addProductRow() {
-        const template = document.querySelector('#productRowTemplate');
-        const clone = template.content.cloneNode(true);
-        document.querySelector('#productRows').appendChild(clone);
-    }
+    $(document).on('click', '.btn-remove-product', function() {
+        removeProductRow(this);
+    });
 
-    function removeProductRow(button) {
-        const productRows = document.querySelectorAll('.product-row');
-        if (productRows.length > 1) {
-            button.closest('.product-row').remove();
-        } else {
-            alert('At least one product is required.');
-        }
-    }
+    $(document).on('change', '.product-select', function() {
+        updateProductUnit(this);
+    });
 
-    // Form validation
-    document.getElementById('orderForm').addEventListener('submit', function(e) {
-        const productRows = document.getElementById('productRows');
-        if (productRows.children.length < 1) {
-            e.preventDefault();
-            alert('Please add at least one product to the order.');
-            return;
-        }
-
-        // Check for duplicate products
-        const products = new Set();
-        let hasDuplicate = false;
-        document.querySelectorAll('.product-select').forEach(select => {
-            const value = select.value;
-            if (value && products.has(value)) {
-                hasDuplicate = true;
-            }
-            products.add(value);
-        });
-
-        if (hasDuplicate) {
-            e.preventDefault();
-            alert('Please remove duplicate products from the order.');
+    $('#orderForm').on('submit', function(e) {
+        e.preventDefault(); // Prevent default submission
+        if (validateForm()) {
+            this.submit(); // Submit if validation passes
         }
     });
+});
+
+function initSelect2() {
+    $('.select2').select2({
+        theme: 'bootstrap4',
+        width: '100%',
+        placeholder: 'Select a product'
+    });
+}
+
+function addProductRow() {
+    const template = document.querySelector('#productRowTemplate');
+    const clone = template.content.cloneNode(true);
+    document.querySelector('#productRows').appendChild(clone);
+    initSelect2();
+}
+
+function removeProductRow(button) {
+    const rows = $('#productRows tr').length;
+    if (rows > 1) {
+        $(button).closest('tr').remove();
+    } else {
+        showMessage('At least one product is required', 'danger');
+    }
+}
+
+function updateProductUnit(select) {
+    const productId = $(select).val();
+    const row = $(select).closest('tr');
+    const unitInput = row.find('input[name="unit"]');
+    
+    if (productId) {
+        $.get('/shop/get-product-unit/' + productId)
+            .done(function(response) {
+                unitInput.val(response.unit);
+            })
+            .fail(function() {
+                unitInput.val('');
+                showMessage('Error fetching product unit', 'danger');
+            });
+    } else {
+        unitInput.val('');
+    }
+}
+
+function validateForm() {
+    const products = new Set();
+    let isValid = true;
+    let message = '';
+
+    // Check if there are any product rows
+    if ($('#productRows tr').length === 0) {
+        showMessage('Please add at least one product', 'danger');
+        return false;
+    }
+
+    // Validate each row
+    $('.product-row').each(function() {
+        const productSelect = $(this).find('.product-select');
+        const quantityInput = $(this).find('input[name="quantities[]"]');
+        const value = productSelect.val();
+        const quantity = quantityInput.val();
+
+        if (!value) {
+            isValid = false;
+            message = 'Please select all products';
+            return false;
+        }
+
+        if (!quantity || quantity <= 0) {
+            isValid = false;
+            message = 'Please enter valid quantities for all products';
+            return false;
+        }
+
+        if (products.has(value)) {
+            isValid = false;
+            message = 'Duplicate products are not allowed';
+            return false;
+        }
+        products.add(value);
+    });
+
+    if (!isValid) {
+        showMessage(message, 'danger');
+        return false;
+    }
+
+    return true;
+}
+
+function showMessage(message, type) {
+    const alertDiv = $('#validation-messages');
+    alertDiv.html(message)
+            .removeClass()
+            .addClass(`alert alert-${type}`)
+            .show()
+            .delay(3000)
+            .fadeOut();
+}
 </script>
 {% endblock %}

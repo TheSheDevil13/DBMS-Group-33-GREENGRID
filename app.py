@@ -84,7 +84,7 @@ def login_post():
             session['username'] = user_details[3]
             session['email'] = user_details[4]
             session['role'] = user_role  # Store user role in session
-            session['role'] = user_role  # Store user role in session
+            
             # Special check for admin (both username and email)
             if email_username.upper() == "ADMIN" or email_username == "admin@gmail.com":
                 return redirect('/admin/admin-dashboard')

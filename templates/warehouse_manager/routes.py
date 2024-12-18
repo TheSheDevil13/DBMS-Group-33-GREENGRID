@@ -213,78 +213,34 @@ def manager_dashboard():
 @warehouse_manager_routes.route('/warehouse-manager/stock-products')
 @login_required
 def stock_products():
-    print("\n=== Debug Stock Products ===")
-    print(f"Session data: {session}")
-    
     conn = get_db_connection()
     cursor = conn.cursor()
     try:
-        warehouse_filter = ""
-        params = []
-        if 'warehouse_id' in session:
-            warehouse_filter = "WHERE s.WarehouseID = %s"
-            params = [session['warehouse_id']]
-            print(f"Using warehouse filter: {warehouse_filter} with params: {params}")
-        else:
-            print("No warehouse_id in session!")
-
-        # First, let's check if we have any stock data at all
-        cursor.execute("SELECT COUNT(*) FROM stock")
-        total_stock_count = cursor.fetchone()[0]
-        print(f"Total stock records in database: {total_stock_count}")
-
-        # Query for individual stocks
-        stock_query = f"""
+        cursor.execute("""
             SELECT 
                 s.StockID,
-                s.StockQuantity,
+                (SELECT COALESCE(SUM(CASE 
+                    WHEN s2.StockAvailability = 'Incoming' THEN s2.StockQuantity 
+                    WHEN s2.StockAvailability = 'Outgoing' THEN -s2.StockQuantity 
+                    ELSE 0 
+                END), 0)
+                FROM stock s2 
+                WHERE s2.ProductID = s.ProductID 
+                AND s2.WarehouseID = s.WarehouseID) as ActualQuantity,
                 p.Unit as StockUnit,
                 s.LastUpdateDate,
-                s.StockAvailability,
-                w.Name as WarehouseName,
                 p.ProductName,
-                s.WarehouseID,
                 s.ProductID
             FROM stock s
-            JOIN warehouse w ON s.WarehouseID = w.WarehouseID
             JOIN product p ON s.ProductID = p.ProductID
-            {warehouse_filter}
+            WHERE s.WarehouseID = %s AND s.StockAvailability = 'Incoming'
+            GROUP BY s.StockID, s.ProductID, p.ProductName, p.Unit, s.LastUpdateDate
             ORDER BY s.StockID DESC
-        """
-        print(f"Executing stock query: {stock_query}")
-        print(f"With params: {params}")
-        cursor.execute(stock_query, params)
+        """, (session['warehouse_id'],))
         stocks = cursor.fetchall()
-        print(f"Found {len(stocks)} stock records")
 
-        # Query for total stock by product
-        total_query = f"""
-            SELECT 
-                p.ProductID,
-                p.ProductName,
-                p.Unit,
-                SUM(CASE 
-                    WHEN s.StockAvailability = 'Incoming' THEN s.StockQuantity 
-                    WHEN s.StockAvailability = 'Outgoing' THEN -s.StockQuantity 
-                    ELSE 0 
-                END) as TotalStock
-            FROM product p
-            LEFT JOIN stock s ON p.ProductID = s.ProductID
-            {warehouse_filter}
-            GROUP BY p.ProductID, p.ProductName, p.Unit
-            ORDER BY p.ProductName
-        """
-        print(f"Executing total query: {total_query}")
-        print(f"With params: {params}")
-        cursor.execute(total_query, params)
-        total_stocks = cursor.fetchall()
-        print(f"Found {len(total_stocks)} total stock records")
-
-        return render_template('warehouse_manager/stock-product/list.html', 
-                            stocks=stocks, 
-                            total_stocks=total_stocks)
+        return render_template('warehouse_manager/stock-product/list.html', stocks=stocks)
     except Exception as e:
-        print(f"Error in stock_products: {str(e)}")
         flash(f"Error: {e}", "error")
         return redirect('/warehouse-manager/manager-dashboard')
     finally:
@@ -450,7 +406,7 @@ def list_dispatches():
         """, params)
         accepted_orders = cursor.fetchall()
 
-        # Query for dispatches
+        # Query for dispatches with outgoing stock details
         cursor.execute("""
             SELECT DISTINCT
                 d.DispatchID,
@@ -458,11 +414,17 @@ def list_dispatches():
                 d.OrderID,
                 d.DispatchDate,
                 o.OrderStatus,
-                rs.ShopName
+                rs.ShopName,
+                GROUP_CONCAT(CONCAT(p.ProductName, ': ', s.StockQuantity, ' ', p.Unit) SEPARATOR ', ') as DispatchedItems
             FROM dispatch d
             JOIN `order` o ON d.OrderID = o.OrderID
             JOIN retailshop rs ON o.ShopID = rs.ShopID
+            JOIN stock s ON s.WarehouseID = d.WarehouseID 
+                AND s.StockAvailability = 'Outgoing'
+                AND DATE(s.LastUpdateDate) = DATE(d.DispatchDate)
+            JOIN product p ON s.ProductID = p.ProductID
             WHERE d.WarehouseID = %s
+            GROUP BY d.DispatchID, d.WarehouseID, d.OrderID, d.DispatchDate, o.OrderStatus, rs.ShopName
             ORDER BY d.DispatchDate DESC
         """, (session.get('warehouse_id'),))
         dispatches = cursor.fetchall()
@@ -619,7 +581,68 @@ def view_dispatch(id):
         cursor.close()
         conn.close()
 
+@warehouse_manager_routes.route('/warehouse-manager/get-product-unit/<int:product_id>')
+@login_required
+def get_product_unit(product_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("SELECT Unit FROM product WHERE ProductID = %s", (product_id,))
+        result = cursor.fetchone()
+        if result:
+            return jsonify({'unit': result[0]})
+        return jsonify({'error': 'Product not found'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        cursor.close()
+        conn.close()
 
+@warehouse_manager_routes.route('/warehouse-manager/get-order-details')
+@login_required
+def get_order_details():
+    order_id = request.args.get('order_id')
+    if not order_id:
+        return jsonify({'error': 'Order ID is required'}), 400
+
+    conn = get_db_connection()
+    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    try:
+        # Get order products with current stock levels
+        cursor.execute("""
+            SELECT 
+                od.ProductID,
+                p.ProductName,
+                od.OrderQuantity as ordered_quantity,
+                p.Unit as unit,
+                COALESCE(
+                    (
+                        SELECT SUM(CASE 
+                            WHEN s.StockAvailability = 'Incoming' THEN s.StockQuantity 
+                            WHEN s.StockAvailability = 'Outgoing' THEN -s.StockQuantity 
+                            ELSE 0 
+                        END)
+                        FROM stock s 
+                        WHERE s.ProductID = od.ProductID 
+                        AND s.WarehouseID = o.WarehouseID
+                    ), 
+                    0
+                ) as available_quantity
+            FROM order_details od
+            JOIN `order` o ON od.OrderID = o.OrderID
+            JOIN product p ON od.ProductID = p.ProductID
+            WHERE od.OrderID = %s AND o.WarehouseID = %s
+        """, (order_id, session.get('warehouse_id')))
+        products = cursor.fetchall()
+
+        return jsonify({
+            'products': products
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        cursor.close()
+        conn.close()
 
 # Settings
 @warehouse_manager_routes.route('/warehouse-manager/settings', methods=['GET', 'POST'])
@@ -681,8 +704,3 @@ def settings():
     finally:
         cursor.close()
         conn.close()
-
-
-
-
-
