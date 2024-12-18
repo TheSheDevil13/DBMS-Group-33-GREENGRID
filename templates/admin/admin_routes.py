@@ -844,6 +844,33 @@ def delete_warehouse(id):
         conn.close()
     return redirect(url_for('admin.list_warehouses'))
 
+# Product Management Routes
+@admin_routes.route('/admin/products')
+@login_required
+def admin_view_products():
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Get product information with creator details
+        cursor.execute("""
+            SELECT p.ProductID, p.ProductName, p.Category, p.PricePerUnit, p.Unit, 
+                   p.Seasonality, u.Username as OfficerUsername
+            FROM product p
+            LEFT JOIN users u ON p.OEmployeeID = u.UserID
+            WHERE u.Role = 'O'
+            ORDER BY p.ProductID DESC
+        """)
+        
+        products = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        
+        return render_template('admin/product/list.html', products=products)
+    except Exception as e:
+        flash(f'Error loading products: {str(e)}', 'error')
+        return redirect(url_for('admin.admin_dashboard'))
+
 # Shop Management Routes
 @admin_routes.route('/admin/shop-management/shops')
 @login_required

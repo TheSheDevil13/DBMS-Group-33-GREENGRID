@@ -1,0 +1,71 @@
+{% extends 'farmer/farmer_base.html' %}
+
+{% block title %}Edit Production Data{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">Edit Production Data</h3>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="form-group mb-3">
+                            <label for="product_id">Product</label>
+                            <select class="form-control" id="product_id" name="product_id" required>
+                                {% for product in products %}
+                                <option value="{{ product[0] }}" {% if product[0] == production[1] %}selected{% endif %}>
+                                    {{ product[1] }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="harvest_date">Harvest Date</label>
+                            <input type="date" class="form-control" id="harvest_date" name="harvest_date" 
+                                   value="{{ production[2] }}" required>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="production_cost">Production Cost (৳)</label>
+                            <input type="number" step="0.01" class="form-control" id="production_cost" 
+                                   name="production_cost" value="{{ production[3] }}" required>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="acreage">Acreage</label>
+                            <input type="number" step="0.01" class="form-control" id="acreage" 
+                                   name="acreage" value="{{ production[4] }}">
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-8 mb-3">
+                                <label for="yield_amount">Yield Amount</label>
+                                <input type="number" step="0.01" class="form-control" id="yield_amount" 
+                                       name="yield_amount" value="{{ production[5] }}" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="yield_unit">Unit</label>
+                                <select class="form-control" id="yield_unit" name="yield_unit" required>
+                                    <option value="kg" {% if production[6] == 'kg' %}selected{% endif %}>Kilogram (kg)</option>
+                                    <option value="ton" {% if production[6] == 'ton' %}selected{% endif %}>Ton</option>
+                                    <option value="dozen" {% if production[6] == 'dozen' %}selected{% endif %}>Dozen</option>
+                                    <option value="pieces" {% if production[6] == 'pieces' %}selected{% endif %}>Pieces</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group text-center">
+                            <button type="submit" class="btn btn-primary">Update Production Data</button>
+                            <a href="{{ url_for('farmer.list_production_data') }}" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
