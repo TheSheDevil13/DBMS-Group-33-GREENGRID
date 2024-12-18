@@ -1,12 +1,12 @@
 {% extends "admin/admin_base.html" %}
 
-{% block title %}Add New Officer - GreenGrid{% endblock %}
+{% block title %}Add New Shop Owner - GreenGrid{% endblock %}
 
 {% block content %}
 <!-- Content Wrapper -->
 <div class="content-header">
     <div class="container-fluid">
-        <h1 class="m-0">Agricultural Officers</h1>
+        <h1 class="m-0">Shop Owners</h1>
     </div>
 </div>
 
@@ -14,17 +14,24 @@
 <section class="content">
     <div class="container-fluid">
         <div class="mb-3">
-            <a href="/admin/employee-directory/agricultural-officers" class="btn btn-success">
+            <a href="/admin/shop-management/shop-owners" class="btn btn-success">
                 <i class="fas fa-arrow-left"></i> Back
             </a>
         </div>
-        <!-- Officers List -->
+        <!-- Shop Owner Creation -->
         <div class="card">
             <div class="card-header">
-                <h3 class="card-title">Create Agricultural Officer</h3>
+                <h3 class="card-title">Create Shop Owner</h3>
             </div>
             <div class="card-body">
-                <form action="{{ url_for('admin.create_agricultural_officer_post') }}" method="POST">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+                <form action="{{ url_for('admin.create_shop_owner_post') }}" method="POST">
                     <div class="form-group mb-3">
                         <label for="firstname">First Name</label>
                         <input type="text" class="form-control" id="firstname" name="firstname" required>
@@ -48,7 +55,7 @@
                     </div>
                     <input type="hidden" name="status" value="pending">
                     <div class="mt-4">
-                        <button type="submit" class="btn btn-primary">Create Agricultural Officer</button>
+                        <button type="submit" class="btn btn-primary">Create Shop Owner</button>
                     </div>
                 </form>
             </div>

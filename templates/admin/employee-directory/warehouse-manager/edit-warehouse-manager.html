@@ -1,0 +1,64 @@
+{% extends "admin/admin_base.html" %}
+
+{% block title %}Edit Manager - GreenGrid{% endblock %}
+
+{% block content %}
+<!-- Content Wrapper -->
+<div class="content-header">
+    <div class="container-fluid">
+        <h1 class="m-0">Warehouse Managers</h1>
+    </div>
+</div>
+
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+        <div class="mb-3">
+            <a href="/admin/employee-directory/warehouse-managers" class="btn btn-success">
+                <i class="fas fa-arrow-left"></i> Back
+            </a>
+        </div>
+        <!-- Officers List -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Edit Warehouse Manager</h3>
+            </div>
+            <div class="card-body">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+                <form action="{{ url_for('admin.edit_warehouse_manager_post', id=manager.UserID) }}" method="POST">
+                    <div class="form-group mb-3">
+                        <label for="firstname">First Name</label>
+                        <input type="text" class="form-control" id="firstname" name="firstname" value="{{ manager.FirstName }}" required>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="lastname">Last Name</label>
+                        <input type="text" class="form-control" id="lastname" name="lastname" value="{{ manager.LastName }}" required>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="username">Username</label>
+                        <input type="text" class="form-control" id="username" name="username" value="{{ manager.Username }}" required>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="email">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" value="{{ manager.Email }}" required>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="password">New Password (leave empty to keep current)</label>
+                        <input type="password" class="form-control" id="password" name="password">
+                        <small class="form-text text-muted">Only fill this if you want to change the password</small>
+                    </div>
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-primary">Update Manager</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
