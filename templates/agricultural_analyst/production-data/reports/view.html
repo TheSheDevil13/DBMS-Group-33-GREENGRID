@@ -1,0 +1,61 @@
+{% extends "agricultural_analyst/base.html" %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <h1 class="mt-4">View Report</h1>
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-file-alt me-1"></i>
+            Report Details
+            <div class="float-end">
+                <a href="{{ url_for('analyst.edit_report', id=report[0]) }}" class="btn btn-primary btn-sm">
+                    <i class="fas fa-edit"></i> Edit
+                </a>
+                <a href="{{ url_for('analyst.list_reports') }}" class="btn btn-secondary btn-sm">
+                    <i class="fas fa-list"></i> Back to List
+                </a>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-md-2">
+                    <strong>Title:</strong>
+                </div>
+                <div class="col-md-10">
+                    {{ report[1] }}
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-2">
+                    <strong>Type:</strong>
+                </div>
+                <div class="col-md-10">
+                    <span class="badge bg-{% if report[3] == 'Production' %}primary{% elif report[3] == 'Analysis' %}success{% elif report[3] == 'Forecast' %}warning{% else %}info{% endif %}">
+                        {{ report[3] }}
+                    </span>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-2">
+                    <strong>Report Date:</strong>
+                </div>
+                <div class="col-md-10">
+                    {{ report[4] }}
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-2">
+                    <strong>Details:</strong>
+                </div>
+                <div class="col-md-10">
+                    <div class="card">
+                        <div class="card-body bg-light" style="white-space: pre-wrap;">
+                            {{ report[2] }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

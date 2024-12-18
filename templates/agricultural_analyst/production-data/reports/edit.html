@@ -1,0 +1,40 @@
+{% extends "agricultural_analyst/base.html" %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Edit Report</h1>
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-edit me-1"></i>
+            Edit Report
+        </div>
+        <div class="card-body">
+            <form method="POST">
+                <div class="mb-3">
+                    <label for="title" class="form-label">Title</label>
+                    <input type="text" class="form-control" id="title" name="title" value="{{ report[1] }}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="details" class="form-label">Details</label>
+                    <textarea class="form-control" id="details" name="details" rows="4" required>{{ report[2] }}</textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="type" class="form-label">Type</label>
+                    <select class="form-control" id="type" name="type" required>
+                        <option value="Production" {% if report[3] == 'Production' %}selected{% endif %}>Production</option>
+                        <option value="Analysis" {% if report[3] == 'Analysis' %}selected{% endif %}>Analysis</option>
+                        <option value="Forecast" {% if report[3] == 'Forecast' %}selected{% endif %}>Forecast</option>
+                        <option value="Other" {% if report[3] == 'Other' %}selected{% endif %}>Other</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="report_date" class="form-label">Report Date</label>
+                    <input type="date" class="form-control" id="report_date" name="report_date" value="{{ report[4] }}" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Update Report</button>
+                <a href="{{ url_for('analyst.list_reports') }}" class="btn btn-secondary">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
