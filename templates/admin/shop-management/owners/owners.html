@@ -1,0 +1,76 @@
+{% extends "admin/admin_base.html" %}
+
+{% block title %}Shop Owners - GreenGrid{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div class="container-fluid">
+        <h1 class="m-0">Shop Owners</h1>
+    </div>
+</div>
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="mb-3">
+            <a href="/admin/shop-management/shop-owners/create-owner" class="btn btn-success">
+                <i class="fas fa-plus"></i> Add New Shop Owner
+            </a>
+        </div>
+        
+        <div class="card">
+            <div class="card-body">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+                
+                <table class="table table-bordered" id="ownersTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for owner in owners %}
+                        <tr>
+                            <td>{{ owner.UserID }}</td>
+                            <td>{{ owner.FirstName }} {{ owner.LastName }}</td>
+                            <td>{{ owner.Username }}</td>
+                            <td>{{ owner.Email }}</td>
+                            <td>
+                                <a href="/admin/shop-management/shop-owners/edit/{{ owner.UserID }}" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <form action="/admin/shop-management/shop-owners/delete/{{ owner.UserID }}" method="POST" style="display: inline;">
+                                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this shop owner?')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        $('#ownersTable').DataTable({
+            "responsive": true,
+            "autoWidth": false
+        });
+    });
+</script>
+{% endblock %}

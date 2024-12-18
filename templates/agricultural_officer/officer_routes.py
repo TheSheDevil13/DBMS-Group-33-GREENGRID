@@ -36,24 +36,21 @@ def officer_dashboard():
 @officer_routes.route('/agricultural-officer/products')
 @login_required
 def list_products():
-    print("Debug: Entering list_products function")
-    print(f"Debug: Session data - user_id: {session.get('user_id')}, role: {session.get('role')}")
-    
     conn = get_db_connection()
     cursor = conn.cursor()
-    try:
-        print("Debug: Executing SQL query")
-        cursor.execute("SELECT * FROM product")
-        products = cursor.fetchall()
-        print(f"Debug: Found {len(products) if products else 0} products")
-        return render_template('agricultural_officer/product/list.html', products=products)
-    except Exception as e:
-        print(f"Debug: Error occurred - {str(e)}")
-        flash(f"Error: {e}", "error")
-        return redirect(url_for('officer.officer_dashboard'))
-    finally:
-        cursor.close()
-        conn.close()
+    
+    # Get only products created by the logged-in officer
+    cursor.execute("""
+        SELECT ProductID, ProductName, Category, PricePerUnit, Unit, Seasonality 
+        FROM product 
+        WHERE OEmployeeID = %s
+        ORDER BY ProductID DESC
+    """, (session['user_id'],))
+    
+    products = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return render_template('agricultural_officer/product/list.html', products=products)
 
 @officer_routes.route('/agricultural-officer/products/create', methods=['GET', 'POST'])
 @login_required
@@ -61,31 +58,28 @@ def create_product():
     if request.method == 'GET':
         return render_template('agricultural_officer/product/create.html')
     
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    try:
-        # Get form data
+    if request.method == 'POST':
         product_name = request.form['product_name']
         category = request.form['category']
         price_per_unit = request.form['price_per_unit']
         unit = request.form['unit']
         seasonality = request.form['seasonality']
         
-        # Insert new product
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Insert product with the officer's ID
         cursor.execute("""
-            INSERT INTO product (ProductName, Category, PricePerUnit, Unit, Seasonality) 
-            VALUES (%s, %s, %s, %s, %s)
-        """, (product_name, category, price_per_unit, unit, seasonality))
+            INSERT INTO product (ProductName, Category, PricePerUnit, Unit, Seasonality, OEmployeeID)
+            VALUES (%s, %s, %s, %s, %s, %s)
+        """, (product_name, category, price_per_unit, unit, seasonality, session['user_id']))
+        
         conn.commit()
-        flash("New product added successfully!", "success")
-        return redirect('/agricultural-officer/products')
-    except Exception as e:
-        conn.rollback()
-        flash(f"Error adding product: {e}", "error")
-        return redirect('/agricultural-officer/products/create')
-    finally:
         cursor.close()
         conn.close()
+        
+        flash('Product created successfully!', 'success')
+        return redirect(url_for('officer.list_products'))
 
 @officer_routes.route('/agricultural-officer/products/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
