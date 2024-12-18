@@ -619,22 +619,7 @@ def view_dispatch(id):
         cursor.close()
         conn.close()
 
-@warehouse_manager_routes.route('/warehouse-manager/get-product-unit/<int:product_id>')
-@login_required
-def get_product_unit(product_id):
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    try:
-        cursor.execute("SELECT Unit FROM product WHERE ProductID = %s", (product_id,))
-        result = cursor.fetchone()
-        if result:
-            return jsonify({'unit': result[0]})
-        return jsonify({'error': 'Product not found'}), 404
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-    finally:
-        cursor.close()
-        conn.close()
+
 
 # Settings
 @warehouse_manager_routes.route('/warehouse-manager/settings', methods=['GET', 'POST'])

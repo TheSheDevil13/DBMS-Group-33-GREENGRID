@@ -79,15 +79,10 @@ def create_order():
     if request.method == 'GET':
         try:
             # Get products
-            cursor.execute("SELECT ProductID, ProductName FROM product ORDER BY ProductName")
+            cursor.execute("SELECT ProductID, ProductName, Unit, PricePerUnit FROM product ORDER BY ProductName")
             products = cursor.fetchall()
             
-            # Get shops
-            cursor.execute("SELECT ShopID, ShopName FROM retailshop ORDER BY ShopName")
-            shops = cursor.fetchall()
-            
-            return render_template('retail_shop/order/create.html', 
-                                products=products, shops=shops)
+            return render_template('retail_shop/order/create.html', products=products)
         except Exception as e:
             flash(f"Error: {e}", "error")
             return redirect(url_for('shop.list_orders'))
@@ -96,26 +91,55 @@ def create_order():
             conn.close()
     
     try:
-        # Get form data
-        shop_id = session['shop_id']  # Get shop_id from session
-        order_status = request.form['order_status']
+        # Validate input data
+        shop_id = session.get('shop_id')
+        if not shop_id:
+            flash("Shop ID not found in session", "error")
+            return redirect(url_for('shop.list_orders'))
+            
         products = request.form.getlist('products[]')
         quantities = request.form.getlist('quantities[]')
+        
+        # Validate products and quantities
+        if len(products) != len(quantities):
+            flash("Invalid product data submitted", "error")
+            return redirect(url_for('shop.create_order'))
+            
+        if not products or not quantities:
+            flash("Please add at least one product", "error")
+            return redirect(url_for('shop.create_order'))
+            
+        # Validate quantities are positive numbers
+        for qty in quantities:
+            try:
+                if float(qty) <= 0:
+                    flash("Quantities must be positive numbers", "error")
+                    return redirect(url_for('shop.create_order'))
+            except ValueError:
+                flash("Invalid quantity value", "error")
+                return redirect(url_for('shop.create_order'))
 
         # Insert main order
         cursor.execute("""
             INSERT INTO `order` (OrderDate, OrderStatus, ShopID)
-            VALUES (CURDATE(), %s, %s)
-        """, (order_status, shop_id))
+            VALUES (CURDATE(), 'Pending', %s)
+        """, (shop_id,))
         
         order_id = cursor.lastrowid
 
         # Insert order details
-        for i in range(len(products)):
+        for product_id, quantity in zip(products, quantities):
+            # Verify product exists
+            cursor.execute("SELECT ProductID FROM product WHERE ProductID = %s", (product_id,))
+            if not cursor.fetchone():
+                conn.rollback()
+                flash(f"Invalid product ID: {product_id}", "error")
+                return redirect(url_for('shop.create_order'))
+                
             cursor.execute("""
                 INSERT INTO order_details (OrderID, ProductID, OrderQuantity)
                 VALUES (%s, %s, %s)
-            """, (order_id, products[i], quantities[i]))
+            """, (order_id, product_id, quantity))
 
         conn.commit()
         flash("Order created successfully!", "success")
@@ -128,6 +152,23 @@ def create_order():
         cursor.close()
         conn.close()
 
+@shop_routes.route('/shop/get-product-unit/<int:product_id>')
+@login_required
+def get_product_unit(product_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("SELECT Unit FROM product WHERE ProductID = %s", (product_id,))
+        result = cursor.fetchone()
+        if result:
+            return jsonify({'unit': result[0]})
+        return jsonify({'error': 'Product not found'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
 @shop_routes.route('/shop/orders/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
 def edit_order(id):
@@ -136,49 +177,39 @@ def edit_order(id):
     
     if request.method == 'GET':
         try:
-            # Get order with shop details
+            # Verify order belongs to current shop
             cursor.execute("""
                 SELECT o.OrderID, o.OrderDate, o.OrderStatus, o.ShopID, s.ShopName,
                        COUNT(od.ProductID) as product_count, o.WarehouseID
                 FROM `order` o
                 JOIN retailshop s ON o.ShopID = s.ShopID
                 LEFT JOIN order_details od ON o.OrderID = od.OrderID
-                WHERE o.OrderID = %s
+                WHERE o.OrderID = %s AND o.ShopID = %s
                 GROUP BY o.OrderID, o.OrderDate, o.OrderStatus, o.ShopID, s.ShopName, o.WarehouseID
-            """, (id,))
+            """, (id, session.get('shop_id')))
             order = cursor.fetchone()
             
             if not order:
-                flash("Order not found", "error")
+                flash("Order not found or access denied", "error")
                 return redirect('/shop/orders')
 
             # Get product details with unit from product table
             cursor.execute("""
-                SELECT od.OrderID, od.ProductID, od.OrderQuantity, p.Unit, p.ProductName
+                SELECT od.OrderID, od.ProductID, od.OrderQuantity, p.Unit, p.ProductName, p.PricePerUnit
                 FROM order_details od
                 JOIN product p ON od.ProductID = p.ProductID
                 WHERE od.OrderID = %s
             """, (id,))
             products = cursor.fetchall()
 
-            # Get all shops for dropdown
-            cursor.execute("SELECT ShopID, ShopName FROM retailshop")
-            shops = cursor.fetchall()
-
             # Get all products for dropdown
-            cursor.execute("SELECT ProductID, ProductName FROM product")
+            cursor.execute("SELECT ProductID, ProductName, Unit, PricePerUnit FROM product")
             all_products = cursor.fetchall()
-
-            # Get all warehouses for dropdown
-            cursor.execute("SELECT WarehouseID, Name FROM warehouse")
-            warehouses = cursor.fetchall()
 
             return render_template('retail_shop/order/edit.html', 
                                  order=order, 
                                  order_products=products,
-                                 shops=shops,
-                                 all_products=all_products,
-                                 warehouses=warehouses)
+                                 all_products=all_products)
 
         except Exception as e:
             flash(f"Error: {e}", "error")
@@ -189,39 +220,69 @@ def edit_order(id):
 
     elif request.method == 'POST':
         try:
-            shop_id = request.form.get('shop_id')
-            status = request.form.get('status')
-            warehouse_id = request.form.get('warehouse_id') if status == 'Accepted' else None
+            # Verify order belongs to current shop and can be edited
+            cursor.execute("""
+                SELECT OrderStatus FROM `order` 
+                WHERE OrderID = %s AND ShopID = %s
+            """, (id, session.get('shop_id')))
+            current_order = cursor.fetchone()
+            
+            if not current_order:
+                flash("Order not found or access denied", "error")
+                return redirect('/shop/orders')
+                
+            if current_order[0] not in ['Pending', 'Cancelled']:
+                flash("Cannot edit order in current status", "error")
+                return redirect('/shop/orders')
+
+            status = request.form.get('status', 'Pending')
             product_ids = request.form.getlist('product_id[]')
             quantities = request.form.getlist('quantity[]')
-
+            
+            # Validate input
+            if len(product_ids) != len(quantities):
+                flash("Invalid product data submitted", "error")
+                return redirect(url_for('shop.edit_order', id=id))
+                
+            if not product_ids or not quantities:
+                flash("Please add at least one product", "error")
+                return redirect(url_for('shop.edit_order', id=id))
+            
             # Start transaction
             conn.begin()
             
-            # Update order
-            if warehouse_id:
-                cursor.execute("""
-                    UPDATE `order` 
-                    SET ShopID = %s, OrderStatus = %s, WarehouseID = %s
-                    WHERE OrderID = %s
-                """, (shop_id, status, warehouse_id, id))
-            else:
-                cursor.execute("""
-                    UPDATE `order` 
-                    SET ShopID = %s, OrderStatus = %s, WarehouseID = NULL
-                    WHERE OrderID = %s
-                """, (shop_id, status, id))
+            # Update order status
+            cursor.execute("""
+                UPDATE `order` 
+                SET OrderStatus = %s
+                WHERE OrderID = %s AND ShopID = %s
+            """, (status, id, session.get('shop_id')))
 
             # Delete existing order details
             cursor.execute("DELETE FROM order_details WHERE OrderID = %s", (id,))
 
             # Insert new order details
-            for i in range(len(product_ids)):
-                if product_ids[i] and quantities[i]:  # Only insert if product and quantity are provided
-                    cursor.execute("""
-                        INSERT INTO order_details (OrderID, ProductID, OrderQuantity)
-                        VALUES (%s, %s, %s)
-                    """, (id, product_ids[i], quantities[i]))
+            for product_id, quantity in zip(product_ids, quantities):
+                try:
+                    qty = float(quantity)
+                    if qty <= 0:
+                        raise ValueError("Quantity must be positive")
+                except ValueError:
+                    conn.rollback()
+                    flash("Invalid quantity value", "error")
+                    return redirect(url_for('shop.edit_order', id=id))
+                    
+                # Verify product exists
+                cursor.execute("SELECT ProductID FROM product WHERE ProductID = %s", (product_id,))
+                if not cursor.fetchone():
+                    conn.rollback()
+                    flash(f"Invalid product ID: {product_id}", "error")
+                    return redirect(url_for('shop.edit_order', id=id))
+                
+                cursor.execute("""
+                    INSERT INTO order_details (OrderID, ProductID, OrderQuantity)
+                    VALUES (%s, %s, %s)
+                """, (id, product_id, quantity))
 
             conn.commit()
             flash("Order updated successfully", "success")
@@ -234,7 +295,6 @@ def edit_order(id):
         finally:
             cursor.close()
             conn.close()
-
     return redirect(url_for('shop.list_orders'))
 
 @shop_routes.route('/shop/orders/delete/<int:id>')
