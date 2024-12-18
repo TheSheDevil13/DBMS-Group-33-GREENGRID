@@ -89,9 +89,14 @@ def edit_product(id):
     
     if request.method == 'GET':
         try:
-            cursor.execute("SELECT * FROM product WHERE ProductID = %s", (id,))
+            cursor.execute("""
+                SELECT ProductID, ProductName, Category, PricePerUnit, Unit, Seasonality 
+                FROM product 
+                WHERE ProductID = %s AND OEmployeeID = %s
+            """, (id, session['user_id']))
             product = cursor.fetchone()
             if product:
+                print(f"Debug - Product from DB: {product}")  # Debug print
                 return render_template('agricultural_officer/product/edit.html', product=product)
             flash("Product not found!", "error")
             return redirect('/agricultural-officer/products')
@@ -102,44 +107,162 @@ def edit_product(id):
             cursor.close()
             conn.close()
     
-    try:
-        # Get form data
-        product_name = request.form['product_name']
-        category = request.form['category']
-        price_per_unit = request.form['price_per_unit']
-        unit = request.form['unit']
-        seasonality = request.form['seasonality']
-        
-        # Update product
-        cursor.execute("""
-            UPDATE product 
-            SET ProductName = %s, Category = %s, PricePerUnit = %s, Unit = %s, Seasonality = %s
-            WHERE ProductID = %s
-        """, (product_name, category, price_per_unit, unit, seasonality, id))
-        conn.commit()
-        flash("Product updated successfully!", "success")
-    except Exception as e:
-        conn.rollback()
-        flash(f"Error updating product: {e}", "error")
-    finally:
-        cursor.close()
-        conn.close()
-    return redirect('/agricultural-officer/products')
+    if request.method == 'POST':
+        try:
+            product_name = request.form['product_name']
+            category = request.form['category']
+            price_per_unit = request.form['price_per_unit']
+            unit = request.form['unit']
+            seasonality = request.form['seasonality']
+            
+            cursor.execute("""
+                UPDATE product 
+                SET ProductName = %s, Category = %s, PricePerUnit = %s, Unit = %s, Seasonality = %s
+                WHERE ProductID = %s AND OEmployeeID = %s
+            """, (product_name, category, price_per_unit, unit, seasonality, id, session['user_id']))
+            
+            conn.commit()
+            flash('Product updated successfully!', 'success')
+        except Exception as e:
+            conn.rollback()
+            flash(f'Error updating product: {e}', 'error')
+        finally:
+            cursor.close()
+            conn.close()
+        return redirect('/agricultural-officer/products')
 
-@officer_routes.route('/agricultural-officer/products/delete/<int:id>', methods=['POST'])
+@officer_routes.route('/agricultural-officer/products/delete/<int:id>')
 @login_required
 def delete_product(id):
     conn = get_db_connection()
     cursor = conn.cursor()
     try:
-        cursor.execute("DELETE FROM product WHERE ProductID = %s", (id,))
+        # Only delete if the product belongs to the logged-in officer
+        cursor.execute("DELETE FROM product WHERE ProductID = %s AND OEmployeeID = %s", (id, session['user_id']))
         conn.commit()
-        flash("Product deleted successfully!", "success")
+        flash('Product deleted successfully!', 'success')
     except Exception as e:
         conn.rollback()
-        flash(f"Error deleting product: {e}", "error")
+        flash(f'Error deleting product: {e}', 'error')
     finally:
         cursor.close()
         conn.close()
     return redirect('/agricultural-officer/products')
 # Product Management Routes Ends
+
+# Order Management Routes
+@officer_routes.route('/agricultural-officer/orders')
+@login_required
+def list_orders():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        # Get all orders with shop details
+        cursor.execute("""
+            SELECT o.OrderID, o.OrderDate, o.OrderStatus, 
+                   s.ShopName, s.Street as ShopStreet, s.City as ShopCity,
+                   COUNT(od.ProductID) as product_count,
+                   w.Name as WarehouseName
+            FROM `order` o
+            JOIN retailshop s ON o.ShopID = s.ShopID
+            LEFT JOIN warehouse w ON o.WarehouseID = w.WarehouseID
+            LEFT JOIN order_details od ON o.OrderID = od.OrderID
+            GROUP BY o.OrderID, o.OrderDate, o.OrderStatus, s.ShopName, s.Street, s.City, w.Name
+            ORDER BY o.OrderDate DESC
+        """)
+        orders = cursor.fetchall()
+        
+        # Get all warehouses for assignment
+        cursor.execute("SELECT WarehouseID, Name, City FROM warehouse")
+        warehouses = cursor.fetchall()
+        
+        return render_template('agricultural_officer/orders/list.html', orders=orders, warehouses=warehouses)
+    except Exception as e:
+        flash(f"Error: {e}", "error")
+        return redirect(url_for('officer.officer_dashboard'))
+    finally:
+        cursor.close()
+        conn.close()
+
+@officer_routes.route('/agricultural-officer/orders/view/<int:id>')
+@login_required
+def view_order(id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        # Get order with shop details
+        cursor.execute("""
+            SELECT o.OrderID, o.OrderDate, o.OrderStatus, 
+                   s.ShopName, s.Street as ShopStreet, s.City as ShopCity,
+                   o.WarehouseID, w.Name as WarehouseName
+            FROM `order` o
+            JOIN retailshop s ON o.ShopID = s.ShopID
+            LEFT JOIN warehouse w ON o.WarehouseID = w.WarehouseID
+            WHERE o.OrderID = %s
+        """, (id,))
+        order = cursor.fetchone()
+        
+        if not order:
+            flash("Order not found", "error")
+            return redirect(url_for('officer.list_orders'))
+
+        # Get product details
+        cursor.execute("""
+            SELECT p.ProductName, od.OrderQuantity, p.Unit
+            FROM order_details od
+            JOIN product p ON od.ProductID = p.ProductID
+            WHERE od.OrderID = %s
+        """, (id,))
+        products = cursor.fetchall()
+        
+        # Get warehouses for assignment
+        cursor.execute("SELECT WarehouseID, Name, City FROM warehouse")
+        warehouses = cursor.fetchall()
+        
+        return render_template('agricultural_officer/orders/details.html', 
+                             order=order, products=products, warehouses=warehouses)
+    except Exception as e:
+        flash(f"Error: {e}", "error")
+        return redirect(url_for('officer.list_orders'))
+    finally:
+        cursor.close()
+        conn.close()
+
+@officer_routes.route('/agricultural-officer/orders/process', methods=['POST'])
+@login_required
+def process_order():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        order_id = request.form.get('order_id')
+        warehouse_id = request.form.get('warehouse_id')
+        action = request.form.get('action')
+        
+        if not order_id or not warehouse_id or not action:
+            flash("Missing required parameters", "error")
+            return redirect(url_for('officer.list_orders'))
+            
+        if action == 'accept':
+            # Update order status and assign warehouse
+            cursor.execute("""
+                UPDATE `order` 
+                SET OrderStatus = 'Accepted', WarehouseID = %s
+                WHERE OrderID = %s AND OrderStatus = 'Pending'
+            """, (warehouse_id, order_id))
+            
+            if cursor.rowcount > 0:
+                conn.commit()
+                flash("Order accepted and assigned to warehouse successfully", "success")
+            else:
+                flash("Order could not be processed", "error")
+        else:
+            flash("Invalid action", "error")
+            
+        return redirect(url_for('officer.list_orders'))
+    except Exception as e:
+        conn.rollback()
+        flash(f"Error: {e}", "error")
+        return redirect(url_for('officer.list_orders'))
+    finally:
+        cursor.close()
+        conn.close()

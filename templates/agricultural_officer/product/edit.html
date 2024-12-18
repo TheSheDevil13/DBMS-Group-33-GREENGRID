@@ -5,62 +5,72 @@
 {% block page_title %}Edit Product{% endblock %}
 
 {% block content %}
-<div class="card">
-    <div class="card-header">
-        <h3 class="card-title">Edit Product</h3>
-    </div>
-    <div class="card-body">
-        <form action="{{ url_for('warehouse_manager.edit_product', id=product[0]) }}" method="POST">
-            <div class="form-group">
-                <label for="product_name">Product Name</label>
-                <input type="text" class="form-control" id="product_name" name="product_name" value="{{ product[1] }}" required maxlength="100">
+<div class="content-wrapper">
+    <div class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Edit Product</h3>
+                        </div>
+                        <div class="card-body">
+                            <form action="{{ url_for('officer.edit_product', id=product[0]) }}" method="POST">
+                                <div class="form-group">
+                                    <label for="product_name">Product Name</label>
+                                    <input type="text" class="form-control" id="product_name" name="product_name" value="{{ product[1] }}" required maxlength="100">
+                                </div>
+                                <div class="form-group">
+                                    <label for="category">Category</label>
+                                    <select class="form-control" id="category" name="category" required>
+                                        <option value="">Select Category</option>
+                                        <option value="Vegetables" {% if product[2] == 'Vegetables' %}selected{% endif %}>Vegetables</option>
+                                        <option value="Fruits" {% if product[2] == 'Fruits' %}selected{% endif %}>Fruits</option>
+                                        <option value="Grains" {% if product[2] == 'Grains' %}selected{% endif %}>Grains</option>
+                                        <option value="Dairy" {% if product[2] == 'Dairy' %}selected{% endif %}>Dairy</option>
+                                        <option value="Meat" {% if product[2] == 'Meat' %}selected{% endif %}>Meat</option>
+                                        <option value="Poultry" {% if product[2] == 'Poultry' %}selected{% endif %}>Poultry</option>
+                                        <option value="Fish" {% if product[2] == 'Fish' %}selected{% endif %}>Fish</option>
+                                        <option value="Others" {% if product[2] == 'Others' %}selected{% endif %}>Others</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="price_per_unit">Price Per Unit (৳)</label>
+                                    <input type="text" class="form-control" id="price_per_unit" name="price_per_unit" value="{{ product[3] }}" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="unit">Unit</label>
+                                    <select class="form-control" id="unit" name="unit" required>
+                                        <option value="">Select Unit</option>
+                                        <option value="Kilogram" {% if product[4] == 'Kilogram' %}selected{% endif %}>Kilogram (kg)</option>
+                                        <option value="Gram" {% if product[4] == 'Gram' %}selected{% endif %}>Gram (g)</option>
+                                        <option value="Liter" {% if product[4] == 'Liter' %}selected{% endif %}>Liter (l)</option>
+                                        <option value="Milliliter" {% if product[4] == 'Milliliter' %}selected{% endif %}>Milliliter (ml)</option>
+                                        <option value="Pieces" {% if product[4] == 'Pieces' %}selected{% endif %}>Pieces (pcs)</option>
+                                        <option value="Dozen" {% if product[4] == 'Dozen' %}selected{% endif %}>Dozen</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="seasonality">Seasonality</label>
+                                    <select class="form-control" id="seasonality" name="seasonality" required>
+                                        <option value="">Select Seasonality</option>
+                                        <option value="All Year" {% if product[5] == 'All Year' %}selected{% endif %}>All Year</option>
+                                        <option value="Spring" {% if product[5] == 'Spring' %}selected{% endif %}>Spring</option>
+                                        <option value="Summer" {% if product[5] == 'Summer' %}selected{% endif %}>Summer</option>
+                                        <option value="Autumn" {% if product[5] == 'Autumn' %}selected{% endif %}>Autumn</option>
+                                        <option value="Winter" {% if product[5] == 'Winter' %}selected{% endif %}>Winter</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <button type="submit" class="btn btn-primary">Update Product</button>
+                                    <a href="{{ url_for('officer.list_products') }}" class="btn btn-secondary">Cancel</a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="form-group">
-                <label for="category">Category</label>
-                <select class="form-control" id="category" name="category" required>
-                    <option value="">Select Category</option>
-                    <option value="Vegetables" {% if product[2] == 'Vegetables' %}selected{% endif %}>Vegetables</option>
-                    <option value="Fruits" {% if product[2] == 'Fruits' %}selected{% endif %}>Fruits</option>
-                    <option value="Grains" {% if product[2] == 'Grains' %}selected{% endif %}>Grains</option>
-                    <option value="Dairy" {% if product[2] == 'Dairy' %}selected{% endif %}>Dairy</option>
-                    <option value="Meat" {% if product[2] == 'Meat' %}selected{% endif %}>Meat</option>
-                    <option value="Poultry" {% if product[2] == 'Poultry' %}selected{% endif %}>Poultry</option>
-                    <option value="Fish" {% if product[2] == 'Fish' %}selected{% endif %}>Fish</option>
-                    <option value="Others" {% if product[2] == 'Others' %}selected{% endif %}>Others</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="price_per_unit">Price Per Unit (৳)</label>
-                <input type="text" class="form-control" id="price_per_unit" name="price_per_unit" value="{{ product[3] }}" required>
-            </div>
-            <div class="form-group">
-                <label for="unit">Unit</label>
-                <select class="form-control" id="unit" name="unit" required>
-                    <option value="">Select Unit</option>
-                    <option value="Kilogram (kg)" {% if product[5] == 'Kilogram (kg)' %}selected{% endif %}>Kilogram (kg)</option>
-                    <option value="Gram (g)" {% if product[5] == 'Gram (g)' %}selected{% endif %}>Gram (g)</option>
-                    <option value="Liter (l)" {% if product[5] == 'Liter (l)' %}selected{% endif %}>Liter (l)</option>
-                    <option value="Milliliter (ml)" {% if product[5] == 'Milliliter (ml)' %}selected{% endif %}>Milliliter (ml)</option>
-                    <option value="Pieces (pcs)" {% if product[5] == 'Pieces (pcs)' %}selected{% endif %}>Pieces (pcs)</option>
-                    <option value="Dozen" {% if product[5] == 'Dozen' %}selected{% endif %}>Dozen</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="seasonality">Seasonality</label>
-                <select class="form-control" id="seasonality" name="seasonality" required>
-                    <option value="">Select Seasonality</option>
-                    <option value="All Year" {% if product[4] == 'All Year' %}selected{% endif %}>All Year</option>
-                    <option value="Spring" {% if product[4] == 'Spring' %}selected{% endif %}>Spring</option>
-                    <option value="Summer" {% if product[4] == 'Summer' %}selected{% endif %}>Summer</option>
-                    <option value="Autumn" {% if product[4] == 'Autumn' %}selected{% endif %}>Autumn</option>
-                    <option value="Winter" {% if product[4] == 'Winter' %}selected{% endif %}>Winter</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <button type="submit" class="btn btn-primary">Update Product</button>
-                <a href="{{ url_for('warehouse_manager.list_products') }}" class="btn btn-secondary">Cancel</a>
-            </div>
-        </form>
+        </div>
     </div>
 </div>
 {% endblock %}

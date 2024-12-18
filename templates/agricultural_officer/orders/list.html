@@ -1,0 +1,135 @@
+{% extends "agricultural_officer/officer_base.html" %}
+
+{% block title %}Orders - GreenGrid{% endblock %}
+
+{% block page_title %}Order Management{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+    <div class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">All Orders</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped" id="ordersTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Order ID</th>
+                                            <th>Order Date</th>
+                                            <th>Shop Name</th>
+                                            <th>Shop Location</th>
+                                            <th>Products</th>
+                                            <th>Status</th>
+                                            <th>Warehouse</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for order in orders %}
+                                        <tr>
+                                            <td>{{ order[0] }}</td>
+                                            <td>{{ order[1] }}</td>
+                                            <td>{{ order[3] }}</td>
+                                            <td>{{ order[4] }}, {{ order[5] }}</td>
+                                            <td>{{ order[6] }} products</td>
+                                            <td>
+                                                {% if order[2] == 'Pending' %}
+                                                    <span class="badge badge-warning">{{ order[2] }}</span>
+                                                {% elif order[2] == 'Accepted' %}
+                                                    <span class="badge badge-success">{{ order[2] }}</span>
+                                                {% else %}
+                                                    <span class="badge badge-info">{{ order[2] }}</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ order[7] if order[7] else '-' }}</td>
+                                            <td>
+                                                <div class="btn-group">
+                                                    <a href="{{ url_for('officer.view_order', id=order[0]) }}" class="btn btn-sm btn-info mr-1">
+                                                        <i class="fas fa-eye"></i> View
+                                                    </a>
+                                                    {% if order[2] == 'Pending' %}
+                                                    <button type="button" class="btn btn-sm btn-success" data-toggle="modal" 
+                                                            data-target="#acceptOrderModal" 
+                                                            data-order-id="{{ order[0] }}">
+                                                        <i class="fas fa-check"></i> Accept
+                                                    </button>
+                                                    {% endif %}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Accept Order Modal -->
+<div class="modal fade" id="acceptOrderModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Accept Order</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <form action="{{ url_for('officer.process_order') }}" method="POST">
+                <div class="modal-body">
+                    <input type="hidden" name="order_id" id="modalOrderId">
+                    <input type="hidden" name="action" value="accept">
+                    
+                    <div class="form-group">
+                        <label for="warehouse_id">Select Warehouse</label>
+                        <select name="warehouse_id" id="warehouse_id" class="form-control" required>
+                            <option value="">Select a warehouse...</option>
+                            {% for warehouse in warehouses %}
+                            <option value="{{ warehouse[0] }}">{{ warehouse[1] }} ({{ warehouse[2] }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">Accept Order</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+$(document).ready(function() {
+    $('#ordersTable').DataTable({
+        "paging": false,
+        "searching": false,
+        "info": false,
+        "ordering": true,
+        "scrollX": true,
+        "scrollCollapse": true,
+        "autoWidth": false,
+        "responsive": false,
+        "dom": 't'
+    });
+
+    $('#acceptOrderModal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget);
+        var orderId = button.data('order-id');
+        var modal = $(this);
+        modal.find('#modalOrderId').val(orderId);
+    });
+});
+</script>
+{% endblock %}

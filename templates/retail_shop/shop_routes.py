@@ -297,20 +297,50 @@ def edit_order(id):
             conn.close()
     return redirect(url_for('shop.list_orders'))
 
-@shop_routes.route('/shop/orders/delete/<int:id>')
+@shop_routes.route('/shop/orders/delete/<int:id>', methods=['POST'])
 @login_required
 def delete_order(id):
     conn = get_db_connection()
     cursor = conn.cursor()
     try:
-        # Delete order details first (due to foreign key constraint)
+        print(f"Attempting to delete order {id}")  # Debug log
+        
+        # First verify the order belongs to the current shop
+        cursor.execute("SELECT ShopID, OrderStatus FROM `order` WHERE OrderID = %s", (id,))
+        order = cursor.fetchone()
+        print(f"Order details: {order}")  # Debug log
+        
+        if not order or order[0] != session.get('shop_id'):
+            print(f"Access denied. Shop ID: {session.get('shop_id')}")  # Debug log
+            flash("Order not found or access denied", "error")
+            return redirect(url_for('shop.list_orders'))
+
+        # Start transaction
+        cursor.execute("START TRANSACTION")
+        print("Transaction started")  # Debug log
+
+        # Delete from all related tables in correct order
+        print("Deleting from dispatch...")  # Debug log
+        cursor.execute("DELETE FROM dispatch WHERE OrderID = %s", (id,))
+        print(f"Dispatch rows affected: {cursor.rowcount}")  # Debug log
+        
+        print("Deleting from order_details...")  # Debug log
         cursor.execute("DELETE FROM order_details WHERE OrderID = %s", (id,))
-        # Then delete the main order
+        print(f"Order details rows affected: {cursor.rowcount}")  # Debug log
+        
+        print("Deleting from order...")  # Debug log
         cursor.execute("DELETE FROM `order` WHERE OrderID = %s", (id,))
+        print(f"Order rows affected: {cursor.rowcount}")  # Debug log
+        
+        # Commit transaction
         conn.commit()
+        print("Transaction committed")  # Debug log
         flash("Order deleted successfully!", "success")
     except Exception as e:
+        # Rollback transaction on error
         conn.rollback()
+        print(f"Error in delete_order: {str(e)}")  # Debug log
+        print(f"Full error details: {type(e).__name__}: {str(e)}")  # More detailed error log
         flash(f"Error deleting order: {e}", "error")
     finally:
         cursor.close()
