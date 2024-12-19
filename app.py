@@ -6,6 +6,7 @@ from templates.agricultural_officer.routes.officer_routes import officer_routes
 from templates.farmer.farmer_routes import farmer_routes 
 from templates.agricultural_analyst.analyst_route import analyst_routes
 from templates.warehouse_manager.routes import warehouse_manager_routes
+from templates.retail_shop.shop_routes import shop_routes
 
 # Initialize the Flask app
 app = Flask(__name__, template_folder='templates')
@@ -108,7 +109,7 @@ def login_post():
                 print("Debug - Matched analyst role")  # Debug print
                 return redirect('/agricultural-analyst/analyst-dashboard')
             elif user_role == 'S':
-                    return redirect('/retail-shop/shop-dashboard')
+                    return redirect('/shop/shop-dashboard')
             elif user_role == 'F':
                 return redirect('/farmer/farmer-dashboard')
             else:
@@ -189,6 +190,7 @@ app.register_blueprint(officer_routes)
 app.register_blueprint(farmer_routes)
 app.register_blueprint(analyst_routes)
 app.register_blueprint(warehouse_manager_routes)
+app.register_blueprint(shop_routes)
 
 if __name__ == '__main__':
     app.run(debug=True)
