@@ -7,6 +7,10 @@ from functools import wraps
 
 admin_routes = Blueprint('admin', __name__)
 
+@admin_routes.context_processor
+def inject_username():
+    return dict(username=session.get('username', ''))
+
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -28,9 +32,57 @@ def get_db_connection():
         database='greengrid'
     )
 
-@admin_routes.route('/admin/admin-dashboard')
-def admin_dashboard():
-    return render_template('admin/dashboard/admin-dashboard.html')
+@admin_routes.route('/admin/admin-dashboard/<string:username>')
+@login_required
+def admin_dashboardUsername(username):
+    conn = get_db_connection()
+    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    try:
+        # Get admin information
+        query = """
+        SELECT u.UserID, u.FirstName, u.LastName, u.Username, u.Email, u.Role, 
+                u.AgriOfficeID, u.Street, u.City, u.PostalCode, u.Number
+        FROM users u
+        WHERE u.Username = %s AND u.Role = 'Admin'
+        """
+        cursor.execute(query, (username,))
+        admin = cursor.fetchone()
+        
+        if not admin:
+            flash('Admin not found or unauthorized access', 'error')
+            return redirect(url_for('login'))
+        
+        # Get the first 3 products
+        product_query = """
+        SELECT ProductName, PricePerUnit, Unit
+        FROM product
+        ORDER BY ProductID DESC
+        LIMIT 3;
+        """
+        cursor.execute(product_query)
+        products = cursor.fetchall()
+
+        # Get recent orders with shop details
+        cursor.execute("""
+            SELECT o.OrderID, rs.ShopName, o.OrderStatus, DATE_FORMAT(o.OrderDate, '%Y-%m-%d') as OrderDate
+            FROM `order` o
+            JOIN retailshop rs ON o.ShopID = rs.ShopID
+            WHERE o.OrderStatus IN ('Pending', 'Accepted', 'Delivered', 'Cancelled')
+            ORDER BY o.OrderDate DESC
+            LIMIT 3
+        """)
+        recent_orders = cursor.fetchall()
+
+        
+        return render_template('admin/dashboard/admin-dashboard.html', admin=admin, products=products, recent_orders=recent_orders)
+    except Exception as e:
+        flash(f'Error: {str(e)}', 'error')
+        return redirect(url_for('login'))
+    finally:
+        cursor.close()
+        conn.close()
+    # #Get
+    # return render_template('admin/dashboard/admin-dashboard.html')
 
 @admin_routes.route('/admin/employee-directory/agricultural-officers')
 def admin_agricultural_officers():
@@ -871,6 +923,29 @@ def admin_view_products():
         flash(f'Error loading products: {str(e)}', 'error')
         return redirect(url_for('admin.admin_dashboard'))
 
+# Production Data Management Routes
+@admin_routes.route('/admin/production-data', methods=['GET'])
+@login_required
+def list_production_data():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute("""
+        SELECT p.ProductionID, pr.ProductName, p.HarvestDate, p.ProductionCost, 
+               p.Acreage, p.YieldAmount, p.YieldUnit, 
+               u.Username as FarmerName
+        FROM productiondata p
+        JOIN product pr ON p.ProductID = pr.ProductID
+        JOIN users u ON p.FarmerID = u.UserID
+        ORDER BY p.HarvestDate DESC
+    """)
+    
+    productions = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    
+    return render_template('admin/production-data/list.html', productions=productions)
+
 # Shop Management Routes
 @admin_routes.route('/admin/shop-management/shops')
 @login_required
@@ -1205,6 +1280,102 @@ def delete_shop_owner(id):
         conn.rollback()
         print(f"Error in delete_shop_owner: {str(e)}")
         return redirect(url_for('admin.admin_shop_owners'))
+    finally:
+        cursor.close()
+        conn.close()
+
+# Consumption Patterns Route
+@admin_routes.route('/admin/consumption-patterns')
+@login_required
+def consumption_patterns():
+    conn = get_db_connection()
+    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    try:
+        # Get consumption patterns data for the last year
+        cursor.execute("""
+            SELECT 
+                p.ProductID,
+                p.ProductName,
+                p.Seasonality,
+                SUM(od.OrderQuantity) as TotalOrderedQuantity,
+                ROUND(SUM(od.OrderQuantity) / 12, 2) as ConsumptionRate
+            FROM product p
+            LEFT JOIN order_details od ON p.ProductID = od.ProductID
+            LEFT JOIN `order` o ON od.OrderID = o.OrderID
+            WHERE o.OrderDate >= DATE_SUB(CURDATE(), INTERVAL 1 YEAR)
+                AND o.OrderStatus = 'Delivered'
+            GROUP BY p.ProductID, p.ProductName, p.Seasonality
+            ORDER BY p.ProductName
+        """)
+        consumption_patterns = cursor.fetchall()
+
+        return render_template('admin/consumption-patterns/list.html',
+                            consumption_patterns=consumption_patterns)
+    except Exception as e:
+        flash(f'Error: {str(e)}', 'error')
+        return redirect(url_for('admin.admin_dashboardUsername', username=session.get('username')))
+    finally:
+        cursor.close()
+        conn.close()
+
+# Settings Route
+@admin_routes.route('/admin/settings', methods=['GET', 'POST'])
+@login_required
+def settings():
+    conn = get_db_connection()
+    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    
+    try:
+        if request.method == 'POST':
+            # Get form data
+            name = request.form.get('name').split()  # Split name into first and last
+            first_name = name[0]
+            last_name = name[1] if len(name) > 1 else ''  # Handle case where no last name is provided
+            street = request.form.get('street')
+            city = request.form.get('city')
+            postal_code = request.form.get('postal_code')
+            
+            # Update admin information in users table
+            cursor.execute("""
+                UPDATE users 
+                SET FirstName = %s,
+                    LastName = %s,
+                    Street = %s,
+                    City = %s,
+                    PostalCode = %s
+                WHERE UserID = %s AND Role = 'Admin'
+            """, (first_name, last_name, street, city, postal_code, session.get('user_id')))
+            
+            conn.commit()
+            
+            # Clear any existing flash messages
+            session.pop('_flashes', None)
+            
+            flash('Admin information updated successfully!', 'success')
+            return redirect(url_for('admin.settings'))
+        
+        # Get current admin information
+        cursor.execute("""
+            SELECT 
+                UserID,
+                CONCAT(FirstName, ' ', COALESCE(LastName, '')) as Name,
+                Street,
+                City,
+                PostalCode
+            FROM users 
+            WHERE UserID = %s AND Role = 'Admin'
+        """, (session.get('user_id'),))
+        
+        admin = cursor.fetchone()
+        if not admin:
+            flash('Admin not found!', 'error')
+            return redirect(url_for('login'))
+            
+        return render_template('admin/settings/settings.html', admin=admin)
+        
+    except Exception as e:
+        flash(f'Error: {str(e)}', 'error')
+        return redirect(url_for('admin.settings'))
     finally:
         cursor.close()
         conn.close()

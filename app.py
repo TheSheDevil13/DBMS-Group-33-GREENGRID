@@ -73,9 +73,9 @@ def login_post():
             
             # Get full user details
             cursor.execute("""
-                SELECT UserID, FirstName, LastName, Username, Email, Role 
+                SELECT UserID, FirstName, LastName, Username, Email 
                 FROM users 
-                WHERE (Email = %s OR Username = %s)
+                WHERE Email = %s OR Username = %s
             """, (email_username, email_username))
             user_details = cursor.fetchone()
             
@@ -87,7 +87,9 @@ def login_post():
             
             # Special check for admin (both username and email)
             if email_username.upper() == "ADMIN" or email_username == "admin@gmail.com":
-                return redirect('/admin/admin-dashboard')
+                return redirect('/admin/admin-dashboard/'+email_username)
+
+                
             
             # Redirect based on role for other users
             elif user_role == 'O':
@@ -216,3 +218,4 @@ app.register_blueprint(shop_routes)
 
 if __name__ == '__main__':
     app.run(debug=True)
+    app.run(debug=True, use_reloader=True, host='0.0.0.0', port=5000)

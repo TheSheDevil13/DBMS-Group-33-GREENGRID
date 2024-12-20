@@ -1,4 +1,3 @@
-
 {% extends "agricultural_officer/officer_base.html" %}
 
 {% block title %}Officer Dashboard - GreenGrid{% endblock %}
@@ -28,7 +27,7 @@
                             <span class="info-box-icon bg-info"><i class="fas fa-box"></i></span>
                             <div class="info-box-content">
                                 <span class="info-box-text">Total Products</span>
-                                <span class="info-box-number">1,410</span>
+                                <span class="info-box-number">{{ total_products }}</span>
                             </div>
                         </div>
                     </div>
@@ -37,7 +36,7 @@
                             <span class="info-box-icon bg-success"><i class="fas fa-shopping-cart"></i></span>
                             <div class="info-box-content">
                                 <span class="info-box-text">Pending Orders</span>
-                                <span class="info-box-number">15</span>
+                                <span class="info-box-number">{{ pending_orders }}</span>
                             </div>
                         </div>
                     </div>
@@ -86,30 +85,32 @@
                                     <thead>
                                         <tr>
                                             <th>Order ID</th>
-                                            <th>Product</th>
+                                            <th>Shop Name</th>
                                             <th>Status</th>
                                             <th>Date</th>
                                         </tr>
                                     </thead>
                                     <tbody>
+                                        {% for order in recent_orders %}
                                         <tr>
-                                            <td>ORD-2024-001</td>
-                                            <td>BRRI Dhan 28 (Rice Seeds)</td>
-                                            <td><span class="badge badge-warning">Pending Approval</span></td>
-                                            <td>2024-03-15</td>
+                                            <td>{{ order.OrderID }}</td>
+                                            <td>{{ order.ShopName }}</td>
+                                            <td>
+                                                {% if order.OrderStatus == 'Pending' %}
+                                                    <span class="badge badge-warning">Pending</span>
+                                                {% elif order.OrderStatus == 'Accepted' %}
+                                                    <span class="badge badge-info">Accepted</span>
+                                                {% elif order.OrderStatus == 'Delivered' %}
+                                                    <span class="badge badge-success">Delivered</span>
+                                                {% elif order.OrderStatus == 'Cancelled' %}
+                                                    <span class="badge badge-danger">Cancelled</span>
+                                                {% else %}
+                                                    <span class="badge badge-secondary">{{ order.OrderStatus }}</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ order.OrderDate }}</td>
                                         </tr>
-                                        <tr>
-                                            <td>ORD-2024-002</td>
-                                            <td>Fertilizer Package A</td>
-                                            <td><span class="badge badge-success">In Transit</span></td>
-                                            <td>2024-03-14</td>
-                                        </tr>
-                                        <tr>
-                                            <td>ORD-2024-003</td>
-                                            <td>Mixed Seeds Package</td>
-                                            <td><span class="badge badge-primary">Processing</span></td>
-                                            <td>2024-03-16</td>
-                                        </tr>
+                                        {% endfor %}
                                     </tbody>
                                 </table>
                             </div>

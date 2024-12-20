@@ -74,12 +74,19 @@ def list_orders():
 @login_required
 def create_order():
     conn = get_db_connection()
-    cursor = conn.cursor()
+    cursor = conn.cursor(pymysql.cursors.DictCursor)
     
     if request.method == 'GET':
         try:
-            # Get products
-            cursor.execute("SELECT ProductID, ProductName, Unit, PricePerUnit FROM product ORDER BY ProductName")
+            # Get products with stock information from warehouse stock
+            cursor.execute("""
+                SELECT p.ProductID, p.ProductName, p.Unit, p.PricePerUnit,
+                       COALESCE(SUM(s.OrderQuantity), 0) as InStock
+                FROM product p
+                LEFT JOIN order_details s ON p.ProductID = s.ProductID
+                GROUP BY p.ProductID, p.ProductName, p.Unit, p.PricePerUnit
+                ORDER BY p.ProductName
+            """)
             products = cursor.fetchall()
             
             return render_template('retail_shop/order/create.html', products=products)
@@ -420,6 +427,46 @@ def get_order_details():
         return jsonify({'products': products})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
+@shop_routes.route('/shop/request-stock', methods=['POST'])
+@login_required
+def request_stock():
+    product_id = request.form.get('product_id')
+    quantity = request.form.get('quantity')
+    shop_id = session.get('shop_id')
+    
+    print(f"Received request - Product ID: {product_id}, Quantity: {quantity}, Shop ID: {shop_id}")
+    
+    if not all([product_id, quantity, shop_id]):
+        missing = []
+        if not product_id: missing.append('product_id')
+        if not quantity: missing.append('quantity')
+        if not shop_id: missing.append('shop_id')
+        error_msg = f"Missing required data: {', '.join(missing)}"
+        print(error_msg)
+        return jsonify({'error': error_msg}), 400
+        
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    try:
+        # Insert new demand request
+        cursor.execute("""
+            INSERT INTO demand (ShopID, ProductID, RequestedQuantity) 
+            VALUES (%s, %s, %s)
+        """, (shop_id, product_id, quantity))
+        
+        conn.commit()
+        print(f"Successfully inserted demand request for Shop {shop_id}, Product {product_id}")
+        return jsonify({'message': 'Stock request submitted successfully'})
+    except Exception as e:
+        conn.rollback()
+        error_msg = str(e)
+        print(f"Error inserting demand request: {error_msg}")
+        return jsonify({'error': error_msg}), 500
     finally:
         cursor.close()
         conn.close()
