@@ -1,47 +1,43 @@
-{% extends "retail_shop/shop_base.html" %}
-
-{% block title %}Retail Shop Dashboard - GreenGrid{% endblock %}
-
+{% extends 'retail_shop/shop_base.html' %}
 {% block content %}
-<div class="content-wrapper">
+
     <!-- Content Header -->
-    <section class="content-header">
+    <div class="content-header">
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h1>Welcome Back!</h1>
-                    <p class="text-muted">Your GreenGrid Retail Shop Dashboard</p>
+                    <h1 class="m-0">Dashboard</h1>
                 </div>
             </div>
         </div>
-    </section>
+    </div>
 
     <!-- Main content -->
     <section class="content">
         <div class="container-fluid">
-            <!-- Info boxes -->
+            <!-- Info Boxes -->
             <div class="row">
-                <div class="col-12 col-sm-6 col-md-3">
-                    <div class="info-box">
-                        <span class="info-box-icon bg-info"><i class="fas fa-shopping-basket"></i></span>
+                <div class="col-12 col-sm-6 col-md-4">
+                    <div class="info-box mb-3">
+                        <span class="info-box-icon bg-info elevation-1"><i class="fas fa-shopping-cart"></i></span>
                         <div class="info-box-content">
                             <span class="info-box-text">Total Orders</span>
                             <span class="info-box-number">10</span>
                         </div>
                     </div>
                 </div>
-                <div class="col-12 col-sm-6 col-md-3">
-                    <div class="info-box">
-                        <span class="info-box-icon bg-warning"><i class="fas fa-clock"></i></span>
+                <div class="col-12 col-sm-6 col-md-4">
+                    <div class="info-box mb-3">
+                        <span class="info-box-icon bg-warning elevation-1"><i class="fas fa-clock"></i></span>
                         <div class="info-box-content">
                             <span class="info-box-text">Pending Orders</span>
                             <span class="info-box-number">5</span>
                         </div>
                     </div>
                 </div>
-                <div class="col-12 col-sm-6 col-md-3">
-                    <div class="info-box">
-                        <span class="info-box-icon bg-success"><i class="fas fa-check-circle"></i></span>
+                <div class="col-12 col-sm-6 col-md-4">
+                    <div class="info-box mb-3">
+                        <span class="info-box-icon bg-success elevation-1"><i class="fas fa-check-circle"></i></span>
                         <div class="info-box-content">
                             <span class="info-box-text">Completed Orders</span>
                             <span class="info-box-number">5</span>
@@ -49,7 +45,95 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Charts -->
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Monthly Sales</h3>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="salesChart" style="min-height: 300px;"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Product Categories</h3>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="categoryChart" style="min-height: 250px; max-width: 400px; margin: auto;"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
-</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Monthly Sales Line Chart
+    const salesCtx = document.getElementById('salesChart');
+    new Chart(salesCtx, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [{
+                label: 'Sales ($)',
+                data: [12000, 19000, 15000, 25000, 22000, 30000],
+                borderColor: 'rgb(75, 192, 192)',
+                tension: 0.1,
+                fill: false
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return '$' + value.toLocaleString();
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Product Categories Pie Chart
+    const categoryCtx = document.getElementById('categoryChart');
+    new Chart(categoryCtx, {
+        type: 'pie',
+        data: {
+            labels: ['Electronics', 'Clothing', 'Food', 'Books'],
+            datasets: [{
+                data: [30, 25, 25, 20],
+                backgroundColor: [
+                    'rgb(255, 99, 132)',
+                    'rgb(54, 162, 235)',
+                    'rgb(255, 205, 86)',
+                    'rgb(75, 192, 192)'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            aspectRatio: 1.5,
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: {
+                        boxWidth: 12
+                    }
+                }
+            }
+        }
+    });
+</script>
 {% endblock %}
