@@ -923,6 +923,69 @@ def admin_view_products():
         flash(f'Error loading products: {str(e)}', 'error')
         return redirect(url_for('admin.admin_dashboard'))
 
+@admin_routes.route('/search', methods=['GET'])
+@login_required
+def search():
+    query = request.args.get('query', '')  # Get the search term from the URL
+    results = []
+
+    if query:
+        try:
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            
+            # Search query with LIKE for product names
+            sql_query = """
+                SELECT p.ProductID, p.ProductName, p.Category, p.PricePerUnit, p.Unit, 
+                       p.Seasonality, u.Username as OfficerUsername
+                FROM product p
+                LEFT JOIN users u ON p.OEmployeeID = u.UserID
+                WHERE p.ProductName LIKE %s
+                ORDER BY p.ProductID DESC
+            """
+            cursor.execute(sql_query, (f"%{query}%",))
+            results = cursor.fetchall()
+            cursor.close()
+            conn.close()
+        except Exception as e:
+            print("An error occurred:", e)
+            flash(f"An error occurred while searching: {e}", "error")
+
+    return render_template('admin/product/search_results.html', query=query, results=results)
+
+@admin_routes.route('/search-production', methods=['GET'])
+@login_required
+def search_production():
+    query = request.args.get('query', '')  # Get the search term from the URL
+    results = []
+
+    if query:
+        try:
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            
+            # Search query for production data
+            sql_query = """
+                SELECT p.ProductionID, pr.ProductName, p.HarvestDate, p.ProductionCost, 
+                       p.Acreage, p.YieldAmount, p.YieldUnit, 
+                       u.Username as FarmerName
+                FROM productiondata p
+                JOIN product pr ON p.ProductID = pr.ProductID
+                JOIN users u ON p.FarmerID = u.UserID
+                WHERE pr.ProductName LIKE %s
+                   OR u.Username LIKE %s
+                ORDER BY p.HarvestDate DESC
+            """
+            cursor.execute(sql_query, (f"%{query}%", f"%{query}%"))
+            results = cursor.fetchall()
+            cursor.close()
+            conn.close()
+        except Exception as e:
+            print("An error occurred:", e)
+            flash(f"An error occurred while searching: {e}", "error")
+
+    return render_template('admin/production-data/search_results.html', query=query, results=results)
+
 # Production Data Management Routes
 @admin_routes.route('/admin/production-data', methods=['GET'])
 @login_required
