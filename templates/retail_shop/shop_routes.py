@@ -81,9 +81,13 @@ def create_order():
             # Get products with stock information from warehouse stock
             cursor.execute("""
                 SELECT p.ProductID, p.ProductName, p.Unit, p.PricePerUnit,
-                       COALESCE(SUM(s.OrderQuantity), 0) as InStock
+                       COALESCE(SUM(CASE 
+                           WHEN s.StockAvailability = 'Incoming' THEN s.StockQuantity 
+                           WHEN s.StockAvailability = 'Outgoing' THEN -s.StockQuantity 
+                           ELSE 0 
+                       END), 0) as InStock
                 FROM product p
-                LEFT JOIN order_details s ON p.ProductID = s.ProductID
+                LEFT JOIN stock s ON p.ProductID = s.ProductID
                 GROUP BY p.ProductID, p.ProductName, p.Unit, p.PricePerUnit
                 ORDER BY p.ProductName
             """)
