@@ -70,7 +70,7 @@
                     <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
                         data-accordion="false">
                         <li class="nav-item">
-                            <a href="/admin/admin-dashboard" class="nav-link">
+                            <a href="/admin/admin-dashboard/{{ username }}" class="nav-link">
                                 <i class="nav-icon fas fa-tachometer-alt"></i>
                                 <p>Dashboard</p>
                             </a>
@@ -111,14 +111,21 @@
                                 <p>Products Overview</p>
                             </a>
                         </li>
-                      
-                                             
+
                         <li class="nav-item">
-                            <a href="order-management.html" class="nav-link">
-                                <i class="nav-icon fas fa-shopping-cart"></i>
-                                <p>Order Management</p>
+                            <a href="/admin/production-data" class="nav-link">
+                                <i class="nav-icon fas fa-chart-line"></i>
+                                <p>Production Data</p>
                             </a>
                         </li>
+
+                        <li class="nav-item">
+                            <a href="/admin/consumption-patterns" class="nav-link">
+                                <i class="nav-icon fas fa-chart-bar"></i>
+                                <p>Consumption Patterns</p>
+                            </a>
+                        </li>
+                       
                         <li class="nav-item">
                             <a href="/admin/warehouses" class="nav-link">
                                 <i class="nav-icon fas fa-warehouse"></i>
@@ -162,7 +169,7 @@
                         </li>
                       
                         <li class="nav-item">
-                            <a href="settings.html" class="nav-link">
+                            <a href="/admin/settings" class="nav-link">
                                 <i class="nav-icon fas fa-cog"></i>
                                 <p>Settings</p>
                             </a>

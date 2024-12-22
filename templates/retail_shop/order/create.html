@@ -7,6 +7,7 @@
 {% block extra_css %}
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap4.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <style>
     .product-row { 
         padding: 15px;
@@ -35,6 +36,20 @@
     .select2-container {
         width: 100% !important;
     }
+    .action-buttons {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+    .btn-icon {
+        width: 38px;
+        height: 38px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 4px;
+    }
 </style>
 {% endblock %}
 
@@ -49,41 +64,66 @@
                 <div class="card-body">
                     <form action="{{ url_for('shop.create_order') }}" method="POST" id="orderForm">
                         <div class="card">
-                            <div class="card-header bg-light">
-                                <h3 class="card-title">Order Products</h3>
-                                <div class="card-tools">
-                                    <button type="button" class="btn btn-primary" id="addProductBtn">
-                                        <i class="fas fa-plus"></i> Add Product
-                                    </button>
-                                </div>
-                            </div>
                             <div class="card-body">
-                                <div class="table-responsive">
-                                    <table class="table table-bordered" id="productsTable">
-                                        <thead>
-                                            <tr>
-                                                <th width="40%">Product</th>
-                                                <th width="25%">Quantity</th>
-                                                <th width="25%">Unit</th>
-                                                <th width="10%">Action</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="productRows">
-                                        </tbody>
-                                    </table>
+                                <div id="productRows">
+                                    <div class="product-row">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label>Product</label>
+                                                    <select class="form-control product-select" name="products[]" required onchange="checkStock(this)">
+                                                        <option value="">Select Product</option>
+                                                        {% for product in products %}
+                                                        <option value="{{ product.ProductID }}" 
+                                                                data-unit="{{ product.Unit }}"
+                                                                data-stock="{{ product.InStock }}"
+                                                                data-price="{{ product.PricePerUnit }}">
+                                                            {{ product.ProductName }} 
+                                                            {% if product.InStock <= 0 %}
+                                                                (Out of Stock)
+                                                            {% else %}
+                                                                (In Stock: {{ product.InStock }} {{ product.Unit }})
+                                                            {% endif %}
+                                                        </option>
+                                                        {% endfor %}
+                                                    </select>
+                                                    <small class="text-danger stock-warning" style="display: none;">
+                                                        This product is out of stock
+                                                    </small>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label>Quantity</label>
+                                                    <div class="input-group">
+                                                        <input type="number" class="form-control quantity-input" name="quantities[]" required min="0" step="0.01">
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text product-unit"></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label>&nbsp;</label>
+                                                    <div class="action-buttons">
+                                                        <button type="button" class="btn btn-danger btn-icon" onclick="removeProductRow(this)" title="Remove">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                        <button type="button" class="btn btn-warning request-stock" style="display: none;">
+                                                            <i class="fas fa-exclamation-circle"></i> Request Stock
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div id="validation-messages" class="alert alert-danger" style="display:none;">
-                                </div>
+                                <button type="button" class="btn btn-success" id="addProductBtn">Add Another Product</button>
                             </div>
                         </div>
-
-                        <div class="form-group mt-4">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save"></i> Create Order
-                            </button>
-                            <a href="{{ url_for('shop.list_orders') }}" class="btn btn-secondary">
-                                <i class="fas fa-times"></i> Cancel
-                            </a>
+                        <div class="card-footer">
+                            <button type="submit" class="btn btn-primary">Create Order</button>
                         </div>
                     </form>
                 </div>
@@ -94,28 +134,58 @@
 
 <!-- Product Row Template -->
 <template id="productRowTemplate">
-    <tr class="product-row">
-        <td>
-            <select class="form-control select2 product-select" name="products[]" required>
-                <option value="">Select Product</option>
-                {% for product in products %}
-                <option value="{{ product[0] }}">{{ product[1] }}</option>
-                {% endfor %}
-            </select>
-        </td>
-        <td>
-            <input type="number" class="form-control" name="quantities[]" 
-                   placeholder="Enter quantity" required min="1" step="0.01">
-        </td>
-        <td>
-            <input type="text" class="form-control" name="unit" readonly>
-        </td>
-        <td class="text-center">
-            <button type="button" class="btn btn-danger btn-sm btn-remove-product">
-                <i class="fas fa-trash"></i>
-            </button>
-        </td>
-    </tr>
+    <div class="product-row">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Product</label>
+                    <select class="form-control product-select" name="products[]" required onchange="checkStock(this)">
+                        <option value="">Select Product</option>
+                        {% for product in products %}
+                        <option value="{{ product.ProductID }}" 
+                                data-unit="{{ product.Unit }}"
+                                data-stock="{{ product.InStock }}"
+                                data-price="{{ product.PricePerUnit }}">
+                            {{ product.ProductName }} 
+                            {% if product.InStock <= 0 %}
+                                (Out of Stock)
+                            {% else %}
+                                (In Stock: {{ product.InStock }} {{ product.Unit }})
+                            {% endif %}
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <small class="text-danger stock-warning" style="display: none;">
+                        This product is out of stock
+                    </small>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label>Quantity</label>
+                    <div class="input-group">
+                        <input type="number" class="form-control quantity-input" name="quantities[]" required min="0" step="0.01">
+                        <div class="input-group-append">
+                            <span class="input-group-text product-unit"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label>&nbsp;</label>
+                    <div class="action-buttons">
+                        <button type="button" class="btn btn-danger btn-icon" onclick="removeProductRow(this)" title="Remove">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                        <button type="button" class="btn btn-warning request-stock" style="display: none;">
+                            <i class="fas fa-exclamation-circle"></i> Request Stock
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </template>
 {% endblock %}
 
@@ -136,6 +206,56 @@ $(document).ready(function() {
 
     $(document).on('change', '.product-select', function() {
         updateProductUnit(this);
+    });
+
+    $(document).on('click', '.request-stock', function(e) {
+        e.preventDefault();
+        console.log('Request stock button clicked');
+        
+        const $button = $(this);
+        const row = $button.closest('.product-row');
+        const productSelect = row.find('.product-select');
+        const quantityInput = row.find('.quantity-input');
+        
+        const productId = productSelect.val();
+        const quantity = quantityInput.val();
+        
+        console.log('Product ID:', productId);
+        console.log('Quantity:', quantity);
+        
+        // Validate quantity
+        if (!quantity || quantity <= 0) {
+            showMessage('error', 'Please enter a valid quantity greater than 0');
+            quantityInput.focus();
+            return;
+        }
+        
+        if (!productId) {
+            showMessage('error', 'Please select a product');
+            return;
+        }
+        
+        const data = {
+            'product_id': productId,
+            'quantity': quantity
+        };
+        console.log('Sending data:', data);
+        
+        $.ajax({
+            url: '/shop/request-stock',
+            type: 'POST',
+            data: data,
+            success: function(response) {
+                console.log('Success:', response);
+                showMessage('success', response.message);
+                $button.prop('disabled', true).text('Request Sent');
+            },
+            error: function(xhr, status, error) {
+                console.log('Error:', xhr.responseText);
+                const errorMsg = xhr.responseJSON ? xhr.responseJSON.error : 'Failed to submit request';
+                showMessage('error', errorMsg);
+            }
+        });
     });
 
     $('#orderForm').on('submit', function(e) {
@@ -162,31 +282,44 @@ function addProductRow() {
 }
 
 function removeProductRow(button) {
-    const rows = $('#productRows tr').length;
+    const rows = $('#productRows .product-row').length;
     if (rows > 1) {
-        $(button).closest('tr').remove();
+        $(button).closest('.product-row').remove();
     } else {
         showMessage('At least one product is required', 'danger');
     }
 }
 
 function updateProductUnit(select) {
-    const productId = $(select).val();
-    const row = $(select).closest('tr');
-    const unitInput = row.find('input[name="unit"]');
+    const $select = $(select);
+    const $row = $select.closest('.product-row');
+    const selectedOption = $select.find('option:selected');
+    const unit = selectedOption.data('unit') || '';
     
-    if (productId) {
-        $.get('/shop/get-product-unit/' + productId)
-            .done(function(response) {
-                unitInput.val(response.unit);
-            })
-            .fail(function() {
-                unitInput.val('');
-                showMessage('Error fetching product unit', 'danger');
-            });
+    $row.find('.product-unit').text(unit);
+}
+
+function checkStock(select) {
+    const $select = $(select);
+    const $row = $select.closest('.product-row');
+    const $stockWarning = $row.find('.stock-warning');
+    const $requestStockBtn = $row.find('.request-stock');
+    
+    const selectedOption = $select.find('option:selected');
+    const inStock = parseFloat(selectedOption.data('stock'));
+    console.log('Stock level:', inStock);
+    
+    if (inStock <= 0) {
+        $stockWarning.show();
+        $requestStockBtn.show();
+        console.log('Showing request stock button');
     } else {
-        unitInput.val('');
+        $stockWarning.hide();
+        $requestStockBtn.hide();
+        console.log('Hiding request stock button');
     }
+    
+    updateProductUnit(select);
 }
 
 function validateForm() {
@@ -195,7 +328,7 @@ function validateForm() {
     let message = '';
 
     // Check if there are any product rows
-    if ($('#productRows tr').length === 0) {
+    if ($('#productRows .product-row').length === 0) {
         showMessage('Please add at least one product', 'danger');
         return false;
     }

@@ -30,7 +30,45 @@ def get_db_connection():
 @officer_routes.route('/agricultural-officer/officer-dashboard')
 @login_required
 def officer_dashboard():
-    return render_template('agricultural_officer/dashboard/officer-dashboard.html')
+    conn = get_db_connection()
+    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    try:
+        # Get total products count
+        cursor.execute("""
+            SELECT COUNT(*) as total_count
+            FROM product
+        """)
+        total_products = cursor.fetchone()['total_count']
+
+        # Get pending orders count
+        cursor.execute("""
+            SELECT COUNT(*) as pending_count
+            FROM `order` o
+            WHERE o.OrderStatus = 'Pending'
+        """)
+        pending_count = cursor.fetchone()['pending_count']
+
+        # Get recent orders with shop details
+        cursor.execute("""
+            SELECT o.OrderID, rs.ShopName, o.OrderStatus, DATE_FORMAT(o.OrderDate, '%Y-%m-%d') as OrderDate
+            FROM `order` o
+            JOIN retailshop rs ON o.ShopID = rs.ShopID
+            WHERE o.OrderStatus IN ('Pending', 'Accepted', 'Delivered', 'Cancelled')
+            ORDER BY o.OrderID DESC
+            LIMIT 5
+        """)
+        recent_orders = cursor.fetchall()
+
+        return render_template('agricultural_officer/dashboard/officer-dashboard.html', 
+                             total_products=total_products,
+                             pending_orders=pending_count,
+                             recent_orders=recent_orders)
+    except Exception as e:
+        flash(f"Error loading dashboard: {str(e)}", "error")
+        return redirect(url_for('login'))
+    finally:
+        cursor.close()
+        conn.close()
 
 # Product Management Routes Starts
 @officer_routes.route('/agricultural-officer/products')
@@ -115,6 +153,15 @@ def edit_product(id):
             unit = request.form['unit']
             seasonality = request.form['seasonality']
             
+            # Get current price before update
+            cursor.execute("SELECT PricePerUnit FROM product WHERE ProductID = %s", (id,))
+            current_price = cursor.fetchone()[0]
+            
+            # Only record price history if price has changed
+            if str(current_price) != price_per_unit:
+                cursor.execute("INSERT INTO price_history (ProductID, PricePerUnit) VALUES (%s, %s)",
+                          (id, price_per_unit))
+            
             cursor.execute("""
                 UPDATE product 
                 SET ProductName = %s, Category = %s, PricePerUnit = %s, Unit = %s, Seasonality = %s
@@ -148,6 +195,7 @@ def delete_product(id):
         cursor.close()
         conn.close()
     return redirect('/agricultural-officer/products')
+
 # Product Management Routes Ends
 
 # Order Management Routes
@@ -175,8 +223,28 @@ def list_orders():
         # Get all warehouses for assignment
         cursor.execute("SELECT WarehouseID, Name, City FROM warehouse")
         warehouses = cursor.fetchall()
+
+        # Get demands for each shop
+        cursor.execute("""
+            SELECT 
+                d.ShopID, 
+                s.ShopName, 
+                d.ProductID, 
+                p.ProductName, 
+                d.RequestedQuantity
+            FROM 
+                demand d
+            JOIN 
+                retailshop s ON d.ShopID = s.ShopID
+            JOIN 
+                product p ON d.ProductID = p.ProductID
+        """)
+        demands = cursor.fetchall()
         
-        return render_template('agricultural_officer/orders/list.html', orders=orders, warehouses=warehouses)
+        return render_template('agricultural_officer/orders/list.html', 
+                             orders=orders, 
+                             warehouses=warehouses,
+                             product_requests=demands)
     except Exception as e:
         flash(f"Error: {e}", "error")
         return redirect(url_for('officer.officer_dashboard'))

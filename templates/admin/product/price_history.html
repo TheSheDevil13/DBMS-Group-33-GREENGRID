@@ -1,0 +1,62 @@
+{% extends "admin/admin_base.html" %}
+
+{% block title %}Price History - {{ product.ProductName }}{% endblock %}
+
+{% block page_title %}Price History for {{ product.ProductName }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Price History</h1>
+    <div class="mb-4">
+        <a href="{{ url_for('admin.admin_view_products') }}" class="btn btn-secondary">Back to Products</a>
+    </div>
+
+    <!-- Product Information Card -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-info-circle me-1"></i>
+            Product Information
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Product ID:</strong> {{ product.ProductID }}</p>
+                    <p><strong>Product Name:</strong> {{ product.ProductName }}</p>
+                    <p><strong>Category:</strong> {{ product.Category }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Unit:</strong> {{ product.Unit }}</p>
+                    <p><strong>Current Price:</strong> ৳{{ product.PricePerUnit }} per {{ product.Unit }}</p>
+                    <p><strong>Seasonality:</strong> {{ product.Seasonality }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Price History Table -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-history me-1"></i>
+            Price History Records
+        </div>
+        <div class="card-body">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Price (per {{ product.Unit }})</th>
+                        <th>Updated At</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in price_history %}
+                    <tr>
+                        <td>৳{{ record.PricePerUnit }}</td>
+                        <td>{{ record.UpdatedAt.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
