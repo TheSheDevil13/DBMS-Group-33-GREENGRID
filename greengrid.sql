@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 18, 2024 at 10:22 PM
+-- Generation Time: Dec 22, 2024 at 05:45 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -143,21 +143,6 @@ CREATE TABLE `farmer` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `farmer_deliver`
---
-
-CREATE TABLE `farmer_deliver` (
-  `FarmerID` int(11) NOT NULL,
-  `ProductID` int(11) NOT NULL,
-  `WarehouseID` int(11) NOT NULL,
-  `ProductQuantity` decimal(10,2) NOT NULL,
-  `PricePerUnit` decimal(10,2) NOT NULL,
-  `DeliveryStatus` enum('Pending','In Transit','Delivered') NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `farmer_subsidery`
 --
 
@@ -269,6 +254,13 @@ CREATE TABLE `price_history` (
   `UpdatedAt` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `price_history`
+--
+
+INSERT INTO `price_history` (`PriceHistoryID`, `ProductID`, `PricePerUnit`, `UpdatedAt`) VALUES
+(1, 42, 125.00, '2024-12-22 04:33:54');
+
 -- --------------------------------------------------------
 
 --
@@ -292,7 +284,28 @@ CREATE TABLE `product` (
 INSERT INTO `product` (`ProductID`, `ProductName`, `Category`, `PricePerUnit`, `Seasonality`, `Unit`, `OEmployeeID`) VALUES
 (17, 'Potato', 'Vegetables', '7', 'All Year', 'Kilogram', 33),
 (21, 'Rice', 'Grains', '105', 'All Year', 'Gram (g)', 33),
-(22, 'Apples', 'Fruits', '49', 'Spring', 'Dozen', 33);
+(22, 'Apples', 'Fruits', '49', 'Spring', 'Dozen', 33),
+(23, 'Cheese', 'Dairy', '250', 'All Year', 'Gram', 67),
+(24, 'Tomato', 'Vegetables', '15', 'Summer', 'Kilogram', 33),
+(25, 'Wheat', 'Grains', '95', 'All Year', 'Gram', 33),
+(26, 'Banana', 'Fruits', '30', 'All Year', 'Dozen', 33),
+(27, 'Milk', 'Dairy', '55', 'All Year', 'Liter', 67),
+(28, 'Carrot', 'Vegetables', '18', 'Winter', 'Kilogram', 33),
+(29, 'Corn', 'Grains', '70', 'Autumn', 'Kilogram', 33),
+(30, 'Mango', 'Fruits', '100', 'Summer', 'Dozen', 33),
+(31, 'Yogurt', 'Dairy', '80', 'All Year', 'Gram', 67),
+(32, 'Cucumber', 'Vegetables', '20', 'Summer', 'Kilogram', 33),
+(33, 'Barley', 'Grains', '85', 'All Year', 'Kilogram', 33),
+(34, 'Orange', 'Fruits', '60', 'Winter', 'Dozen', 33),
+(35, 'Butter', 'Dairy', '150', 'All Year', 'Gram', 67),
+(36, 'Spinach', 'Vegetables', '25', 'All Year', 'Kilogram', 33),
+(37, 'Oats', 'Grains', '110', 'All Year', 'Kilogram', 33),
+(38, 'Peach', 'Fruits', '75', 'Summer', 'Dozen', 33),
+(39, 'Cream', 'Dairy', '200', 'All Year', 'Liter', 67),
+(40, 'Capsicum', 'Vegetables', '35', 'Summer', 'Kilogram', 33),
+(41, 'Quinoa', 'Grains', '130', 'All Year', 'Kilogram', 33),
+(42, 'Grapes', 'Fruits', '125', 'Autumn', 'Kilogram', 33),
+(43, 'Paneer', 'Dairy', '250', 'All Year', 'Gram', 67);
 
 -- --------------------------------------------------------
 
@@ -341,7 +354,8 @@ CREATE TABLE `retailshop` (
 
 INSERT INTO `retailshop` (`ShopID`, `ShopName`, `Number`, `Email`, `Street`, `City`, `PostalCode`, `OwnerID`) VALUES
 (17, 'Agora', '1234567888', 'agora2@gmail.com', 'Dhanmondi 27', 'Dhaka', '123456', 59),
-(18, 'Meena Baazar', '1234567678', 'meena@gmail.com', 'Dhanmondi 9', 'Dhaka', '123456', 65);
+(18, 'Meena Baazar', '1234567678', 'meena@gmail.com', 'Dhanmondi 9', 'Dhaka', '123456', 65),
+(19, 'Unimart', '1234567789', 'unimart@gmail.com', 'Dhanmondi 9', 'Dhaka', '1204', 68);
 
 -- --------------------------------------------------------
 
@@ -370,10 +384,14 @@ INSERT INTO `stock` (`StockID`, `StockQuantity`, `LastUpdateDate`, `StockAvailab
 (43, 1000.00, '2024-12-19', 'Incoming', 22, 22),
 (44, 1000.00, '2024-12-19', 'Incoming', 22, 17),
 (45, 100.00, '2024-12-19', 'Outgoing', 22, 22),
-(46, 10000.00, '2024-12-19', 'Incoming', 19, 22),
+(46, 8900.00, '2024-12-22', 'Incoming', 19, 22),
 (47, 10.00, '2024-12-19', 'Outgoing', 19, 22),
 (48, 20.00, '2024-12-19', 'Outgoing', 19, 22),
-(49, 100.00, '2024-12-19', 'Outgoing', 19, 22);
+(49, 100.00, '2024-12-19', 'Outgoing', 19, 22),
+(50, 10000.00, '2024-12-22', 'Incoming', 19, 21),
+(51, 5467.00, '2024-12-22', 'Incoming', 19, 23),
+(52, 1000.00, '2024-12-22', 'Incoming', 19, 24),
+(53, 700.00, '2024-12-22', 'Incoming', 19, 32);
 
 -- --------------------------------------------------------
 
@@ -388,25 +406,34 @@ CREATE TABLE `users` (
   `Username` varchar(50) NOT NULL,
   `Email` varchar(100) DEFAULT NULL,
   `PasswordHash` varchar(255) DEFAULT NULL,
-  `Role` enum('O','A','W','S','F') DEFAULT NULL
+  `Role` enum('O','A','W','S','F','Admin') DEFAULT NULL,
+  `AgriOfficeID` int(11) DEFAULT NULL,
+  `Street` varchar(50) DEFAULT NULL,
+  `City` varchar(50) DEFAULT NULL,
+  `PostalCode` varchar(50) DEFAULT NULL,
+  `Number` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`UserID`, `FirstName`, `LastName`, `Username`, `Email`, `PasswordHash`, `Role`) VALUES
-(1, 'Mymuna', 'Rahman', 'admin', 'admin@gmail.com', 'pbkdf2:sha256:1000000$0i7lmoUwPxQZnkmZ$8660e6cac662e99ffdc638f199abfe552c6d83b0821281e0382f74197ae086a9', ''),
-(29, 'Mahmud', 'Hasan', 'mahmud33', 'mahmud@gmail.com', 'pbkdf2:sha256:1000000$pfU5SVhP1R0e8ewh$a43203302fb6c930ee6e2f8d384acde86e1d5ac0990e2162b0a425f296d1186c', 'A'),
-(33, 'Tanvir', 'Rahman', 'tanvir33', 'tanvir@gmail.com', 'pbkdf2:sha256:1000000$lsBxjfcNhKbKFXjT$c4c072c05dedc3f00874f5d942954f16356a085f0d2b7e214d40789bc94121a6', 'O'),
-(48, 'Roni', 'Alam', 'roni34', 'roni@gmail.com', 'pbkdf2:sha256:1000000$TsClBAbSxcY8X0Lh$aee178445d9c7ca2f8d3a094dcc4df5b9bcbcd24e55d98898b7193a8025c9137', 'A'),
-(50, 'Samia', 'Saba', 'samia33', 'samia@gmail.com', 'pbkdf2:sha256:1000000$TZRYPvKoUgP7mvWc$1aa2501e1e719f4f01a2c3e95e894f38a8b76462744947fce8213fb211420d91', 'W'),
-(54, 'Kafi', 'asd', 'kafi33', 'kafi@gmail.com', 'pbkdf2:sha256:1000000$7FOTCSVt9kZxu75g$88256fc6a63bc26e86b8acb15a8fe24512cd6365c17a881838a0d809c2cde24a', 'F'),
-(57, 'Ibrahim', 'Hasan', 'ibrahim33', 'ibrahim@gmail.com', 'pbkdf2:sha256:1000000$34o5T2gCOrSytATI$7d3cc1c1cd39720a57bf9ceb756895332120612b556294f900f0af4e16ef7458', 'O'),
-(59, 'Tasnia', 'Khan', 'tasnia33', 'tasniakhan@gmail.com', 'pbkdf2:sha256:1000000$vLtE7el1CljZmAfk$890cc79cc666b02753942e66bd6eb14be2d281ce7b98e8df5d4aa9d5a181abbd', 'S'),
-(64, 'Aisha', 'Rahman', 'aisha33', 'aisha@gmail.com', 'pbkdf2:sha256:1000000$IAnHxlzOzqPsdVrC$3015a34eeb3e823b1bb619726419460599003eff201fbb5261455bf92ef5a5fc', 'F'),
-(65, 'Fariha', 'Mirza', 'mirza33', 'mirza@gmail.com', 'pbkdf2:sha256:1000000$69h8NBrGXTYlhuLo$e405e3d42874ae476a492920fdc5227f524aa7e1ddcf0093ec6079a2c26a3ab7', 'S'),
-(66, 'Opu', 'Chowdhury', 'opu33', 'opu@gmail.com', 'pbkdf2:sha256:1000000$yXZCG87xvXZcBgJh$1909190095fb4b5b8a0dc38abc6c5b2ca90592afacf928c02d1ca315f96cddf7', 'W');
+INSERT INTO `users` (`UserID`, `FirstName`, `LastName`, `Username`, `Email`, `PasswordHash`, `Role`, `AgriOfficeID`, `Street`, `City`, `PostalCode`, `Number`) VALUES
+(1, 'Mymuna', 'Rahman', 'admin', 'admin@gmail.com', 'pbkdf2:sha256:1000000$0i7lmoUwPxQZnkmZ$8660e6cac662e99ffdc638f199abfe552c6d83b0821281e0382f74197ae086a9', 'Admin', NULL, 'Lalmatia F', 'Dhaka', '1205', NULL),
+(29, 'Mahmud', 'Hasan', 'mahmud33', 'mahmud@gmail.com', 'pbkdf2:sha256:1000000$pfU5SVhP1R0e8ewh$a43203302fb6c930ee6e2f8d384acde86e1d5ac0990e2162b0a425f296d1186c', 'A', NULL, NULL, NULL, NULL, NULL),
+(33, 'Tanvir', 'Rahman', 'tanvir33', 'tanvir@gmail.com', 'pbkdf2:sha256:1000000$lsBxjfcNhKbKFXjT$c4c072c05dedc3f00874f5d942954f16356a085f0d2b7e214d40789bc94121a6', 'O', NULL, NULL, NULL, NULL, NULL),
+(48, 'Roni', 'Alam', 'roni34', 'roni@gmail.com', 'pbkdf2:sha256:1000000$TsClBAbSxcY8X0Lh$aee178445d9c7ca2f8d3a094dcc4df5b9bcbcd24e55d98898b7193a8025c9137', 'A', NULL, NULL, NULL, NULL, NULL),
+(50, 'Samia', 'Saba', 'samia33', 'samia@gmail.com', 'pbkdf2:sha256:1000000$TZRYPvKoUgP7mvWc$1aa2501e1e719f4f01a2c3e95e894f38a8b76462744947fce8213fb211420d91', 'W', NULL, NULL, NULL, NULL, NULL),
+(54, 'Kafi', 'asd', 'kafi33', 'kafi@gmail.com', 'pbkdf2:sha256:1000000$7FOTCSVt9kZxu75g$88256fc6a63bc26e86b8acb15a8fe24512cd6365c17a881838a0d809c2cde24a', 'F', NULL, NULL, NULL, NULL, NULL),
+(57, 'Ibrahim', 'Hasan', 'ibrahim33', 'ibrahim@gmail.com', 'pbkdf2:sha256:1000000$34o5T2gCOrSytATI$7d3cc1c1cd39720a57bf9ceb756895332120612b556294f900f0af4e16ef7458', 'O', NULL, NULL, NULL, NULL, NULL),
+(59, 'Tasnia', 'Khan', 'tasnia33', 'tasniakhan@gmail.com', 'pbkdf2:sha256:1000000$vLtE7el1CljZmAfk$890cc79cc666b02753942e66bd6eb14be2d281ce7b98e8df5d4aa9d5a181abbd', 'S', NULL, NULL, NULL, NULL, NULL),
+(64, 'Aisha', 'Rahman', 'aisha33', 'aisha@gmail.com', 'pbkdf2:sha256:1000000$IAnHxlzOzqPsdVrC$3015a34eeb3e823b1bb619726419460599003eff201fbb5261455bf92ef5a5fc', 'F', NULL, NULL, NULL, NULL, NULL),
+(65, 'Fariha', 'Mirza', 'mirza33', 'mirza@gmail.com', 'pbkdf2:sha256:1000000$69h8NBrGXTYlhuLo$e405e3d42874ae476a492920fdc5227f524aa7e1ddcf0093ec6079a2c26a3ab7', 'S', NULL, NULL, NULL, NULL, NULL),
+(66, 'Opu', 'Chowdhury', 'opu33', 'opu@gmail.com', 'pbkdf2:sha256:1000000$yXZCG87xvXZcBgJh$1909190095fb4b5b8a0dc38abc6c5b2ca90592afacf928c02d1ca315f96cddf7', 'W', NULL, NULL, NULL, NULL, NULL),
+(67, 'Sumaiya', 'Sadiya', 'sadiya33', 'sadiya@gmail.com', 'pbkdf2:sha256:1000000$MmJIu0JaGvToEho0$3bf36b4d23b6a29a23149460116ee394a4228f780e41ce75b25ced9cdb8e1768', 'O', NULL, NULL, NULL, NULL, NULL),
+(68, 'Umaiza', 'Hossain', 'umaiza33', 'umaiza@gmail.com', 'pbkdf2:sha256:1000000$FYNXb4EoFSw2O6CM$a8b1d721c19c98839cb3ea514c891deebcb735ef8539afeb429e0af7dced1a90', 'S', NULL, NULL, NULL, NULL, NULL),
+(69, 'Taukir', 'Oli', 'taukir33', 'taukir@gmail.com', 'pbkdf2:sha256:1000000$a04y8FIQ19MoHqUM$bd535d707de5ce9534801e5ae9f3c20bb11a6d31a4ac7c380cd491a42059d6c4', 'F', NULL, NULL, NULL, NULL, NULL),
+(70, 'Summy', 'Raihan', 'summy33', 'summy@gmail.com', 'pbkdf2:sha256:1000000$hTV95W0kbdjDdIip$a02f7076d46d3faee0b7b7f8ac821d9630161d60a7b22519361d433c4ede56ee', 'W', NULL, NULL, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -432,7 +459,8 @@ CREATE TABLE `warehouse` (
 
 INSERT INTO `warehouse` (`WarehouseID`, `Name`, `Street`, `City`, `PostalCode`, `Temperature`, `Humidity`, `LightExposure`, `WEmployeeID`) VALUES
 (19, 'Bashundhara R/A Warehouse', 'Bashundhara Block K', 'Dhaka', '123445', 22.00, 22.00, 22.00, 50),
-(22, 'Mirpur-Warehouse A', 'Mirupur 10', 'Dhaka', '123457', 44.00, 44.00, 44.00, 66);
+(22, 'Mirpur-Warehouse A', 'Mirupur 10', 'Dhaka', '123457', 44.00, 44.00, 44.00, 66),
+(23, 'Lalmatia Warehouse A', 'asdfg', 'Sylhet', '123457', 43.00, 22.00, 11.00, 70);
 
 -- --------------------------------------------------------
 
@@ -500,14 +528,6 @@ ALTER TABLE `farmer`
   ADD PRIMARY KEY (`FarmerID`),
   ADD UNIQUE KEY `Number` (`Number`),
   ADD UNIQUE KEY `Email` (`Email`);
-
---
--- Indexes for table `farmer_deliver`
---
-ALTER TABLE `farmer_deliver`
-  ADD PRIMARY KEY (`FarmerID`,`ProductID`,`WarehouseID`),
-  ADD KEY `ProductID` (`ProductID`),
-  ADD KEY `WarehouseID` (`WarehouseID`);
 
 --
 -- Indexes for table `farmer_subsidery`
@@ -592,7 +612,8 @@ ALTER TABLE `stock`
 ALTER TABLE `users`
   ADD PRIMARY KEY (`UserID`),
   ADD UNIQUE KEY `username` (`Username`),
-  ADD UNIQUE KEY `email` (`Email`);
+  ADD UNIQUE KEY `email` (`Email`),
+  ADD KEY `users_AgriOffice_FK` (`AgriOfficeID`);
 
 --
 -- Indexes for table `warehouse`
@@ -651,13 +672,13 @@ ALTER TABLE `order`
 -- AUTO_INCREMENT for table `price_history`
 --
 ALTER TABLE `price_history`
-  MODIFY `PriceHistoryID` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `PriceHistoryID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `product`
 --
 ALTER TABLE `product`
-  MODIFY `ProductID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+  MODIFY `ProductID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=44;
 
 --
 -- AUTO_INCREMENT for table `productiondata`
@@ -669,25 +690,25 @@ ALTER TABLE `productiondata`
 -- AUTO_INCREMENT for table `retailshop`
 --
 ALTER TABLE `retailshop`
-  MODIFY `ShopID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+  MODIFY `ShopID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT for table `stock`
 --
 ALTER TABLE `stock`
-  MODIFY `StockID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=50;
+  MODIFY `StockID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=54;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `UserID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=67;
+  MODIFY `UserID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=71;
 
 --
 -- AUTO_INCREMENT for table `warehouse`
 --
 ALTER TABLE `warehouse`
-  MODIFY `WarehouseID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+  MODIFY `WarehouseID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
 -- Constraints for dumped tables
@@ -730,14 +751,6 @@ ALTER TABLE `dispatch`
 --
 ALTER TABLE `employee`
   ADD CONSTRAINT `FK_Employee_AgriOffice` FOREIGN KEY (`AgriOfficeID`) REFERENCES `agriculturaloffice` (`AgriOfficeID`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Constraints for table `farmer_deliver`
---
-ALTER TABLE `farmer_deliver`
-  ADD CONSTRAINT `farmer_deliver_ibfk_1` FOREIGN KEY (`FarmerID`) REFERENCES `farmer` (`FarmerID`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `farmer_deliver_ibfk_2` FOREIGN KEY (`ProductID`) REFERENCES `product` (`ProductID`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `farmer_deliver_ibfk_3` FOREIGN KEY (`WarehouseID`) REFERENCES `warehouse` (`WarehouseID`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `farmer_subsidery`
@@ -797,6 +810,12 @@ ALTER TABLE `retailshop`
 ALTER TABLE `stock`
   ADD CONSTRAINT `stock_ibfk_1` FOREIGN KEY (`WarehouseID`) REFERENCES `warehouse` (`WarehouseID`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `stock_ibfk_2` FOREIGN KEY (`ProductID`) REFERENCES `product` (`ProductID`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `users`
+--
+ALTER TABLE `users`
+  ADD CONSTRAINT `users_AgriOffice_FK` FOREIGN KEY (`AgriOfficeID`) REFERENCES `agriculturaloffice` (`AgriOfficeID`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `warehouse`

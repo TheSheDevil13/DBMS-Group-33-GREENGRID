@@ -153,6 +153,15 @@ def edit_product(id):
             unit = request.form['unit']
             seasonality = request.form['seasonality']
             
+            # Get current price before update
+            cursor.execute("SELECT PricePerUnit FROM product WHERE ProductID = %s", (id,))
+            current_price = cursor.fetchone()[0]
+            
+            # Only record price history if price has changed
+            if str(current_price) != price_per_unit:
+                cursor.execute("INSERT INTO price_history (ProductID, PricePerUnit) VALUES (%s, %s)",
+                          (id, price_per_unit))
+            
             cursor.execute("""
                 UPDATE product 
                 SET ProductName = %s, Category = %s, PricePerUnit = %s, Unit = %s, Seasonality = %s
@@ -186,6 +195,7 @@ def delete_product(id):
         cursor.close()
         conn.close()
     return redirect('/agricultural-officer/products')
+
 # Product Management Routes Ends
 
 # Order Management Routes

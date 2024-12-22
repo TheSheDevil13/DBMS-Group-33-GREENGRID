@@ -923,6 +923,43 @@ def admin_view_products():
         flash(f'Error loading products: {str(e)}', 'error')
         return redirect(url_for('admin.admin_dashboard'))
 
+@admin_routes.route('/admin/products/price-history/<int:id>')
+@login_required
+def view_price_history(id):
+    conn = get_db_connection()
+    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    
+    try:
+        # Get product details
+        cursor.execute("""
+            SELECT p.ProductID, p.ProductName, p.Category, p.Unit, p.PricePerUnit, p.Seasonality
+            FROM product p
+            WHERE p.ProductID = %s
+        """, (id,))
+        product = cursor.fetchone()
+        
+        # Get price history
+        cursor.execute("""
+            SELECT ph.PricePerUnit, ph.UpdatedAt,
+                   CONCAT(e.FirstName, ' ', e.LastName) as UpdatedBy
+            FROM price_history ph
+            JOIN product p ON p.ProductID = ph.ProductID
+            JOIN users e ON e.UserID = p.OEmployeeID
+            WHERE ph.ProductID = %s
+            ORDER BY ph.UpdatedAt DESC
+        """, (id,))
+        price_history = cursor.fetchall()
+        
+        return render_template('admin/product/price_history.html', 
+                             product=product,
+                             price_history=price_history)
+    except Exception as e:
+        flash(f'Error fetching price history: {str(e)}', 'error')
+        return redirect(url_for('admin.admin_view_products'))
+    finally:
+        cursor.close()
+        conn.close()
+
 @admin_routes.route('/search', methods=['GET'])
 @login_required
 def search():

@@ -34,6 +34,7 @@
                                     <th>Unit</th>
                                     <th>Seasonality</th>
                                     <th>Created By</th>
+                                    <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -46,6 +47,11 @@
                                     <td>{{ product[4] }}</td>
                                     <td>{{ product[5] }}</td>
                                     <td>{{ product[6] if product[6] else 'N/A' }}</td>
+                                    <td>
+                                        <a href="{{ url_for('admin.view_price_history', id=product[0]) }}" class="btn btn-info btn-sm">
+                                            <i class="fas fa-history"></i> Price History
+                                        </a>
+                                    </td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
