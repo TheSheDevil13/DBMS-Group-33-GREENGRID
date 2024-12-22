@@ -1,0 +1,74 @@
+{% extends 'admin/admin_base.html' %}
+
+{% block title %}Production Data Search Results{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Production Data Search Results</h2>
+    
+    <div class="row mb-4">
+        <div class="col-md-6 offset-md-3">
+            <form action="/search-production" method="GET" class="input-group">
+                <input type="text" name="query" class="form-control" placeholder="Search production data..." value="{{ query }}" required>
+                <div class="input-group-append">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Search
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Search Results for "{{ query }}"</h3>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-striped mb-0">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Product</th>
+                            <th>Harvest Date</th>
+                            <th>Production Cost (৳)</th>
+                            <th>Acreage</th>
+                            <th>Yield</th>
+                            <th>Created By</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if results %}
+                            {% for prod in results %}
+                            <tr data-id="{{ prod[0] }}">
+                                <td>{{ prod[0] }}</td>
+                                <td>{{ prod[1] }}</td>
+                                <td>{{ prod[2] }}</td>
+                                <td>৳{{ prod[3] }}</td>
+                                <td>{{ prod[4] }}</td>
+                                <td>{{ prod[5] }} {{ prod[6] }}</td>
+                                <td>{{ prod[7] if prod[7] else 'N/A' }}</td>                         
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="7" class="text-center">No results found</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .table th {
+        background-color: white;
+        border-top: none;
+    }
+    .table td {
+        vertical-align: middle;
+    }
+</style>
+{% endblock %}

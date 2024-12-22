@@ -1,0 +1,381 @@
+{% extends "retail_shop/shop_base.html" %}
+
+{% block title %}Create Order - GreenGrid{% endblock %}
+
+{% block page_title %}Create Order{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap4.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<style>
+    .product-row { 
+        padding: 15px;
+        margin-bottom: 15px;
+        border-bottom: 1px solid #dee2e6;
+    }
+    .select2-container--bootstrap4 .select2-selection--single {
+        height: calc(2.25rem + 2px);
+        padding: .375rem .75rem;
+        line-height: 1.5;
+        border: 1px solid #ced4da;
+    }
+    .select2-container--bootstrap4 .select2-selection--single .select2-selection__rendered {
+        line-height: 1.5;
+        padding-left: 0;
+    }
+    .select2-container--bootstrap4 .select2-selection--single .select2-selection__arrow {
+        height: calc(2.25rem + 2px);
+    }
+    .card-body {
+        padding: 1.5rem;
+    }
+    .table-responsive {
+        margin: 15px 0;
+    }
+    .select2-container {
+        width: 100% !important;
+    }
+    .action-buttons {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+    .btn-icon {
+        width: 38px;
+        height: 38px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 4px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Create New Order</h3>
+                </div>
+                <div class="card-body">
+                    <form action="{{ url_for('shop.create_order') }}" method="POST" id="orderForm">
+                        <div class="card">
+                            <div class="card-body">
+                                <div id="productRows">
+                                    <div class="product-row">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label>Product</label>
+                                                    <select class="form-control product-select" name="products[]" required onchange="checkStock(this)">
+                                                        <option value="">Select Product</option>
+                                                        {% for product in products %}
+                                                        <option value="{{ product.ProductID }}" 
+                                                                data-unit="{{ product.Unit }}"
+                                                                data-stock="{{ product.InStock }}"
+                                                                data-price="{{ product.PricePerUnit }}">
+                                                            {{ product.ProductName }} 
+                                                            {% if product.InStock <= 0 %}
+                                                                (Out of Stock)
+                                                            {% else %}
+                                                                (In Stock: {{ product.InStock }} {{ product.Unit }})
+                                                            {% endif %}
+                                                        </option>
+                                                        {% endfor %}
+                                                    </select>
+                                                    <small class="text-danger stock-warning" style="display: none;">
+                                                        This product is out of stock
+                                                    </small>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label>Quantity</label>
+                                                    <div class="input-group">
+                                                        <input type="number" class="form-control quantity-input" name="quantities[]" required min="0" step="0.01">
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text product-unit"></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label>&nbsp;</label>
+                                                    <div class="action-buttons">
+                                                        <button type="button" class="btn btn-danger btn-icon" onclick="removeProductRow(this)" title="Remove">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                        <button type="button" class="btn btn-warning request-stock" style="display: none;">
+                                                            <i class="fas fa-exclamation-circle"></i> Request Stock
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-success" id="addProductBtn">Add Another Product</button>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <button type="submit" class="btn btn-primary">Create Order</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Product Row Template -->
+<template id="productRowTemplate">
+    <div class="product-row">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Product</label>
+                    <select class="form-control product-select" name="products[]" required onchange="checkStock(this)">
+                        <option value="">Select Product</option>
+                        {% for product in products %}
+                        <option value="{{ product.ProductID }}" 
+                                data-unit="{{ product.Unit }}"
+                                data-stock="{{ product.InStock }}"
+                                data-price="{{ product.PricePerUnit }}">
+                            {{ product.ProductName }} 
+                            {% if product.InStock <= 0 %}
+                                (Out of Stock)
+                            {% else %}
+                                (In Stock: {{ product.InStock }} {{ product.Unit }})
+                            {% endif %}
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <small class="text-danger stock-warning" style="display: none;">
+                        This product is out of stock
+                    </small>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label>Quantity</label>
+                    <div class="input-group">
+                        <input type="number" class="form-control quantity-input" name="quantities[]" required min="0" step="0.01">
+                        <div class="input-group-append">
+                            <span class="input-group-text product-unit"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label>&nbsp;</label>
+                    <div class="action-buttons">
+                        <button type="button" class="btn btn-danger btn-icon" onclick="removeProductRow(this)" title="Remove">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                        <button type="button" class="btn btn-warning request-stock" style="display: none;">
+                            <i class="fas fa-exclamation-circle"></i> Request Stock
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+$(document).ready(function() {
+    initSelect2();
+    addProductRow();
+
+    $('#addProductBtn').on('click', function() {
+        addProductRow();
+    });
+
+    $(document).on('click', '.btn-remove-product', function() {
+        removeProductRow(this);
+    });
+
+    $(document).on('change', '.product-select', function() {
+        updateProductUnit(this);
+    });
+
+    $(document).on('click', '.request-stock', function(e) {
+        e.preventDefault();
+        console.log('Request stock button clicked');
+        
+        const $button = $(this);
+        const row = $button.closest('.product-row');
+        const productSelect = row.find('.product-select');
+        const quantityInput = row.find('.quantity-input');
+        
+        const productId = productSelect.val();
+        const quantity = quantityInput.val();
+        
+        console.log('Product ID:', productId);
+        console.log('Quantity:', quantity);
+        
+        // Validate quantity
+        if (!quantity || quantity <= 0) {
+            showMessage('error', 'Please enter a valid quantity greater than 0');
+            quantityInput.focus();
+            return;
+        }
+        
+        if (!productId) {
+            showMessage('error', 'Please select a product');
+            return;
+        }
+        
+        const data = {
+            'product_id': productId,
+            'quantity': quantity
+        };
+        console.log('Sending data:', data);
+        
+        $.ajax({
+            url: '/shop/request-stock',
+            type: 'POST',
+            data: data,
+            success: function(response) {
+                console.log('Success:', response);
+                showMessage('success', response.message);
+                $button.prop('disabled', true).text('Request Sent');
+            },
+            error: function(xhr, status, error) {
+                console.log('Error:', xhr.responseText);
+                const errorMsg = xhr.responseJSON ? xhr.responseJSON.error : 'Failed to submit request';
+                showMessage('error', errorMsg);
+            }
+        });
+    });
+
+    $('#orderForm').on('submit', function(e) {
+        e.preventDefault(); // Prevent default submission
+        if (validateForm()) {
+            this.submit(); // Submit if validation passes
+        }
+    });
+});
+
+function initSelect2() {
+    $('.select2').select2({
+        theme: 'bootstrap4',
+        width: '100%',
+        placeholder: 'Select a product'
+    });
+}
+
+function addProductRow() {
+    const template = document.querySelector('#productRowTemplate');
+    const clone = template.content.cloneNode(true);
+    document.querySelector('#productRows').appendChild(clone);
+    initSelect2();
+}
+
+function removeProductRow(button) {
+    const rows = $('#productRows .product-row').length;
+    if (rows > 1) {
+        $(button).closest('.product-row').remove();
+    } else {
+        showMessage('At least one product is required', 'danger');
+    }
+}
+
+function updateProductUnit(select) {
+    const $select = $(select);
+    const $row = $select.closest('.product-row');
+    const selectedOption = $select.find('option:selected');
+    const unit = selectedOption.data('unit') || '';
+    
+    $row.find('.product-unit').text(unit);
+}
+
+function checkStock(select) {
+    const $select = $(select);
+    const $row = $select.closest('.product-row');
+    const $stockWarning = $row.find('.stock-warning');
+    const $requestStockBtn = $row.find('.request-stock');
+    
+    const selectedOption = $select.find('option:selected');
+    const inStock = parseFloat(selectedOption.data('stock'));
+    console.log('Stock level:', inStock);
+    
+    if (inStock <= 0) {
+        $stockWarning.show();
+        $requestStockBtn.show();
+        console.log('Showing request stock button');
+    } else {
+        $stockWarning.hide();
+        $requestStockBtn.hide();
+        console.log('Hiding request stock button');
+    }
+    
+    updateProductUnit(select);
+}
+
+function validateForm() {
+    const products = new Set();
+    let isValid = true;
+    let message = '';
+
+    // Check if there are any product rows
+    if ($('#productRows .product-row').length === 0) {
+        showMessage('Please add at least one product', 'danger');
+        return false;
+    }
+
+    // Validate each row
+    $('.product-row').each(function() {
+        const productSelect = $(this).find('.product-select');
+        const quantityInput = $(this).find('input[name="quantities[]"]');
+        const value = productSelect.val();
+        const quantity = quantityInput.val();
+
+        if (!value) {
+            isValid = false;
+            message = 'Please select all products';
+            return false;
+        }
+
+        if (!quantity || quantity <= 0) {
+            isValid = false;
+            message = 'Please enter valid quantities for all products';
+            return false;
+        }
+
+        if (products.has(value)) {
+            isValid = false;
+            message = 'Duplicate products are not allowed';
+            return false;
+        }
+        products.add(value);
+    });
+
+    if (!isValid) {
+        showMessage(message, 'danger');
+        return false;
+    }
+
+    return true;
+}
+
+function showMessage(message, type) {
+    const alertDiv = $('#validation-messages');
+    alertDiv.html(message)
+            .removeClass()
+            .addClass(`alert alert-${type}`)
+            .show()
+            .delay(3000)
+            .fadeOut();
+}
+</script>
+{% endblock %}

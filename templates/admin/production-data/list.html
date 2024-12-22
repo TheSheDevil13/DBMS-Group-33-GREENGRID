@@ -1,0 +1,114 @@
+{% extends 'admin/admin_base.html' %}
+
+{% block title %}Production Data{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Production Data</h2>
+    
+    <div class="row mb-4">
+        <div class="col-md-6 offset-md-3">
+            <form action="/search-production" method="GET" class="input-group">
+                <input type="text" name="query" class="form-control" placeholder="Search production data..." required>
+                <div class="input-group-append">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Search
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-striped mb-0">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Product</th>
+                            <th>Harvest Date</th>
+                            <th>Production Cost (৳)</th>
+                            <th>Acreage</th>
+                            <th>Yield</th>
+                            <th>Created By</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for prod in productions %}
+                        <tr data-id="{{ prod[0] }}">
+                            <td>{{ prod[0] }}</td>
+                            <td>{{ prod[1] }}</td>
+                            <td>{{ prod[2] }}</td>
+                            <td>৳{{ prod[3] }}</td>
+                            <td>{{ prod[4] }}</td>
+                            <td>{{ prod[5] }} {{ prod[6] }}</td>
+                            <td>{{ prod[7] if prod[7] else 'N/A' }}</td>                         
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .table th {
+        background-color: white;
+        border-top: none;
+    }
+    .table td {
+        vertical-align: middle;
+    }
+    .card {
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .btn-group {
+        gap: 5px;
+    }
+    .btn-sm {
+        padding: 0.25rem 0.5rem;
+    }
+</style>
+
+<script>
+function deleteProduction(productionId) {
+    if (confirm('Are you sure you want to delete this production record?')) {
+        fetch(`/admin/production-data/delete/${productionId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Remove the row from the table
+                const row = document.querySelector(`tr[data-id="${productionId}"]`);
+                if (row) row.remove();
+                
+                // Show success message
+                const alert = document.createElement('div');
+                alert.className = 'alert alert-success alert-dismissible fade show';
+                alert.innerHTML = `
+                    ${data.message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                `;
+                document.querySelector('.container').insertBefore(alert, document.querySelector('.card'));
+                
+                // Refresh the page after a short delay
+                setTimeout(() => window.location.reload(), 1000);
+            } else {
+                alert(data.message || 'Error deleting production data');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error deleting production data');
+        });
+    }
+}
+</script>
+{% endblock %}

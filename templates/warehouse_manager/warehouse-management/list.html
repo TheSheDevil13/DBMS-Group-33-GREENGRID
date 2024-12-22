@@ -1,15 +1,50 @@
-{% extends "warehouse_manager/base.html" %}
+{% extends "admin/admin_base.html" %}
 
 {% block title %}Warehouse Management - GreenGrid{% endblock %}
 
 {% block page_title %}Warehouse Management{% endblock %}
+
+{% block styles %}
+<style>
+    .btn-flat {
+        width: 36px;
+        height: 36px;
+        padding: 0;
+        line-height: 36px;
+        text-align: center;
+        border-radius: 3px;
+        margin: 0 2px;
+    }
+    .btn-flat i {
+        margin: 0;
+    }
+    .btn-group {
+        display: flex;
+        gap: 4px;
+    }
+    .btn-group form {
+        margin: 0;
+    }
+    .btn-group .btn {
+        border-radius: 0;
+    }
+    .btn-group .btn:first-child {
+        border-top-left-radius: 3px;
+        border-bottom-left-radius: 3px;
+    }
+    .btn-group .btn:last-child {
+        border-top-right-radius: 3px;
+        border-bottom-right-radius: 3px;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
 <div class="card">
     <div class="card-header">
         <h3 class="card-title">Warehouse List</h3>
         <div class="card-tools">
-            <a href="{{ url_for('warehouse_manager.create_warehouse') }}" class="btn btn-primary">
+            <a href="{{ url_for('admin.create_warehouse') }}" class="btn btn-primary">
                 <i class="fas fa-plus"></i> Add New Warehouse
             </a>
         </div>
@@ -42,13 +77,16 @@
                     <td>{{ "%.2f"|format(warehouse[6]) }}</td>
                     <td>{{ "%.2f"|format(warehouse[7]) }}</td>
                     <td>{{ warehouse[9] if warehouse[9] else 'Not Assigned' }}</td>
-                    <td>
-                        <a href="{{ url_for('warehouse_manager.edit_warehouse', id=warehouse[0]) }}" class="btn btn-sm btn-info">
-                            <i class="fas fa-edit"></i> Edit
+                    <td style="white-space: nowrap;">
+                        <a href="{{ url_for('admin.edit_warehouse', id=warehouse[0]) }}" class="btn btn-info btn-flat" data-toggle="tooltip" title="Edit">
+                            <i class="fas fa-edit"></i>
                         </a>
-                        <a href="#" class="btn btn-sm btn-danger" onclick="deleteWarehouse({{ warehouse[0] }})">
-                            <i class="fas fa-trash"></i> Delete
-                        </a>
+                        &nbsp;&nbsp;
+                        <form action="{{ url_for('admin.delete_warehouse', id=warehouse[0]) }}" method="POST" style="display: inline;">
+                            <button type="submit" class="btn btn-danger btn-flat" onclick="return confirm('Are you sure you want to delete this warehouse?');" data-toggle="tooltip" title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
                     </td>
                 </tr>
                 {% endfor %}
@@ -71,12 +109,7 @@
             "responsive": true,
             "buttons": ["copy", "csv", "excel", "pdf", "print"]
         }).buttons().container().appendTo('#warehouseTable_wrapper .col-md-6:eq(0)');
+        $('[data-toggle="tooltip"]').tooltip();
     });
-
-    function deleteWarehouse(warehouseId) {
-        if (confirm('Are you sure you want to delete this warehouse?')) {
-            window.location.href = "{{ url_for('warehouse_manager.delete_warehouse', id=0) }}".replace('0', warehouseId);
-        }
-    }
 </script>
 {% endblock %}
